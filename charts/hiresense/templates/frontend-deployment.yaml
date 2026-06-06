@@ -1,0 +1,75 @@
+{{- range $variant := list "candidate" "recruiter" }}
+{{- $name := printf "hiresense-frontend-%s" $variant }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Values.global.namespace }}
+  labels:
+    {{- include "hiresense.labels" $ | nindent 4 }}
+    app: {{ $name }}
+    variant: {{ $variant }}
+spec:
+  replicas: {{ $.Values.frontend.replicas }}
+  selector:
+    matchLabels:
+      app: {{ $name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $name }}
+        variant: {{ $variant }}
+    spec:
+      imagePullSecrets:
+        - name: {{ $.Values.global.imagePullSecret }}
+      containers:
+        - name: frontend
+          image: {{ include "hiresense.image" (dict "Values" $.Values "repository" $.Values.frontend.image.repository "tag" $.Values.frontend.image.tag) }}
+          imagePullPolicy: {{ $.Values.global.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ $.Values.frontend.port }}
+          envFrom:
+            - configMapRef:
+                name: hiresense-frontend-env
+          env:
+            - name: VITE_HIRESENSE_PORTAL_MODE
+              value: {{ $variant | quote }}
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources: {{- toYaml $.Values.frontend.resources | nindent 12 }}
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: hiresense-frontend-nginx-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Values.global.namespace }}
+  labels: {{- include "hiresense.labels" $ | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ $name }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+{{- end }}

@@ -1,0 +1,35 @@
+{{- if .Values.worker.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hiresense-worker
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "hiresense.labels" . | nindent 4 }}
+    app: hiresense-worker
+spec:
+  replicas: {{ .Values.worker.replicas }}
+  selector:
+    matchLabels:
+      app: hiresense-worker
+  template:
+    metadata:
+      labels:
+        app: hiresense-worker
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.global.imagePullSecret }}
+      containers:
+        - name: worker
+          image: {{ include "hiresense.image" (dict "Values" .Values "repository" .Values.worker.image.repository "tag" .Values.worker.image.tag) }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          {{- if .Values.worker.command }}
+          command: {{ toJson .Values.worker.command }}
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: hiresense-env
+            - secretRef:
+                name: hiresense-secrets
+          resources: {{- toYaml .Values.worker.resources | nindent 12 }}
+{{- end }}

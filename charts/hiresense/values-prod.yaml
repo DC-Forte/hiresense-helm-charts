@@ -1,0 +1,18 @@
+# Production overrides. Non-secret. Combine at install time with
+# values-prod.secrets.yaml (produced from `terraform output`, gitignored).
+
+backend:
+  replicas: 2
+  image:
+    tag: latest    # override with --set backend.image.tag=sha-<commit> for a pinned roll
+aiEngine:
+  replicas: 2
+frontend:
+  replicas: 2
+worker:
+  enabled: true
+  replicas: 1
+
+env:
+  ENVIRONMENT: production
+  LOG_LEVEL: info

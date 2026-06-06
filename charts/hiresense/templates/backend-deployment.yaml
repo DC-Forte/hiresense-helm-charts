@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hiresense-backend
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "hiresense.labels" . | nindent 4 }}
+    app: hiresense-backend
+spec:
+  replicas: {{ .Values.backend.replicas }}
+  selector:
+    matchLabels:
+      app: hiresense-backend
+  template:
+    metadata:
+      labels:
+        app: hiresense-backend
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.global.imagePullSecret }}
+      containers:
+        - name: backend
+          image: {{ include "hiresense.image" (dict "Values" .Values "repository" .Values.backend.image.repository "tag" .Values.backend.image.tag) }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.backend.port }}
+            - name: ws
+              containerPort: {{ .Values.backend.wsPort }}
+          envFrom:
+            - configMapRef:
+                name: hiresense-env
+            - secretRef:
+                name: hiresense-secrets
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          resources: {{- toYaml .Values.backend.resources | nindent 12 }}

@@ -1,0 +1,155 @@
+# Default values for hiresense chart. Production overrides in values-prod.yaml,
+# secrets in values-prod.secrets.yaml (gitignored).
+
+global:
+  namespace: hiresense-app
+  registry: ghcr.io/dc-forte
+  imagePullPolicy: Always
+  imagePullSecret: ghcr-pull
+
+hosts:
+  candidate: hiresense.dc-forte.com
+  recruiter: hiresense-recruiter.dc-forte.com
+  api:       hiresense-api.dc-forte.com
+  ai:        hiresense-ai.dc-forte.com
+
+istio:
+  enabled: true
+  gateway: hiresense-gateway
+  ingressSelector:
+    istio: ingressgateway
+
+tls:
+  enabled: true
+  issuer: letsencrypt-prod
+  secretName: hiresense-tls
+  # Set true if you want Helm to also create the ClusterIssuer + Certificate.
+  # Default false because we adopted pre-existing cert-manager resources.
+  manageCertManager: false
+
+backend:
+  image:
+    repository: chapter-interview-go-backend
+    tag: latest
+  replicas: 2
+  port: 5000
+  wsPort: 5000  # Go serves WS on the same port as HTTP
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1
+      memory: 1.5Gi
+
+aiEngine:
+  image:
+    repository: chapter-interview-python-backend
+    tag: latest
+  replicas: 2
+  port: 9091
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1
+      memory: 1.5Gi
+
+frontend:
+  image:
+    repository: chapter-interview-frontend
+    tag: latest
+  replicas: 2
+  port: 80
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+worker:
+  enabled: true
+  image:
+    repository: chapter-interview-go-worker  # separate Dockerfile target --target worker
+    tag: latest
+  replicas: 1
+  command: []  # CMD /app/worker is baked into the image; empty = use image default
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 768Mi
+
+# Non-secret env. Secrets are below in `secrets:`, populated via
+# values-prod.secrets.yaml (gitignored).
+env:
+  ENVIRONMENT: production
+  PORT: "5000"
+  DB_SSL_MODE: require
+  DB_POOL_MAX: "10"
+  DB_POOL_MIN: "2"
+  LLM_TIMEOUT_MS: "120000"
+  CANDIDATE_AUTH_V2: "true"
+  RECORDING_STORAGE_PROVIDER: spaces
+  AWS_REGION: fra1
+  AZURE_OPENAI_API_VERSION: "2025-01-01-preview"
+  AZURE_OPENAI_DEPLOYMENT_NAME: "gpt-5.2"
+  AZURE_OPENAI_ENDPOINT: "https://chapterfoundry.cognitiveservices.azure.com/"
+  LIVEKIT_URL: "wss://chapterapps-ai-iw2w99kh.livekit.cloud"
+  LIVEKIT_AGENT_NAME: "CA_KYr8TJFzLG2w"
+  SMTP_HOST: "smtp.sendgrid.net"
+  SMTP_PORT: "465"
+  SMTP_USER: "apikey"
+  FROM_EMAIL: "contact@em1043.chaptervitamins.net"
+
+# All values below are placeholders. Real values are injected via
+# values-prod.secrets.yaml (gitignored, produced from `terraform output`).
+secrets:
+  databaseUrl: ""           # postgresql://user:pw@host:25060/hiresense?sslmode=require
+  redisUrl: ""              # rediss://default:pw@host:25061
+  mongodbUri: ""            # mongodb://user:pw@10.x.x.x:27017/chapter_ai_interview?authSource=...
+  jwtSecret: ""
+  candidateJwtSecret: ""
+  jwtRefreshSecret: ""
+  sessionSecret: ""
+  encryptionKey: ""
+  internalServiceToken: ""
+  azureOpenaiApiKey: ""
+  livekitApiKey: ""
+  livekitApiSecret: ""
+  smtpPass: ""
+  googleClientId: ""
+  googleClientSecret: ""
+  spaces:
+    accessKey: ""
+    secretKey: ""
+    endpoint: "https://fra1.digitaloceanspaces.com"
+    region: "fra1"
+    bucket: "hiresense"
+
+# Frontend runtime env (injected by docker-entrypoint.sh into bundle)
+frontendEnv:
+  VITE_API_BASE_URL: "https://hiresense-api.dc-forte.com/api"
+  VITE_ADMIN_API_BASE_URL: "https://hiresense-api.dc-forte.com/api/admin-api"
+  VITE_FRONTEND_URL: "https://hiresense-recruiter.dc-forte.com"
+  VITE_CANDIDATE_PORTAL_URL: "https://hiresense.dc-forte.com"
+  VITE_LIVEKIT_URL: "wss://chapterapps-ai-iw2w99kh.livekit.cloud"
+  VITE_AGENTIC_API_URL: "https://hiresense-api.dc-forte.com/api/agentic"
+  VITE_AGENTIC_WS_URL: "wss://hiresense-api.dc-forte.com/ws/interview"
+  VITE_PYTHON_API_URL: "https://hiresense-ai.dc-forte.com"
+  VITE_PYTHON_URL: "https://hiresense-ai.dc-forte.com"
+  VITE_SIGNALING_URL: "wss://hiresense-api.dc-forte.com"
+  VITE_WS_URL: "wss://hiresense-api.dc-forte.com"
+  VITE_ENABLE_LIVEKIT: "true"
+  VITE_ENABLE_TEXT_INTERVIEW: "true"
+  VITE_ENABLE_WEBRTC: "true"
+  VITE_THEME_PROFILE: "hiresense"
+  VITE_ENV: "production"
+
+certManager:
+  email: ops@dc-forte.com

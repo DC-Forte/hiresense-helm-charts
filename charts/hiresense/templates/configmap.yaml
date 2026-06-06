@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hiresense-env
+  namespace: {{ .Values.global.namespace }}
+  labels: {{- include "hiresense.labels" . | nindent 4 }}
+data:
+{{- range $k, $v := .Values.env }}
+  {{ $k }}: {{ $v | quote }}
+{{- end }}
+  CANDIDATE_PORTAL_URL: "https://{{ .Values.hosts.candidate }}"
+  # Where the candidate-side OAuth callback redirects after success/failure
+  # (candidate-api/auth/oauth-google.js + oauth-github.js).
+  # Without this it falls back to FRONTEND_URL (= recruiter host) and the
+  # candidate lands on the recruiter login page after Google sign-in.
+  CANDIDATE_FRONTEND_URL: "https://{{ .Values.hosts.candidate }}"
+  FRONTEND_URL: "https://{{ .Values.hosts.recruiter }}"
+  # Default email "from" name when an organization has no `name` of its own
+  # set on the Organization row. Without this the email service falls back
+  # to 'HireSense' / 'AI Interview Platform' literals in code.
+  MASKING_NAME: "HireSense"
+  ADMIN_URL: "https://{{ .Values.hosts.recruiter }}"
+  NEW_ADMIN_URL: "https://{{ .Values.hosts.recruiter }}"
+  PYTHON_BACKEND_URL: "http://hiresense-ai-engine.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.aiEngine.port }}/api/v1"
+  AGENTIC_API_URL: "http://hiresense-ai-engine.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.aiEngine.port }}/api/v1"
+  AI_ENGINE_TEXT_URL: "http://hiresense-ai-engine.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.aiEngine.port }}/api/v1"
+  PYTHON_FEEDBACK_SERVICE_URL: "http://hiresense-ai-engine.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.aiEngine.port }}"
+  PYTHON_HEALTH_CHECK_URL: "http://hiresense-ai-engine.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.aiEngine.port }}/api/v1"
+  PYTHON_SESSION_SERVICE_URL: "http://hiresense-ai-engine.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.aiEngine.port }}"
+  PYTHON_TEMPLATE_SERVICE_URL: "http://hiresense-ai-engine.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.aiEngine.port }}"
+  GOOGLE_CALLBACK_URL: "https://{{ .Values.hosts.api }}/api/oauth/google/callback"
+  API_BASE_URL: "https://{{ .Values.hosts.api }}"
+  GITHUB_CALLBACK_URL: "https://{{ .Values.hosts.api }}/api/oauth/github/callback"
+  # S3 / Spaces (non-secret bits)
+  RESUME_S3_BUCKET: {{ .Values.secrets.spaces.bucket | quote }}
+  IMAGE_S3_BUCKET: {{ .Values.secrets.spaces.bucket | quote }}
+  CERTIFICATE_S3_BUCKET: {{ .Values.secrets.spaces.bucket | quote }}
+  CERTIFICATE_S3_ENDPOINT: {{ .Values.secrets.spaces.endpoint | quote }}
+  CERTIFICATE_S3_REGION: {{ .Values.secrets.spaces.region | quote }}
+  CERTIFICATE_STORAGE_ENABLED: "true"
+  CERTIFICATE_STORAGE_PROVIDER: "s3"
+  IMAGE_S3_ENDPOINT: {{ .Values.secrets.spaces.endpoint | quote }}
+  IMAGE_S3_REGION: {{ .Values.secrets.spaces.region | quote }}
+  S3_BUCKET: {{ .Values.secrets.spaces.bucket | quote }}
+  S3_ENDPOINT: {{ .Values.secrets.spaces.endpoint | quote }}
+  S3_REGION: {{ .Values.secrets.spaces.region | quote }}
+  RECORDING_S3_BUCKET: {{ .Values.secrets.spaces.bucket | quote }}
+---
+# Frontend runtime env (VITE_*) — read by docker-entrypoint.sh to inject into bundle
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hiresense-frontend-env
+  namespace: {{ .Values.global.namespace }}
+  labels: {{- include "hiresense.labels" . | nindent 4 }}
+data:
+{{- range $k, $v := .Values.frontendEnv }}
+  {{ $k }}: {{ $v | quote }}
+{{- end }}

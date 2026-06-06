@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hiresense-ai-engine
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "hiresense.labels" . | nindent 4 }}
+    app: hiresense-ai-engine
+spec:
+  replicas: {{ .Values.aiEngine.replicas }}
+  selector:
+    matchLabels:
+      app: hiresense-ai-engine
+  template:
+    metadata:
+      labels:
+        app: hiresense-ai-engine
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.global.imagePullSecret }}
+      initContainers:
+        - name: seed-prompts
+          image: {{ include "hiresense.image" (dict "Values" .Values "repository" .Values.aiEngine.image.repository "tag" .Values.aiEngine.image.tag) }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          command: ["sh", "-c", "cp -an /app/prompts/. /writable-prompts/ 2>/dev/null; true"]
+          volumeMounts:
+            - name: prompts
+              mountPath: /writable-prompts
+      containers:
+        - name: ai-engine
+          image: {{ include "hiresense.image" (dict "Values" .Values "repository" .Values.aiEngine.image.repository "tag" .Values.aiEngine.image.tag) }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.aiEngine.port }}
+          envFrom:
+            - configMapRef:
+                name: hiresense-env
+            - secretRef:
+                name: hiresense-secrets
+          volumeMounts:
+            - name: prompts
+              mountPath: /app/prompts
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          resources: {{- toYaml .Values.aiEngine.resources | nindent 12 }}
+      volumes:
+        - name: prompts
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hiresense-ai-engine
+  namespace: {{ .Values.global.namespace }}
+  labels: {{- include "hiresense.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    app: hiresense-ai-engine
+  ports:
+    - name: http
+      port: {{ .Values.aiEngine.port }}
+      targetPort: http
