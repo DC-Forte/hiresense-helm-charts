@@ -4,4 +4,4 @@ description: HireSense — AI interview platform (Go backend + Python AI engine 
   React frontend)
 name: hiresense
 type: application
-version: 0.1.0
+version: 0.1.1
