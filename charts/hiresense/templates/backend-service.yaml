@@ -12,6 +12,3 @@ spec:
     - name: http
       port: {{ .Values.backend.port }}
       targetPort: http
-    - name: ws
-      port: {{ .Values.backend.wsPort }}
-      targetPort: ws

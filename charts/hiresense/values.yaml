@@ -32,8 +32,7 @@ backend:
     repository: chapter-interview-go-backend
     tag: latest
   replicas: 2
-  port: 5000
-  wsPort: 5000  # Go serves WS on the same port as HTTP
+  port: 5000  # HTTP and WS share the same port
   resources:
     requests:
       cpu: 250m
@@ -91,21 +90,22 @@ env:
   ENVIRONMENT: production
   PORT: "5000"
   DB_SSL_MODE: require
-  DB_POOL_MAX: "10"
-  DB_POOL_MIN: "2"
+  DB_POOL_MAX: "25"
+  DB_POOL_MIN: "5"
   LLM_TIMEOUT_MS: "120000"
   CANDIDATE_AUTH_V2: "true"
   RECORDING_STORAGE_PROVIDER: spaces
   AWS_REGION: fra1
-  AZURE_OPENAI_API_VERSION: "2025-01-01-preview"
-  AZURE_OPENAI_DEPLOYMENT_NAME: "gpt-5.2"
-  AZURE_OPENAI_ENDPOINT: "https://chapterfoundry.cognitiveservices.azure.com/"
-  LIVEKIT_URL: "wss://chapterapps-ai-iw2w99kh.livekit.cloud"
-  LIVEKIT_AGENT_NAME: "CA_KYr8TJFzLG2w"
-  SMTP_HOST: "smtp.sendgrid.net"
-  SMTP_PORT: "465"
-  SMTP_USER: "apikey"
-  FROM_EMAIL: "contact@em1043.chaptervitamins.net"
+  # AZURE_OPENAI_API_VERSION: "2025-01-01-preview"
+  # AZURE_OPENAI_DEPLOYMENT_NAME: "gpt-5.2"
+  # AZURE_OPENAI_ENDPOINT: "https://chapterfoundry.cognitiveservices.azure.com/"
+  OPENAI_MODEL: "gpt-5.2"
+  LIVEKIT_URL: "wss://dc-forte-c3qnkc6a.livekit.cloud"
+  LIVEKIT_AGENT_NAME: "dc-forte-voice-agent"
+  SMTP_HOST: "smtp.gmail.com"
+  SMTP_PORT: "587"
+  SMTP_USER: "engage@dc-forte.com"
+  FROM_EMAIL: "contact@dc-forte.com"
 
 # All values below are placeholders. Real values are injected via
 # values-prod.secrets.yaml (gitignored, produced from `terraform output`).
@@ -119,7 +119,7 @@ secrets:
   sessionSecret: ""
   encryptionKey: ""
   internalServiceToken: ""
-  azureOpenaiApiKey: ""
+  openaiApiKey: ""
   livekitApiKey: ""
   livekitApiSecret: ""
   smtpPass: ""
@@ -138,7 +138,7 @@ frontendEnv:
   VITE_ADMIN_API_BASE_URL: "https://hiresense-api.dc-forte.com/api/admin-api"
   VITE_FRONTEND_URL: "https://hiresense-recruiter.dc-forte.com"
   VITE_CANDIDATE_PORTAL_URL: "https://hiresense.dc-forte.com"
-  VITE_LIVEKIT_URL: "wss://chapterapps-ai-iw2w99kh.livekit.cloud"
+  VITE_LIVEKIT_URL: "wss://dc-forte-c3qnkc6a.livekit.cloud"
   VITE_AGENTIC_API_URL: "https://hiresense-api.dc-forte.com/api/agentic"
   VITE_AGENTIC_WS_URL: "wss://hiresense-api.dc-forte.com/ws/interview"
   VITE_PYTHON_API_URL: "https://hiresense-ai.dc-forte.com"

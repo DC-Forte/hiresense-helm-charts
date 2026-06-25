@@ -54,8 +54,7 @@ spec:
         - destination:
             host: hiresense-backend.{{ .Values.global.namespace }}.svc.cluster.local
             port:
-              number: {{ .Values.backend.wsPort }}
-      websocketUpgrade: true
+              number: {{ .Values.backend.port }}
     - route:
         - destination:
             host: hiresense-backend.{{ .Values.global.namespace }}.svc.cluster.local
