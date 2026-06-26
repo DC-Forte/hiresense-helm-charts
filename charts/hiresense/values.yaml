@@ -106,6 +106,32 @@ env:
   SMTP_PORT: "587"
   SMTP_USER: "engage@dc-forte.com"
   FROM_EMAIL: "contact@dc-forte.com"
+  FEEDBACK_WORKER_ENABLED: "true"
+  RECORDING_WORKER_ENABLED: "true"
+  RESUME_UPLOAD_WORKER_ENABLED: "true"
+  EMAIL_WORKER_ENABLED: "true"
+  # Worker tuning
+  FEEDBACK_WORKER_POLL_INTERVAL_SECONDS: "30"
+  FEEDBACK_WORKER_BATCH_SIZE: "5"
+  FEEDBACK_WORKER_MAX_RETRIES: "5"
+  RECORDING_WORKER_POLL_INTERVAL_SECONDS: "60"
+  RESUME_UPLOAD_POLL_INTERVAL_SECONDS: "10"
+  RESUME_UPLOAD_BATCH_SIZE: "5"
+  EMAIL_WORKER_POLL_INTERVAL_SECONDS: "30"
+  EMAIL_WORKER_BATCH_SIZE: "10"
+  # LLM
+  LLM_RETRY_COUNT: "2"
+  # Auth / JWT expiry
+  JWT_ACCESS_EXPIRY_MINUTES: "15"
+  JWT_REFRESH_EXPIRY_DAYS: "7"
+  ADMIN_PERM_CACHE_TTL_SECONDS: "300"
+  # Rate limits
+  RATE_LIMIT_MAX: "10000"
+  RATE_LIMIT_WINDOW_SECONDS: "900"
+  AUTH_RATE_LIMIT_MAX: "200"
+  OTP_RATE_LIMIT_MAX: "10"
+  # Safety
+  ALLOW_DEGRADED_PROMPTS: "0"
 
 # All values below are placeholders. Real values are injected via
 # values-prod.secrets.yaml (gitignored, produced from `terraform output`).
@@ -125,6 +151,8 @@ secrets:
   smtpPass: ""
   googleClientId: ""
   googleClientSecret: ""
+  candidateGithubClientId: ""
+  candidateGithubClientSecret: ""
   spaces:
     accessKey: ""
     secretKey: ""

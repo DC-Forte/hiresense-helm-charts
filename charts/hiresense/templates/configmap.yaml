@@ -29,8 +29,10 @@ data:
   PYTHON_SESSION_SERVICE_URL: "http://hiresense-ai-engine.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.aiEngine.port }}"
   PYTHON_TEMPLATE_SERVICE_URL: "http://hiresense-ai-engine.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.aiEngine.port }}"
   GOOGLE_CALLBACK_URL: "https://{{ .Values.hosts.api }}/api/oauth/google/callback"
-  API_BASE_URL: "https://{{ .Values.hosts.api }}"
   GITHUB_CALLBACK_URL: "https://{{ .Values.hosts.api }}/api/oauth/github/callback"
+  CANDIDATE_GOOGLE_CALLBACK_URL: "https://{{ .Values.hosts.api }}/candidate-api/auth/oauth/google/callback"
+  CANDIDATE_GITHUB_CALLBACK_URL: "https://{{ .Values.hosts.api }}/candidate-api/auth/oauth/github/callback"
+  API_BASE_URL: "https://{{ .Values.hosts.api }}"
   # S3 / Spaces (non-secret bits)
   RESUME_S3_BUCKET: {{ .Values.secrets.spaces.bucket | quote }}
   IMAGE_S3_BUCKET: {{ .Values.secrets.spaces.bucket | quote }}
