@@ -12,4 +12,27 @@ entries:
     urls:
     - https://github.com/DC-Forte/hiresense-helm-charts/releases/download/hiresense-0.1.1/hiresense-0.1.1.tgz
     version: 0.1.1
-generated: "2026-06-06T07:57:00.874162396Z"
+  hiresense-monitoring:
+  - apiVersion: v2
+    created: "2026-06-27T07:28:07.887560796Z"
+    dependencies:
+    - name: kube-prometheus-stack
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 65.3.1
+    - name: loki
+      repository: https://grafana.github.io/helm-charts
+      version: 6.7.4
+    - name: tempo
+      repository: https://grafana.github.io/helm-charts
+      version: 1.14.0
+    - name: promtail
+      repository: https://grafana.github.io/helm-charts
+      version: 6.16.6
+    description: Observability stack — Prometheus, Grafana, Loki, Tempo, Promtail
+    digest: fce1f6c765a183c6cd79278ebb4c401e84cb9846a6a45c39980cab6f015854ba
+    name: hiresense-monitoring
+    type: application
+    urls:
+    - https://github.com/DC-Forte/hiresense-helm-charts/releases/download/hiresense-monitoring-0.1.0/hiresense-monitoring-0.1.0.tgz
+    version: 0.1.0
+generated: "2026-06-27T07:28:07.887575708Z"
