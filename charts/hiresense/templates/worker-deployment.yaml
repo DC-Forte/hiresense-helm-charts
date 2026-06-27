@@ -26,6 +26,10 @@ spec:
           {{- if .Values.worker.command }}
           command: {{ toJson .Values.worker.command }}
           {{- end }}
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.monitoring.workerMetricsPort }}
+              protocol: TCP
           envFrom:
             - configMapRef:
                 name: hiresense-env

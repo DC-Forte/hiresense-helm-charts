@@ -12,6 +12,7 @@ hosts:
   recruiter: hiresense-recruiter.dc-forte.com
   api:       hiresense-api.dc-forte.com
   ai:        hiresense-ai.dc-forte.com
+  grafana:   ""  # set in values-prod.yaml to add grafana.dc-forte.com to TLS cert
 
 istio:
   enabled: true
@@ -181,3 +182,20 @@ frontendEnv:
 
 certManager:
   email: ops@dc-forte.com
+
+# Monitoring integration — connects the app to the monitoring chart.
+monitoring:
+  # OTLP endpoint for distributed tracing (backend + worker → Tempo).
+  # Set to "tempo.monitoring.svc.cluster.local:4318" when monitoring chart is installed.
+  otlpEndpoint: ""
+
+  # Port the worker exposes Prometheus /metrics on.
+  workerMetricsPort: "9091"
+
+  # Set true to deploy ServiceMonitor resources for Prometheus scraping.
+  # Requires kube-prometheus-stack installed in the monitoring namespace.
+  serviceMonitor:
+    enabled: false
+    # Labels added to ServiceMonitors — must match Prometheus serviceMonitorSelector.
+    # kube-prometheus-stack with serviceMonitorSelector: {} matches any label.
+    labels: {}

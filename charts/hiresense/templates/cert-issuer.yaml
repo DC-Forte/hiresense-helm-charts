@@ -30,4 +30,7 @@ spec:
     - {{ .Values.hosts.recruiter | quote }}
     - {{ .Values.hosts.api | quote }}
     - {{ .Values.hosts.ai | quote }}
+    {{- if .Values.hosts.grafana }}
+    - {{ .Values.hosts.grafana | quote }}
+    {{- end }}
 {{- end }}

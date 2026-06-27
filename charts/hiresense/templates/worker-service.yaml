@@ -1,0 +1,20 @@
+{{- if and .Values.worker.enabled .Values.monitoring.serviceMonitor.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: hiresense-worker-metrics
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "hiresense.labels" . | nindent 4 }}
+    app: hiresense-worker
+spec:
+  type: ClusterIP
+  clusterIP: None  # headless — ServiceMonitor scrapes pods directly
+  selector:
+    app: hiresense-worker
+  ports:
+    - name: metrics
+      port: {{ .Values.monitoring.workerMetricsPort }}
+      targetPort: metrics
+      protocol: TCP
+{{- end }}

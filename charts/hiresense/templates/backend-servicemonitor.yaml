@@ -1,0 +1,25 @@
+{{- if .Values.monitoring.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: hiresense-backend
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "hiresense.labels" . | nindent 4 }}
+    app: hiresense-backend
+    {{- with .Values.monitoring.serviceMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  namespaceSelector:
+    matchNames:
+      - {{ .Values.global.namespace }}
+  selector:
+    matchLabels:
+      app: hiresense-backend
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+{{- end }}

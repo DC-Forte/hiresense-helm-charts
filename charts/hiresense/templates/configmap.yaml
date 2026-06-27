@@ -47,6 +47,11 @@ data:
   S3_ENDPOINT: {{ .Values.secrets.spaces.endpoint | quote }}
   S3_REGION: {{ .Values.secrets.spaces.region | quote }}
   RECORDING_S3_BUCKET: {{ .Values.secrets.spaces.bucket | quote }}
+  # Observability
+  WORKER_METRICS_PORT: {{ .Values.monitoring.workerMetricsPort | quote }}
+  {{- if .Values.monitoring.otlpEndpoint }}
+  OTLP_ENDPOINT: {{ .Values.monitoring.otlpEndpoint | quote }}
+  {{- end }}
 ---
 # Frontend runtime env (VITE_*) — read by docker-entrypoint.sh to inject into bundle
 apiVersion: v1

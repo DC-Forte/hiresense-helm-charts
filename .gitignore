@@ -4,3 +4,4 @@
 .cr-index/
 values-prod.secrets.yaml
 values-prod.secrets-*.yaml
+charts/monitoring/charts/

@@ -1,0 +1,163 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hiresense-app-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "HireSense"
+data:
+  hiresense-app.json: |
+    {
+      "title": "HireSense App",
+      "uid": "hiresense-app",
+      "schemaVersion": 38,
+      "refresh": "30s",
+      "time": { "from": "now-1h", "to": "now" },
+      "panels": [
+        {
+          "id": 1,
+          "type": "row",
+          "title": "HTTP — Backend",
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }
+        },
+        {
+          "id": 2,
+          "title": "Request Rate (req/s)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 1 },
+          "targets": [{
+            "expr": "sum(rate(http_server_request_duration_seconds_count{namespace=\"hiresense-app\",job=~\"hiresense-backend.*\"}[2m])) by (http_route, http_request_method)",
+            "legendFormat": "{{ "{{" }}http_request_method{{ "}}" }} {{ "{{" }}http_route{{ "}}" }}",
+            "datasource": { "type": "prometheus" }
+          }],
+          "fieldConfig": { "defaults": { "unit": "reqps" } }
+        },
+        {
+          "id": 3,
+          "title": "Latency p50 / p95 / p99 (ms)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 1 },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.50, sum(rate(http_server_request_duration_seconds_bucket{namespace=\"hiresense-app\",job=~\"hiresense-backend.*\"}[2m])) by (le)) * 1000",
+              "legendFormat": "p50",
+              "datasource": { "type": "prometheus" }
+            },
+            {
+              "expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{namespace=\"hiresense-app\",job=~\"hiresense-backend.*\"}[2m])) by (le)) * 1000",
+              "legendFormat": "p95",
+              "datasource": { "type": "prometheus" }
+            },
+            {
+              "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{namespace=\"hiresense-app\",job=~\"hiresense-backend.*\"}[2m])) by (le)) * 1000",
+              "legendFormat": "p99",
+              "datasource": { "type": "prometheus" }
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "ms" } }
+        },
+        {
+          "id": 4,
+          "title": "Error Rate (5xx %)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 1 },
+          "targets": [{
+            "expr": "100 * sum(rate(http_server_request_duration_seconds_count{namespace=\"hiresense-app\",job=~\"hiresense-backend.*\",http_response_status_code=~\"5..\"}[2m])) / sum(rate(http_server_request_duration_seconds_count{namespace=\"hiresense-app\",job=~\"hiresense-backend.*\"}[2m]))",
+            "legendFormat": "error %",
+            "datasource": { "type": "prometheus" }
+          }],
+          "fieldConfig": { "defaults": { "unit": "percent", "max": 100, "min": 0 } }
+        },
+        {
+          "id": 5,
+          "type": "row",
+          "title": "Worker",
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 9 }
+        },
+        {
+          "id": 6,
+          "title": "Worker Goroutines",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 10 },
+          "targets": [{
+            "expr": "go_goroutines{namespace=\"hiresense-app\",job=~\"hiresense-worker.*\"}",
+            "legendFormat": "goroutines",
+            "datasource": { "type": "prometheus" }
+          }],
+          "fieldConfig": { "defaults": { "unit": "short" } }
+        },
+        {
+          "id": 7,
+          "title": "Worker Heap Memory",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 10 },
+          "targets": [{
+            "expr": "go_memstats_heap_inuse_bytes{namespace=\"hiresense-app\",job=~\"hiresense-worker.*\"}",
+            "legendFormat": "heap in-use",
+            "datasource": { "type": "prometheus" }
+          }],
+          "fieldConfig": { "defaults": { "unit": "bytes" } }
+        },
+        {
+          "id": 8,
+          "title": "Worker GC Pause Rate",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 10 },
+          "targets": [{
+            "expr": "rate(go_gc_duration_seconds_sum{namespace=\"hiresense-app\",job=~\"hiresense-worker.*\"}[2m])",
+            "legendFormat": "gc pause rate",
+            "datasource": { "type": "prometheus" }
+          }],
+          "fieldConfig": { "defaults": { "unit": "s" } }
+        },
+        {
+          "id": 9,
+          "type": "row",
+          "title": "Pod Health",
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 18 }
+        },
+        {
+          "id": 10,
+          "title": "Pod Restarts",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 19 },
+          "targets": [{
+            "expr": "increase(kube_pod_container_status_restarts_total{namespace=\"hiresense-app\"}[15m])",
+            "legendFormat": "{{ "{{" }}pod{{ "}}" }}",
+            "datasource": { "type": "prometheus" }
+          }],
+          "fieldConfig": { "defaults": { "unit": "short" } }
+        },
+        {
+          "id": 11,
+          "title": "Container CPU Usage",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 19 },
+          "targets": [{
+            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"hiresense-app\",container!=\"\",container!=\"POD\"}[2m])) by (pod)",
+            "legendFormat": "{{ "{{" }}pod{{ "}}" }}",
+            "datasource": { "type": "prometheus" }
+          }],
+          "fieldConfig": { "defaults": { "unit": "cores" } }
+        },
+        {
+          "id": 12,
+          "type": "row",
+          "title": "Logs",
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 27 }
+        },
+        {
+          "id": 13,
+          "title": "Backend Logs",
+          "type": "logs",
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 28 },
+          "options": { "dedupStrategy": "none", "showLabels": false, "showTime": true, "wrapLogMessage": true },
+          "targets": [{
+            "expr": "{namespace=\"hiresense-app\", app=\"hiresense-backend\"} | json",
+            "datasource": { "type": "loki" }
+          }]
+        }
+      ]
+    }

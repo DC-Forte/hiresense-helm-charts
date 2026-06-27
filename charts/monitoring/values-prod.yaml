@@ -1,0 +1,164 @@
+# Production overrides for hiresense-monitoring.
+# Non-secret. Secrets (Grafana admin password, Spaces keys) go in values-prod.secrets.yaml.
+#
+# Requires two pre-created DigitalOcean Spaces buckets:
+#   doctl spaces create hiresense-loki   --region fra1
+#   doctl spaces create hiresense-tempo  --region fra1
+#
+# Install:
+#   helm upgrade --install monitoring ./charts/monitoring -n monitoring \
+#     -f charts/monitoring/values-prod.yaml \
+#     -f charts/monitoring/values-prod.secrets.yaml
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Prometheus + Grafana
+# ─────────────────────────────────────────────────────────────────────────────
+kube-prometheus-stack:
+
+  prometheus:
+    prometheusSpec:
+      retention: 30d
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: do-block-storage
+            resources:
+              requests:
+                storage: 20Gi
+      resources:
+        requests:
+          cpu: 500m
+          memory: 1Gi
+        limits:
+          cpu: 2
+          memory: 4Gi
+
+  grafana:
+    # adminPassword injected via values-prod.secrets.yaml
+
+    service:
+      type: ClusterIP
+
+    grafana.ini:
+      server:
+        root_url: "https://grafana.dc-forte.com/"
+        domain: grafana.dc-forte.com
+
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+      limits:
+        cpu: 1
+        memory: 1Gi
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Loki — production: DigitalOcean Spaces (S3-compatible) backend
+# ─────────────────────────────────────────────────────────────────────────────
+loki:
+  loki:
+    storage:
+      type: s3
+      bucketNames:
+        chunks: hiresense
+        ruler: hiresense
+        admin: hiresense
+      s3:
+        endpoint: fra1.digitaloceanspaces.com
+        region: fra1
+        prefix: loki/
+        # Credentials injected via values-prod.secrets.yaml
+        accessKeyId: ""
+        secretAccessKey: ""
+        s3ForcePathStyle: true   # required for DO Spaces
+        insecure: false
+
+    schemaConfig:
+      configs:
+        - from: "2024-01-01"
+          store: tsdb
+          object_store: s3
+          schema: v13
+          index:
+            prefix: loki_index_
+            period: 24h
+
+    limits_config:
+      retention_period: 720h  # 30 days
+
+  singleBinary:
+    replicas: 1
+    persistence:
+      enabled: true
+      storageClass: do-block-storage
+      size: 5Gi   # WAL only; chunks go to Spaces
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 1
+        memory: 2Gi
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Tempo — production: DigitalOcean Spaces (S3-compatible) backend
+# ─────────────────────────────────────────────────────────────────────────────
+tempo:
+  tempo:
+    compactor:
+      compaction:
+        block_retention: 168h   # 7 days in prod
+
+    storage:
+      trace:
+        backend: s3
+        s3:
+          bucket: hiresense
+          endpoint: fra1.digitaloceanspaces.com
+          region: fra1
+          prefix: tempo/
+          # Credentials injected via values-prod.secrets.yaml
+          access_key: ""
+          secret_key: ""
+          forcepathstyle: true  # required for DO Spaces
+          insecure: false
+        wal:
+          path: /var/tempo/wal
+
+  persistence:
+    enabled: true
+    storageClassName: do-block-storage
+    size: 5Gi   # WAL only; blocks go to Spaces
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1
+      memory: 2Gi
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Promtail
+# ─────────────────────────────────────────────────────────────────────────────
+promtail:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 512Mi
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Grafana Istio ingress
+# ─────────────────────────────────────────────────────────────────────────────
+grafana:
+  istio:
+    enabled: true
+    host: "grafana.dc-forte.com"
+    ingressSelector:
+      istio: ingressgateway
+    tls:
+      enabled: true
+      secretName: "hiresense-tls"

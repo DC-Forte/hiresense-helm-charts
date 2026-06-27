@@ -1,0 +1,381 @@
+# Default values for hiresense-monitoring umbrella chart.
+#
+# Components:
+#   - kube-prometheus-stack  (Prometheus + Grafana + kube-state-metrics + node-exporter)
+#   - loki                   (log aggregation, SingleBinary mode)
+#   - tempo                  (distributed tracing, monolithic mode)
+#   - promtail               (log shipper — DaemonSet that tails pod logs → Loki)
+#
+# Quick install (dev/local):
+#   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+#   helm repo add grafana https://grafana.github.io/helm-charts
+#   helm repo update
+#   helm dep update charts/monitoring
+#   kubectl create namespace monitoring
+#   helm upgrade --install monitoring ./charts/monitoring -n monitoring
+#
+# Production install:
+#   helm upgrade --install monitoring ./charts/monitoring -n monitoring \
+#     -f charts/monitoring/values-prod.yaml \
+#     -f charts/monitoring/values-prod.secrets.yaml
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Prometheus + Grafana  (kube-prometheus-stack)
+# ─────────────────────────────────────────────────────────────────────────────
+kube-prometheus-stack:
+
+  prometheus:
+    prometheusSpec:
+      # Watch ServiceMonitors/PodMonitors in ALL namespaces so hiresense-app
+      # ServiceMonitors are picked up without moving them here.
+      # serviceMonitorSelectorNilUsesHelmValues: false disables the default
+      # {release: monitoring} filter that kube-prometheus-stack adds otherwise.
+      serviceMonitorSelectorNilUsesHelmValues: false
+      serviceMonitorNamespaceSelector: {}
+      serviceMonitorSelector: {}
+      podMonitorSelectorNilUsesHelmValues: false
+      podMonitorNamespaceSelector: {}
+      podMonitorSelector: {}
+      ruleNamespaceSelector: {}
+      ruleSelector: {}
+
+      retention: 15d
+
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: ""  # cluster default; override in values-prod
+            resources:
+              requests:
+                storage: 10Gi
+
+      resources:
+        requests:
+          cpu: 200m
+          memory: 512Mi
+        limits:
+          cpu: 1
+          memory: 2Gi
+
+  alertmanager:
+    enabled: false
+
+  # Disable components not reachable in managed k8s (DOKS)
+  kubeProxy:
+    enabled: false
+  kubeScheduler:
+    enabled: false
+  kubeControllerManager:
+    enabled: false
+  kubeEtcd:
+    enabled: false
+
+  grafana:
+    adminPassword: "changeme"  # override in values-prod.secrets.yaml
+
+    service:
+      type: ClusterIP
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+    # Sidecar discovers ConfigMaps labelled grafana_dashboard=1 in any namespace
+    # and auto-imports them into Grafana.
+    sidecar:
+      dashboards:
+        enabled: true
+        label: grafana_dashboard
+        labelValue: "1"
+        searchNamespace: ALL
+        folderAnnotation: "grafana_folder"
+        provider:
+          foldersFromFilesStructure: true
+
+    # Community dashboards downloaded from grafana.com at startup.
+    dashboardProviders:
+      dashboardproviders.yaml:
+        apiVersion: 1
+        providers:
+          - name: community
+            orgId: 1
+            folder: Community
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/community
+          - name: hiresense
+            orgId: 1
+            folder: HireSense
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/hiresense
+
+    dashboards:
+      community:
+        # Node exporter: full host metrics (CPU, memory, disk, network)
+        node-exporter:
+          gnetId: 1860
+          revision: 37
+          datasource: Prometheus
+        # Kubernetes cluster overview (kube-state-metrics + node-exporter)
+        k8s-cluster:
+          gnetId: 7249
+          revision: 1
+          datasource: Prometheus
+        # Kubernetes pod/deployment compute resources
+        k8s-pods:
+          gnetId: 15760
+          revision: 1
+          datasource: Prometheus
+        # Go runtime: goroutines, GC, memory, CPU
+        go-runtime:
+          gnetId: 10826
+          revision: 1
+          datasource: Prometheus
+        # Prometheus self-monitoring
+        prometheus-overview:
+          gnetId: 3662
+          revision: 2
+          datasource: Prometheus
+        # Loki: log search + volume
+        loki-logs:
+          gnetId: 13407
+          revision: 1
+          datasource: Loki
+        # Tempo: trace search + RED metrics
+        tempo-traces:
+          gnetId: 16543
+          revision: 2
+          datasource: Tempo
+
+    grafana.ini:
+      server:
+        root_url: "%(protocol)s://%(domain)s/"
+
+    # Pre-configure Loki and Tempo datasources.
+    # Prometheus is already added by kube-prometheus-stack.
+    additionalDataSources:
+      - name: Loki
+        type: loki
+        url: http://loki.monitoring.svc.cluster.local:3100
+        access: proxy
+        isDefault: false
+        jsonData:
+          derivedFields:
+            # Clickable link from trace_id in log lines → Tempo trace view
+            - name: TraceID
+              matcherRegex: '"trace_id":"(\w+)"'
+              url: '$${__value.raw}'
+              datasourceUid: tempo
+
+      - name: Tempo
+        type: tempo
+        url: http://tempo.monitoring.svc.cluster.local:3100
+        access: proxy
+        isDefault: false
+        jsonData:
+          httpMethod: GET
+          serviceMap:
+            datasourceUid: prometheus
+          # Trace → Logs correlation (Tempo span → Loki log lines)
+          tracesToLogsV2:
+            datasourceUid: loki
+            filterBySpanID: false
+            filterByTraceID: true
+            spanStartTimeShift: "-15m"
+            spanEndTimeShift: "15m"
+            tags:
+              - key: pod
+                value: pod
+          # Trace → Metrics correlation
+          tracesToMetrics:
+            datasourceUid: prometheus
+          nodeGraph:
+            enabled: true
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Loki  (log aggregation)
+# ─────────────────────────────────────────────────────────────────────────────
+loki:
+  fullnameOverride: loki  # → service: loki.monitoring.svc.cluster.local:3100
+
+  loki:
+    auth_enabled: false
+
+    commonConfig:
+      replication_factor: 1
+
+    # Base: filesystem storage (override to s3 in values-prod)
+    storage:
+      type: filesystem
+
+    schemaConfig:
+      configs:
+        - from: "2024-01-01"
+          store: tsdb
+          object_store: filesystem  # → s3 in prod
+          schema: v13
+          index:
+            prefix: loki_index_
+            period: 24h
+
+    limits_config:
+      retention_period: 720h  # 30 days
+
+  deploymentMode: SingleBinary
+
+  singleBinary:
+    replicas: 1
+    persistence:
+      enabled: true
+      storageClass: ""  # cluster default; override in values-prod
+      size: 10Gi
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+
+  # Disable scalable-mode components (not used in SingleBinary)
+  backend:
+    replicas: 0
+  read:
+    replicas: 0
+  write:
+    replicas: 0
+  chunksCache:
+    enabled: false
+  resultsCache:
+    enabled: false
+  gateway:
+    enabled: false
+  test:
+    enabled: false
+  lokiCanary:
+    enabled: false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Tempo  (distributed tracing)
+# ─────────────────────────────────────────────────────────────────────────────
+tempo:
+  fullnameOverride: tempo  # → service: tempo.monitoring.svc.cluster.local:3100
+
+  tempo:
+    reportingEnabled: false
+    multitenancyEnabled: false
+
+    # Retention
+    compactor:
+      compaction:
+        block_retention: 48h
+
+    # Base: local filesystem storage (override to s3 in values-prod)
+    storage:
+      trace:
+        backend: local
+        local:
+          path: /var/tempo/traces
+        wal:
+          path: /var/tempo/wal
+
+  # Enable OTLP receivers (gRPC :4317, HTTP :4318)
+  # The chart maps these to distributor.receivers in tempo.yaml.
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
+  persistence:
+    enabled: true
+    storageClassName: ""  # cluster default; override in values-prod
+    size: 10Gi
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+  service:
+    type: ClusterIP
+    port: 3100
+    additionalPorts:
+      - name: otlp-grpc
+        port: 4317
+        protocol: TCP
+        targetPort: 4317
+      - name: otlp-http
+        port: 4318
+        protocol: TCP
+        targetPort: 4318
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Promtail  (log shipper — DaemonSet)
+# ─────────────────────────────────────────────────────────────────────────────
+promtail:
+  fullnameOverride: promtail
+
+  config:
+    clients:
+      - url: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
+
+    snippets:
+      # Extract structured JSON log fields as Loki labels/metadata
+      pipelineStages:
+        - json:
+            expressions:
+              level: level
+              msg: msg
+              trace_id: trace_id
+              span_id: span_id
+        - labels:
+            level: ""
+        - structured_metadata:
+            trace_id: ""
+            span_id: ""
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+  rbac:
+    create: true
+    pspEnabled: false
+
+  tolerations:
+    - key: node-role.kubernetes.io/master
+      operator: Exists
+      effect: NoSchedule
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Grafana Istio ingress (opt-in)
+# ─────────────────────────────────────────────────────────────────────────────
+grafana:
+  istio:
+    enabled: false
+    host: "grafana.example.com"
+    # Selector for the Istio ingress gateway pod (matches istio-ingressgateway label)
+    ingressSelector:
+      istio: ingressgateway
+    tls:
+      enabled: false
+      secretName: "grafana-tls"

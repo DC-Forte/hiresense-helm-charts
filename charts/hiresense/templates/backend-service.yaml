@@ -3,7 +3,9 @@ kind: Service
 metadata:
   name: hiresense-backend
   namespace: {{ .Values.global.namespace }}
-  labels: {{- include "hiresense.labels" . | nindent 4 }}
+  labels:
+    {{- include "hiresense.labels" . | nindent 4 }}
+    app: hiresense-backend
 spec:
   type: ClusterIP
   selector:

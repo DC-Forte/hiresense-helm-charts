@@ -1,0 +1,53 @@
+{{- if .Values.grafana.istio.enabled }}
+---
+# Standalone Istio Gateway for Grafana in the monitoring namespace.
+# Using a separate gateway avoids modifying the hiresense app chart.
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: monitoring-gateway
+  namespace: monitoring
+spec:
+  selector:
+    {{- toYaml .Values.grafana.istio.ingressSelector | nindent 4 }}
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - {{ .Values.grafana.istio.host | quote }}
+      {{- if .Values.grafana.istio.tls.enabled }}
+      tls:
+        httpsRedirect: true
+      {{- end }}
+    {{- if .Values.grafana.istio.tls.enabled }}
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      hosts:
+        - {{ .Values.grafana.istio.host | quote }}
+      tls:
+        mode: SIMPLE
+        credentialName: {{ .Values.grafana.istio.tls.secretName }}
+    {{- end }}
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  hosts:
+    - {{ .Values.grafana.istio.host | quote }}
+  gateways:
+    - monitoring-gateway
+  http:
+    - route:
+        - destination:
+            # kube-prometheus-stack names the Grafana service <release>-grafana
+            host: monitoring-grafana.monitoring.svc.cluster.local
+            port:
+              number: 80
+{{- end }}

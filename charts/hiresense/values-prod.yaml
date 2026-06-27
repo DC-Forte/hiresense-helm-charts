@@ -13,6 +13,15 @@ worker:
   enabled: true
   replicas: 1
 
+hosts:
+  grafana: "grafana.dc-forte.com"
+
 env:
   ENVIRONMENT: production
   LOG_LEVEL: info
+
+monitoring:
+  otlpEndpoint: "tempo.monitoring.svc.cluster.local:4318"
+  workerMetricsPort: "9091"
+  serviceMonitor:
+    enabled: true
