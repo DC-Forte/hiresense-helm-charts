@@ -367,6 +367,14 @@ promtail:
       effect: NoSchedule
 
 # ─────────────────────────────────────────────────────────────────────────────
+# metrics-server  (Kubernetes Metrics API — required for kubectl top / HPA)
+# ─────────────────────────────────────────────────────────────────────────────
+metrics-server:
+  args:
+    - --kubelet-preferred-address-types=InternalIP  # DOKS nodes: use InternalIP
+    - --kubelet-use-node-status-port                # avoids kubelet port guessing
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Grafana Istio ingress (opt-in)
 # ─────────────────────────────────────────────────────────────────────────────
 grafana:
