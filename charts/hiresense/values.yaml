@@ -111,6 +111,7 @@ env:
   RECORDING_WORKER_ENABLED: "true"
   RESUME_UPLOAD_WORKER_ENABLED: "true"
   EMAIL_WORKER_ENABLED: "true"
+  RECRUITER_REPORT_WORKER_ENABLED: "true"
   # Worker tuning
   FEEDBACK_WORKER_POLL_INTERVAL_SECONDS: "30"
   FEEDBACK_WORKER_BATCH_SIZE: "5"
@@ -154,6 +155,7 @@ secrets:
   googleClientSecret: ""
   candidateGithubClientId: ""
   candidateGithubClientSecret: ""
+  recruiterReportWebhookUrl: ""
   spaces:
     accessKey: ""
     secretKey: ""
