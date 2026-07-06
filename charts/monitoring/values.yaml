@@ -343,11 +343,18 @@ promtail:
               msg: msg
               trace_id: trace_id
               span_id: span_id
+              error: error
         - labels:
             level: ""
+        - template:
+            source: is_error
+            template: '{{ if or (eq .level "error") (eq .level "ERROR") (eq .level "fatal") (eq .level "FATAL") (eq .level "panic") (eq .level "PANIC") }}true{{ end }}'
+        - labels:
+            is_error: ""
         - structured_metadata:
             trace_id: ""
             span_id: ""
+            error: ""
 
   resources:
     requests:
