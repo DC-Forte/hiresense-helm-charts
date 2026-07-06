@@ -387,3 +387,6 @@ grafana:
     tls:
       enabled: false
       secretName: "grafana-tls"
+    # Reference the hiresense app gateway (namespace/name) to handle HTTP/2
+    # connection coalescing when grafana shares the same TLS cert + IP.
+    hiresenseGateway: ""

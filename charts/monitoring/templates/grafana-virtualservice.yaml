@@ -43,6 +43,9 @@ spec:
     - {{ .Values.grafana.istio.host | quote }}
   gateways:
     - monitoring-gateway
+    {{- if .Values.grafana.istio.hiresenseGateway }}
+    - {{ .Values.grafana.istio.hiresenseGateway | quote }}
+    {{- end }}
   http:
     - route:
         - destination:

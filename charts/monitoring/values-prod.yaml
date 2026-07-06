@@ -162,3 +162,7 @@ grafana:
     tls:
       enabled: true
       secretName: "hiresense-tls"
+    # Fix HTTP/2 coalescing: grafana shares hiresense-tls cert + IP, so Chrome
+    # reuses the hiresense connection. Attaching to both gateways ensures Istio
+    # routes the request regardless of which SNI the connection was opened with.
+    hiresenseGateway: "hiresense-app/hiresense-gateway"

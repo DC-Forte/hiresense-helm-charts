@@ -18,6 +18,9 @@ spec:
         - {{ .Values.hosts.recruiter | quote }}
         - {{ .Values.hosts.api | quote }}
         - {{ .Values.hosts.ai | quote }}
+        {{- if .Values.hosts.grafana }}
+        - {{ .Values.hosts.grafana | quote }}
+        {{- end }}
       {{- if .Values.tls.enabled }}
       tls:
         httpsRedirect: true
@@ -32,6 +35,9 @@ spec:
         - {{ .Values.hosts.recruiter | quote }}
         - {{ .Values.hosts.api | quote }}
         - {{ .Values.hosts.ai | quote }}
+        {{- if .Values.hosts.grafana }}
+        - {{ .Values.hosts.grafana | quote }}
+        {{- end }}
       tls:
         mode: SIMPLE
         credentialName: {{ .Values.tls.secretName }}
