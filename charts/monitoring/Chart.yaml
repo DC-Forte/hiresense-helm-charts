@@ -11,21 +11,21 @@ version: 0.1.0
 #   helm search repo grafana/promtail
 dependencies:
   - name: kube-prometheus-stack
-    version: "65.3.1"
+    version: "87.18.0"
     repository: https://prometheus-community.github.io/helm-charts
 
   - name: loki
-    version: "6.7.4"
+    version: "7.1.0"
     repository: https://grafana.github.io/helm-charts
 
   - name: tempo
-    version: "1.14.0"
+    version: "1.24.4"
     repository: https://grafana.github.io/helm-charts
 
   - name: promtail
-    version: "6.16.6"
+    version: "6.17.1"
     repository: https://grafana.github.io/helm-charts
 
   - name: metrics-server
-    version: "3.12.2"
+    version: "3.13.1"
     repository: https://kubernetes-sigs.github.io/metrics-server/
