@@ -39,6 +39,10 @@ kube-prometheus-stack:
       ruleNamespaceSelector: {}
       ruleSelector: {}
 
+      # Required so Tempo's metrics-generator (span-metrics/service-graphs)
+      # can remote_write RED metrics into this Prometheus.
+      enableRemoteWriteReceiver: true
+
       retention: 15d
 
       storageSpec:
@@ -178,7 +182,7 @@ kube-prometheus-stack:
 
       - name: Tempo
         type: tempo
-        url: http://tempo.monitoring.svc.cluster.local:3100
+        url: http://tempo.monitoring.svc.cluster.local:3200
         access: proxy
         isDefault: false
         jsonData:
@@ -268,11 +272,31 @@ loki:
 # Tempo  (distributed tracing)
 # ─────────────────────────────────────────────────────────────────────────────
 tempo:
-  fullnameOverride: tempo  # → service: tempo.monitoring.svc.cluster.local:3100
+  fullnameOverride: tempo  # → service: tempo.monitoring.svc.cluster.local:3200
 
   tempo:
     reportingEnabled: false
     multitenancyEnabled: false
+
+    # Metrics-generator: required for TraceQL metrics queries (rate(), quantile_over_time(), etc.)
+    # in the Grafana Explore "Traces" view. Without this the generator ring has no
+    # members and queries fail with "error finding generators: empty ring".
+    metricsGenerator:
+      enabled: true
+      processor:
+        local_blocks:
+          flush_to_storage: true
+      storage:
+        path: "/var/tempo/generator-wal"
+        remote_write:
+          - url: http://monitoring-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/write
+      traces_storage:
+        path: "/var/tempo/generator-traces"
+    overrides:
+      defaults:
+        metrics_generator:
+          processors:
+            - local-blocks
 
     # Retention
     compactor:

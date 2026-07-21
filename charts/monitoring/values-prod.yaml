@@ -59,19 +59,36 @@ loki:
   loki:
     storage:
       type: s3
+      use_thanos_objstore: true  # chunks storage below; legacy aws.S3Config dropped the `prefix` field in Loki 3.x
       bucketNames:
         chunks: hiresense
         ruler: hiresense
         admin: hiresense
       s3:
+        # Legacy client — still used for ruler/admin API storage, which have no thanos_objstore support.
+        # No prefix here: ruler/admin write to bucket root now (ruler unused in this deployment).
         endpoint: fra1.digitaloceanspaces.com
         region: fra1
-        prefix: loki/
         # Credentials injected via values-prod.secrets.yaml
         accessKeyId: ""
         secretAccessKey: ""
         s3ForcePathStyle: true   # required for DO Spaces
         insecure: false
+
+      object_store:
+        # Thanos-based client for chunks storage — the only path that still supports a bucket prefix,
+        # letting loki and tempo/ share the "hiresense" bucket.
+        # storage_prefix only allows [a-zA-Z0-9-], no slash (unlike the legacy `prefix` field).
+        type: s3
+        storage_prefix: loki
+        s3:
+          endpoint: fra1.digitaloceanspaces.com
+          region: fra1
+          bucket_lookup_type: path   # thanos equivalent of s3ForcePathStyle, required for DO Spaces
+          # Credentials injected via values-prod.secrets.yaml
+          access_key_id: ""
+          secret_access_key: ""
+          insecure: false
 
     schemaConfig:
       configs:
