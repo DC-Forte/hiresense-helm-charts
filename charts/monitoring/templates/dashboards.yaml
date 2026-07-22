@@ -161,3 +161,158 @@ data:
         }
       ]
     }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: go-metrics-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "Community"
+data:
+  go-metrics.json: |
+    {
+      "title": "Go Metrics",
+      "uid": "go-metrics-fixed",
+      "schemaVersion": 38,
+      "refresh": "30s",
+      "time": { "from": "now-1h", "to": "now" },
+      "templating": {
+        "list": [
+          {
+            "name": "namespace",
+            "label": "namespace",
+            "type": "query",
+            "datasource": { "type": "prometheus" },
+            "query": "label_values(go_goroutines, namespace)",
+            "refresh": 1
+          },
+          {
+            "name": "pod",
+            "label": "pod",
+            "type": "query",
+            "datasource": { "type": "prometheus" },
+            "query": "label_values(go_goroutines{namespace=\"$namespace\"}, pod)",
+            "refresh": 1
+          }
+        ]
+      },
+      "panels": [
+        {
+          "id": 1,
+          "title": "Memory in Off-Heap",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "targets": [
+            { "expr": "go_memstats_mspan_inuse_bytes{namespace=\"$namespace\", pod=~\"$pod\"}", "legendFormat": "mspan_inuse", "datasource": { "type": "prometheus" } },
+            { "expr": "go_memstats_mspan_sys_bytes{namespace=\"$namespace\", pod=~\"$pod\"}", "legendFormat": "mspan_sys", "datasource": { "type": "prometheus" } },
+            { "expr": "go_memstats_mcache_inuse_bytes{namespace=\"$namespace\", pod=~\"$pod\"}", "legendFormat": "mcache_inuse", "datasource": { "type": "prometheus" } },
+            { "expr": "go_memstats_mcache_sys_bytes{namespace=\"$namespace\", pod=~\"$pod\"}", "legendFormat": "mcache_sys", "datasource": { "type": "prometheus" } },
+            { "expr": "go_memstats_buck_hash_sys_bytes{namespace=\"$namespace\", pod=~\"$pod\"}", "legendFormat": "buck_hash_sys", "datasource": { "type": "prometheus" } },
+            { "expr": "go_memstats_gc_sys_bytes{namespace=\"$namespace\", pod=~\"$pod\"}", "legendFormat": "gc_sys", "datasource": { "type": "prometheus" } },
+            { "expr": "go_memstats_other_sys_bytes{namespace=\"$namespace\", pod=~\"$pod\"}", "legendFormat": "other_sys", "datasource": { "type": "prometheus" } },
+            { "expr": "go_memstats_next_gc_bytes{namespace=\"$namespace\", pod=~\"$pod\"}", "legendFormat": "next_gc", "datasource": { "type": "prometheus" } }
+          ],
+          "fieldConfig": { "defaults": { "unit": "bytes" } }
+        },
+        {
+          "id": 2,
+          "title": "Memory in Heap",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "targets": [
+            { "expr": "go_memstats_heap_alloc_bytes{namespace=\"$namespace\", pod=~\"$pod\"}", "legendFormat": "heap_alloc", "datasource": { "type": "prometheus" } },
+            { "expr": "go_memstats_heap_sys_bytes{namespace=\"$namespace\", pod=~\"$pod\"}", "legendFormat": "heap_sys", "datasource": { "type": "prometheus" } },
+            { "expr": "go_memstats_heap_idle_bytes{namespace=\"$namespace\", pod=~\"$pod\"}", "legendFormat": "heap_idle", "datasource": { "type": "prometheus" } },
+            { "expr": "go_memstats_heap_inuse_bytes{namespace=\"$namespace\", pod=~\"$pod\"}", "legendFormat": "heap_inuse", "datasource": { "type": "prometheus" } },
+            { "expr": "go_memstats_heap_released_bytes{namespace=\"$namespace\", pod=~\"$pod\"}", "legendFormat": "heap_released", "datasource": { "type": "prometheus" } }
+          ],
+          "fieldConfig": { "defaults": { "unit": "bytes" } }
+        },
+        {
+          "id": 3,
+          "title": "Memory in Stack",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+          "targets": [
+            { "expr": "go_memstats_stack_inuse_bytes{namespace=\"$namespace\", pod=~\"$pod\"}", "legendFormat": "stack_inuse", "datasource": { "type": "prometheus" } },
+            { "expr": "go_memstats_stack_sys_bytes{namespace=\"$namespace\", pod=~\"$pod\"}", "legendFormat": "stack_sys", "datasource": { "type": "prometheus" } }
+          ],
+          "fieldConfig": { "defaults": { "unit": "bytes" } }
+        },
+        {
+          "id": 4,
+          "title": "Total Used Memory",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+          "targets": [
+            { "expr": "go_memstats_sys_bytes{namespace=\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{ "{{" }}pod{{ "}}" }}", "datasource": { "type": "prometheus" } }
+          ],
+          "fieldConfig": { "defaults": { "unit": "bytes" } }
+        },
+        {
+          "id": 5,
+          "title": "Number of Live Objects",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+          "targets": [
+            { "expr": "go_memstats_mallocs_total{namespace=\"$namespace\", pod=~\"$pod\"} - go_memstats_frees_total{namespace=\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{ "{{" }}pod{{ "}}" }}", "datasource": { "type": "prometheus" } }
+          ],
+          "fieldConfig": { "defaults": { "unit": "short" } }
+        },
+        {
+          "id": 6,
+          "title": "Rate of Objects Allocated",
+          "type": "timeseries",
+          "description": "go_memstats_mallocs_total counter — rate() gives objects allocated/s.",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+          "targets": [
+            { "expr": "rate(go_memstats_mallocs_total{namespace=\"$namespace\", pod=~\"$pod\"}[1m])", "legendFormat": "{{ "{{" }}pod{{ "}}" }}", "datasource": { "type": "prometheus" } }
+          ],
+          "fieldConfig": { "defaults": { "unit": "ops" } }
+        },
+        {
+          "id": 7,
+          "title": "Rate of Pointer Dereferences",
+          "type": "timeseries",
+          "description": "go_memstats_lookups_total counter — rate() gives lookups/s.",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+          "targets": [
+            { "expr": "rate(go_memstats_lookups_total{namespace=\"$namespace\", pod=~\"$pod\"}[1m])", "legendFormat": "{{ "{{" }}pod{{ "}}" }}", "datasource": { "type": "prometheus" } }
+          ],
+          "fieldConfig": { "defaults": { "unit": "ops" } }
+        },
+        {
+          "id": 8,
+          "title": "Goroutines",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+          "targets": [
+            { "expr": "go_goroutines{namespace=\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{ "{{" }}pod{{ "}}" }}", "datasource": { "type": "prometheus" } }
+          ],
+          "fieldConfig": { "defaults": { "unit": "short" } }
+        },
+        {
+          "id": 9,
+          "title": "Rates of Allocation",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
+          "targets": [
+            { "expr": "rate(go_memstats_alloc_bytes_total{namespace=\"$namespace\", pod=~\"$pod\"}[1m])", "legendFormat": "{{ "{{" }}pod{{ "}}" }}", "datasource": { "type": "prometheus" } }
+          ],
+          "fieldConfig": { "defaults": { "unit": "Bps" } }
+        },
+        {
+          "id": 10,
+          "title": "GC Duration Quantile",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 },
+          "targets": [
+            { "expr": "go_gc_duration_seconds{namespace=\"$namespace\", pod=~\"$pod\"}", "legendFormat": "{{ "{{" }}pod{{ "}}" }} {{ "{{" }}quantile{{ "}}" }}", "datasource": { "type": "prometheus" } }
+          ],
+          "fieldConfig": { "defaults": { "unit": "s" } }
+        }
+      ]
+    }

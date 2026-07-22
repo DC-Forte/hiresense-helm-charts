@@ -36,6 +36,9 @@ kube-prometheus-stack:
   grafana:
     # adminPassword injected via values-prod.secrets.yaml
 
+    persistence:
+      storageClassName: do-block-storage
+
     service:
       type: ClusterIP
 

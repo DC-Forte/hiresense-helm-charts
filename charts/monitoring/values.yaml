@@ -77,6 +77,16 @@ kube-prometheus-stack:
   grafana:
     adminPassword: "changeme"  # override in values-prod.secrets.yaml
 
+    # Without this, Grafana's SQLite DB (service accounts, API tokens,
+    # any dashboard not provisioned via ConfigMap) lives in ephemeral pod
+    # storage and is wiped every restart — breaks anything authenticating
+    # with a Grafana service account token (e.g. MCP integrations).
+    persistence:
+      enabled: true
+      type: pvc
+      storageClassName: ""  # cluster default; override in values-prod
+      size: 1Gi
+
     service:
       type: ClusterIP
 
@@ -139,11 +149,6 @@ kube-prometheus-stack:
           gnetId: 15760
           revision: 1
           datasource: Prometheus
-        # Go runtime: goroutines, GC, memory, CPU
-        go-runtime:
-          gnetId: 10826
-          revision: 1
-          datasource: Prometheus
         # Prometheus self-monitoring
         prometheus-overview:
           gnetId: 3662
@@ -154,6 +159,12 @@ kube-prometheus-stack:
           gnetId: 13407
           revision: 1
           datasource: Loki
+        # NOTE: "go-runtime" (gnetId 10826) removed — it filters on
+        # kubernetes_namespace/kubernetes_pod_name labels that don't exist on
+        # this cluster's kube-prometheus-stack metrics (real labels are
+        # namespace/pod), so the filter silently matched every Go process
+        # cluster-wide. Replaced by the custom "go-metrics" ConfigMap
+        # dashboard in templates/dashboards.yaml with corrected label names.
         # Tempo: trace search + RED metrics
         tempo-traces:
           gnetId: 16543
