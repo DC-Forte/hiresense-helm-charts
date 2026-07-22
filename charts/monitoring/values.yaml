@@ -361,6 +361,10 @@ promtail:
     snippets:
       # Extract structured JSON log fields as Loki labels/metadata
       pipelineStages:
+        # Strip containerd's log envelope (timestamp/stream/flag prefix)
+        # before parsing the app's JSON payload — without this, json below
+        # never matches and level/error/trace_id/span_id never populate.
+        - cri: {}
         - json:
             expressions:
               level: level
