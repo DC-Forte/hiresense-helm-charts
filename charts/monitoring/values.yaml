@@ -139,11 +139,6 @@ kube-prometheus-stack:
           gnetId: 1860
           revision: 37
           datasource: Prometheus
-        # Kubernetes cluster overview (kube-state-metrics + node-exporter)
-        k8s-cluster:
-          gnetId: 7249
-          revision: 1
-          datasource: Prometheus
         # Kubernetes pod/deployment compute resources
         k8s-pods:
           gnetId: 15760
@@ -165,6 +160,12 @@ kube-prometheus-stack:
         # namespace/pod), so the filter silently matched every Go process
         # cluster-wide. Replaced by the custom "go-metrics" ConfigMap
         # dashboard in templates/dashboards.yaml with corrected label names.
+        # NOTE: "k8s-cluster" (gnetId 7249) removed — 3 of its panels grouped
+        # by cAdvisor labels pod_name/container_name and a docker-only
+        # "^k8s_.*" container name filter, none of which exist on this
+        # cluster's containerd/cAdvisor metrics (real label is pod/container).
+        # Replaced by the custom "k8s-cluster" ConfigMap dashboard in
+        # templates/dashboards.yaml with corrected label/metric names.
         # Tempo: trace search + RED metrics
         tempo-traces:
           gnetId: 16543
