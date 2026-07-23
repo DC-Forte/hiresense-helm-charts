@@ -7,7 +7,9 @@ metadata:
   labels: {{- include "hiresense.labels" . | nindent 4 }}
 spec:
   accessLogging:
-    - filter:
+    - providers:
+        - name: envoy
+      filter:
         expression: >-
           !(request.url_path.startsWith('/v1/traces') ||
           request.url_path.startsWith('/ingest') ||
