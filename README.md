@@ -84,7 +84,7 @@ The example files document every required key — fill from `terraform output` o
 
 | Key group | Source |
 |-----------|--------|
-| DB / Redis / Mongo URLs | DigitalOcean managed databases |
+| DB / Redis URLs | DigitalOcean managed databases |
 | JWT / session secrets | `openssl rand -hex 32` |
 | OpenAI, LiveKit, SMTP | Respective dashboards |
 | DO Spaces keys | DigitalOcean → API → Spaces Keys |

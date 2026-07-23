@@ -140,7 +140,6 @@ env:
 secrets:
   databaseUrl: ""           # postgresql://user:pw@host:25060/hiresense?sslmode=require
   redisUrl: ""              # rediss://default:pw@host:25061
-  mongodbUri: ""            # mongodb://user:pw@10.x.x.x:27017/chapter_ai_interview?authSource=...
   jwtSecret: ""
   candidateJwtSecret: ""
   jwtRefreshSecret: ""
