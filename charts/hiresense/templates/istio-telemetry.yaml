@@ -13,5 +13,7 @@ spec:
         expression: >-
           !(request.url_path.startsWith('/v1/traces') ||
           request.url_path.startsWith('/ingest') ||
-          request.url_path == '/metrics')
+          request.url_path == '/metrics' ||
+          request.url_path == '/health' ||
+          request.url_path == '/api/v1/health')
 {{- end }}
