@@ -1,0 +1,15 @@
+{{- if .Values.istio.enabled }}
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: hiresense-access-log-filter
+  namespace: {{ .Values.global.namespace }}
+  labels: {{- include "hiresense.labels" . | nindent 4 }}
+spec:
+  accessLogging:
+    - filter:
+        expression: >-
+          !(request.url_path.startsWith('/v1/traces') ||
+          request.url_path.startsWith('/ingest') ||
+          request.url_path == '/metrics')
+{{- end }}

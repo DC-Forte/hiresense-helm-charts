@@ -256,7 +256,12 @@ loki:
             period: 24h
 
     limits_config:
-      retention_period: 720h  # 30 days
+      retention_period: 168h  # 7 days
+
+    compactor:
+      working_directory: /var/loki/compactor
+      retention_enabled: true
+      delete_request_store: filesystem
 
   deploymentMode: SingleBinary
 
@@ -322,10 +327,9 @@ tempo:
           processors:
             - local-blocks
 
-    # Retention
-    compactor:
-      compaction:
-        block_retention: 48h
+    # Retention (chart templates this into compactor.compaction.block_retention itself;
+    # setting compactor.compaction.block_retention directly here is a no-op)
+    retention: 168h  # 7 days
 
     # Base: local filesystem storage (override to s3 in values-prod)
     storage:
@@ -378,6 +382,10 @@ tempo:
 pyroscope:
   pyroscope:
     fullnameOverride: pyroscope  # → service: pyroscope.monitoring.svc.cluster.local:4040
+
+    structuredConfig:
+      limits:
+        compactor_blocks_retention_period: 168h  # 7 days
 
     # Base: local filesystem storage (override to s3 in values-prod)
     persistence:

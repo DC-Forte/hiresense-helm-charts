@@ -104,7 +104,12 @@ loki:
             period: 24h
 
     limits_config:
-      retention_period: 720h  # 30 days
+      retention_period: 168h  # 7 days
+
+    compactor:
+      working_directory: /var/loki/compactor
+      retention_enabled: true
+      delete_request_store: s3
 
   singleBinary:
     replicas: 1
@@ -125,9 +130,7 @@ loki:
 # ─────────────────────────────────────────────────────────────────────────────
 tempo:
   tempo:
-    compactor:
-      compaction:
-        block_retention: 168h   # 7 days in prod
+    retention: 168h   # 7 days in prod
 
     storage:
       trace:
