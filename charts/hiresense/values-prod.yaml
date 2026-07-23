@@ -22,6 +22,7 @@ env:
 
 monitoring:
   otlpEndpoint: "tempo.monitoring.svc.cluster.local:4318"
+  pyroscopeServerAddress: "http://pyroscope.monitoring.svc.cluster.local:4040"
   workerMetricsPort: "9091"
   serviceMonitor:
     enabled: true

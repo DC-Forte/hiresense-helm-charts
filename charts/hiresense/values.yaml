@@ -191,6 +191,10 @@ monitoring:
   # Set to "tempo.monitoring.svc.cluster.local:4318" when monitoring chart is installed.
   otlpEndpoint: ""
 
+  # Pyroscope server for continuous profiling (backend + worker).
+  # Set to "http://pyroscope.monitoring.svc.cluster.local:4040" when monitoring chart is installed.
+  pyroscopeServerAddress: ""
+
   # Port the worker exposes Prometheus /metrics on.
   workerMetricsPort: "9091"
 

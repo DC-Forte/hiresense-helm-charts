@@ -52,6 +52,9 @@ data:
   {{- if .Values.monitoring.otlpEndpoint }}
   OTLP_ENDPOINT: {{ .Values.monitoring.otlpEndpoint | quote }}
   {{- end }}
+  {{- if .Values.monitoring.pyroscopeServerAddress }}
+  PYROSCOPE_SERVER_ADDRESS: {{ .Values.monitoring.pyroscopeServerAddress | quote }}
+  {{- end }}
 ---
 # Frontend runtime env (VITE_*) — read by docker-entrypoint.sh to inject into bundle
 apiVersion: v1

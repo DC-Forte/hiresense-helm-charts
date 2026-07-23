@@ -1,4 +1,6 @@
-# hiresense-helm-charts
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="hiresense-helm-charts — two Helm charts deploy HireSense, an AI interview platform, plus a complete observability stack, onto a DigitalOcean Kubernetes cluster">
+</p>
 
 Helm charts for deploying [HireSense](https://hiresense.dc-forte.com) — an AI interview platform — on DigitalOcean Kubernetes (DOKS).
 
@@ -7,7 +9,21 @@ Helm charts for deploying [HireSense](https://hiresense.dc-forte.com) — an AI 
 | Chart | Description |
 |-------|-------------|
 | `charts/hiresense` | App: Go backend, Python AI engine, React frontend, worker |
-| `charts/monitoring` | Observability: Prometheus, Grafana, Loki, Tempo, Promtail, metrics-server |
+| `charts/monitoring` | Observability: Prometheus, Grafana, Loki, Tempo, Promtail, Pyroscope, metrics-server |
+
+## How it observes itself
+
+The backend and worker (both Go) push every signal into the monitoring chart, correlated in one Grafana:
+
+<p align="center">
+  <img src="./assets/readme/architecture.svg" width="100%" alt="Diagram: backend and worker send metrics, logs, traces, and profiles into Prometheus, Loki, Tempo, and Pyroscope, all queried from one Grafana">
+</p>
+
+- **Metrics** → Prometheus scrapes app `ServiceMonitor`s in any namespace.
+- **Logs** → structured JSON via Promtail → Loki; correlates with traces via `trace_id`.
+- **Traces** → OTLP (gRPC `:4317` / HTTP `:4318`) → Tempo.
+- **Profiles** → continuous CPU/memory/goroutine profiling → Pyroscope; flamegraphs click through directly from a Tempo span.
+- **Grafana** at `grafana.dc-forte.com` ties all four together with pre-loaded dashboards.
 
 ## Prerequisites
 
@@ -85,16 +101,6 @@ helm repo update
 helm install hiresense dc-forte/hiresense -n hiresense-app -f your-values.yaml
 ```
 
-## Observability
-
-The monitoring chart ships a complete observability stack:
-
-- **Prometheus** scrapes app ServiceMonitors in any namespace
-- **Grafana** at `grafana.dc-forte.com` with pre-loaded dashboards (node-exporter, K8s pods, Go runtime, Loki, Tempo)
-- **Loki** receives structured JSON logs from Promtail; correlates with Tempo traces via `trace_id`
-- **Tempo** receives OTLP traces (gRPC :4317 / HTTP :4318) from backend + worker
-- **metrics-server** serves the Kubernetes Metrics API (`metrics.k8s.io`) — required for `kubectl top`, HPA, and cluster management tools
-
 ## Using Luxury Yacht
 
 [Luxury Yacht](https://github.com/luxury-yacht/app) is a cross-platform desktop app for browsing and managing Kubernetes clusters. It connects to your cluster via your existing kubeconfig and provides a real-time view of workloads, pods, logs, and resource metrics.
@@ -138,6 +144,6 @@ DOKS-specific note: the monitoring chart already sets `--kubelet-preferred-addre
 |------|-----------------|
 | Nodes | CPU / memory utilisation per node (needs metrics-server) |
 | Workloads → hiresense-app | Pod restarts, image tags, replica counts |
-| Workloads → monitoring | Prometheus, Grafana, Loki, Tempo health |
+| Workloads → monitoring | Prometheus, Grafana, Loki, Tempo, Pyroscope health |
 | Logs | Live pod logs (backed by the Kubernetes log API, not Loki) |
 | Services | Istio gateway, backend, AI engine endpoints |

@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1200" height="380" viewBox="0 0 1200 380"
+     role="img" aria-labelledby="hero-title hero-desc">
+  <title id="hero-title">hiresense-helm-charts</title>
+  <desc id="hero-desc">Two Helm charts deploy HireSense, an AI interview platform, plus a complete observability stack, onto a DigitalOcean Kubernetes cluster.</desc>
+
+  <defs>
+    <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
+      <path d="M28 0H0V28" fill="none" stroke="#1A1E22" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="380" rx="26" fill="#0B0D0F"/>
+  <rect x="1" y="1" width="1198" height="378" rx="25" fill="none" stroke="#1E2226" stroke-width="1"/>
+  <rect x="640" y="0" width="560" height="380" fill="url(#grid)" opacity="0.5"/>
+
+  <!-- Title block -->
+  <g transform="translate(56,0)" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+    <!-- motif: simplified chart node mark -->
+    <g transform="translate(0,54)">
+      <circle cx="8" cy="8" r="7.5" fill="none" stroke="#FF6B35" stroke-width="2"/>
+      <circle cx="8" cy="8" r="2.4" fill="#FF6B35"/>
+      <path d="M8 0.5V3.2M8 12.8V15.5M0.5 8H3.2M12.8 8H15.5" stroke="#FF6B35" stroke-width="1.4"/>
+    </g>
+    <text x="30" y="60" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="14" letter-spacing="2.2" fill="#8A8F98">HELM CHARTS · KUBERNETES DEPLOY</text>
+
+    <text x="0" y="128" font-size="42" font-weight="700" fill="#F5F3EE">hiresense-helm-charts</text>
+
+    <text x="0" y="176" font-size="18" fill="#C7CBD1">Two Helm charts deploy HireSense — an AI</text>
+    <text x="0" y="202" font-size="18" fill="#C7CBD1">interview platform — plus a complete</text>
+    <text x="0" y="228" font-size="18" fill="#C7CBD1">observability stack, on DigitalOcean Kubernetes.</text>
+
+    <text x="0" y="286" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="14" fill="#7C828B" xml:space="preserve">helm v3   ·   kubernetes ≥1.25   ·   digitalocean doks</text>
+  </g>
+
+  <!-- System map -->
+  <g transform="translate(676,50)" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+    <rect width="468" height="284" rx="16" fill="none" stroke="#2A2F35" stroke-width="1.25" stroke-dasharray="4 4"/>
+    <text x="20" y="26" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" letter-spacing="1.6" fill="#6B7280">KUBERNETES CLUSTER · DOKS</text>
+
+    <!-- connector -->
+    <path d="M234 130 V150" stroke="#3A3F45" stroke-width="1.5" fill="none"/>
+    <circle cx="234" cy="130" r="3" fill="#FF6B35"/>
+
+    <!-- Card: charts/hiresense -->
+    <g transform="translate(20,42)">
+      <rect width="428" height="88" rx="12" fill="#14171A" stroke="#262B31" stroke-width="1.25"/>
+      <circle cx="20" cy="24" r="4" fill="#FF6B35"/>
+      <text x="34" y="29" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="15" font-weight="600" fill="#F5F3EE">charts/hiresense</text>
+      <text x="20" y="50" font-size="12.5" fill="#8A8F98">Go backend · Python AI engine · React frontend · worker</text>
+
+      <g font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" fill="#B9BEC6">
+        <rect x="20" y="60" width="66" height="20" rx="10" fill="#1D2124" stroke="#2A2F35"/>
+        <text x="53" y="74" text-anchor="middle">backend</text>
+        <rect x="94" y="60" width="76" height="20" rx="10" fill="#1D2124" stroke="#2A2F35"/>
+        <text x="132" y="74" text-anchor="middle">ai-engine</text>
+        <rect x="178" y="60" width="70" height="20" rx="10" fill="#1D2124" stroke="#2A2F35"/>
+        <text x="213" y="74" text-anchor="middle">frontend</text>
+        <rect x="256" y="60" width="60" height="20" rx="10" fill="#1D2124" stroke="#2A2F35"/>
+        <text x="286" y="74" text-anchor="middle">worker</text>
+      </g>
+    </g>
+
+    <!-- Card: charts/monitoring -->
+    <g transform="translate(20,150)">
+      <rect width="428" height="118" rx="12" fill="#14171A" stroke="#262B31" stroke-width="1.25"/>
+      <circle cx="20" cy="24" r="4" fill="#FF6B35"/>
+      <text x="34" y="29" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="15" font-weight="600" fill="#F5F3EE">charts/monitoring</text>
+      <text x="20" y="50" font-size="12.5" fill="#8A8F98">metrics · logs · traces · profiles</text>
+
+      <g font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" fill="#B9BEC6">
+        <rect x="20" y="60" width="86" height="20" rx="10" fill="#1D2124" stroke="#2A2F35"/>
+        <text x="63" y="74" text-anchor="middle">prometheus</text>
+        <rect x="114" y="60" width="66" height="20" rx="10" fill="#1D2124" stroke="#2A2F35"/>
+        <text x="147" y="74" text-anchor="middle">grafana</text>
+        <rect x="188" y="60" width="50" height="20" rx="10" fill="#1D2124" stroke="#2A2F35"/>
+        <text x="213" y="74" text-anchor="middle">loki</text>
+        <rect x="246" y="60" width="58" height="20" rx="10" fill="#1D2124" stroke="#2A2F35"/>
+        <text x="275" y="74" text-anchor="middle">tempo</text>
+        <rect x="312" y="60" width="76" height="20" rx="10" fill="#FF6B35" fill-opacity="0.12" stroke="#FF6B35" stroke-opacity="0.5"/>
+        <text x="350" y="74" text-anchor="middle" fill="#FF9466">pyroscope</text>
+
+        <rect x="20" y="86" width="74" height="20" rx="10" fill="#1D2124" stroke="#2A2F35"/>
+        <text x="57" y="100" text-anchor="middle">promtail</text>
+        <rect x="102" y="86" width="120" height="20" rx="10" fill="#1D2124" stroke="#2A2F35"/>
+        <text x="162" y="100" text-anchor="middle">metrics-server</text>
+      </g>
+    </g>
+  </g>
+</svg>

@@ -214,8 +214,20 @@ kube-prometheus-stack:
           # Trace → Metrics correlation
           tracesToMetrics:
             datasourceUid: prometheus
+          # Trace → Profiles correlation (Tempo span → Pyroscope flamegraph)
+          tracesToProfiles:
+            datasourceUid: pyroscope
+            tags:
+              - key: service.name
+                value: service_name
           nodeGraph:
             enabled: true
+
+      - name: Pyroscope
+        type: grafana-pyroscope-datasource
+        url: http://pyroscope.monitoring.svc.cluster.local:4040
+        access: proxy
+        isDefault: false
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Loki  (log aggregation)
@@ -359,6 +371,27 @@ tempo:
         port: 4318
         protocol: TCP
         targetPort: 4318
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Pyroscope  (continuous profiling)
+# ─────────────────────────────────────────────────────────────────────────────
+pyroscope:
+  pyroscope:
+    fullnameOverride: pyroscope  # → service: pyroscope.monitoring.svc.cluster.local:4040
+
+    # Base: local filesystem storage (override to s3 in values-prod)
+    persistence:
+      enabled: true
+      storageClassName: ""  # cluster default; override in values-prod
+      size: 10Gi
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Promtail  (log shipper — DaemonSet)
