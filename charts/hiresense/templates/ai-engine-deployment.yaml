@@ -15,6 +15,9 @@ spec:
     metadata:
       labels:
         app: hiresense-ai-engine
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
     spec:
       imagePullSecrets:
         - name: {{ .Values.global.imagePullSecret }}
