@@ -183,7 +183,32 @@ promtail:
             source: path
             expression: "^(/metrics|/health|/api/health|/api/v1/health)$"
         - match:
+            selector: '{app="hiresense-ai-engine"}'
+            stages:
+              - drop:
+                  expression: '.*"GET (/health|/api/v1/health|/api/health|/metrics) HTTP/1\.1" 200.*'
+        - match:
+            selector: '{app="hiresense-backend"}'
+            stages:
+              - json:
+                  expressions:
+                    msg: msg
+              - drop:
+                  source: msg
+                  expression: "^livekit keep-alive.*$"
+        - match:
             selector: '{app="pyroscope"}'
+            stages:
+              - logfmt:
+                  mapping:
+                    level:
+              - regex:
+                  expression: '^\S+ \[(?P<level>\w+)\]'
+              - drop:
+                  source: level
+                  expression: "(?i)^(debug|info)$"
+        - match:
+            selector: '{app="tempo"}'
             stages:
               - logfmt:
                   mapping:
@@ -191,6 +216,35 @@ promtail:
               - drop:
                   source: level
                   expression: "^(debug|info)$"
+        - match:
+            selector: '{app="cpc-bridge-proxy"}'
+            stages:
+              - drop:
+                  expression: '^(127\.0\.0\.1 - - \[.*\] "GET /healthz HTTP/1\.1" 200|\S+ \[.*\] TCP 200 )'
+        - match:
+            selector: '{app="csi-do-node"}'
+            stages:
+              - logfmt:
+                  mapping:
+                    level:
+              - drop:
+                  source: level
+                  expression: "^info$"
+        - match:
+            selector: '{app="cilium-agent", container="arp-fix"}'
+            stages:
+              - drop:
+                  expression: '^\S+ reachable$'
+        - match:
+            selector: '{app="coredns"}'
+            stages:
+              - drop:
+                  expression: '^\[WARNING\] No files matching import glob pattern: custom/\*\.(server|override)$'
+        - match:
+            selector: '{app="doks-otel"}'
+            stages:
+              - drop:
+                  expression: '^(done\.|config is in sync, skipping\.|trying to ref.*sh token\.\.\.)$'
         - match:
             selector: '{app="loki"}'
             stages:
