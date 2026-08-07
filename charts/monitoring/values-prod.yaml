@@ -182,6 +182,27 @@ promtail:
         - drop:
             source: path
             expression: "^(/metrics|/health|/api/health|/api/v1/health)$"
+        - match:
+            selector: '{app="pyroscope"}'
+            stages:
+              - logfmt:
+                  mapping:
+                    level:
+              - drop:
+                  source: level
+                  expression: "^(debug|info)$"
+        - match:
+            selector: '{app="loki"}'
+            stages:
+              - json:
+                  expressions:
+                    level:
+              - logfmt:
+                  mapping:
+                    level:
+              - drop:
+                  source: level
+                  expression: "(?i)^(debug|info)$"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Grafana Istio ingress
