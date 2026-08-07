@@ -172,6 +172,16 @@ promtail:
     limits:
       cpu: 300m
       memory: 512Mi
+  config:
+    snippets:
+      pipelineStages:
+        - cri: {}
+        - json:
+            expressions:
+              path: path
+        - drop:
+            source: path
+            expression: "^(/metrics|/health|/api/health|/api/v1/health)$"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Grafana Istio ingress
