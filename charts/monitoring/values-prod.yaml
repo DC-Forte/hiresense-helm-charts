@@ -246,13 +246,19 @@ promtail:
               - drop:
                   expression: '^(done\.|config is in sync, skipping\.|trying to ref.*sh token\.\.\.)$'
         - match:
-            selector: '{app="loki"}'
+            selector: '{app="loki", container="loki"}'
+            stages:
+              - logfmt:
+                  mapping:
+                    level:
+              - drop:
+                  source: level
+                  expression: "(?i)^(debug|info)$"
+        - match:
+            selector: '{app="loki", container="loki-sc-rules"}'
             stages:
               - json:
                   expressions:
-                    level:
-              - logfmt:
-                  mapping:
                     level:
               - drop:
                   source: level
