@@ -117,6 +117,10 @@ env:
   FEEDBACK_WORKER_BATCH_SIZE: "5"
   FEEDBACK_WORKER_MAX_RETRIES: "5"
   RECORDING_WORKER_POLL_INTERVAL_SECONDS: "60"
+  # Max sessions ffmpeg-merging concurrently per pod (backend + worker both
+  # read this — ffmpeg encoding is CPU-heavy enough to starve/OOM a pod if
+  # unbounded).
+  RECORDING_MAX_CONCURRENT_MERGES: "3"
   RESUME_UPLOAD_POLL_INTERVAL_SECONDS: "10"
   RESUME_UPLOAD_BATCH_SIZE: "5"
   EMAIL_WORKER_POLL_INTERVAL_SECONDS: "30"
