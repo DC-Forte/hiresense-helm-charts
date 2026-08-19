@@ -6,3 +6,5 @@ values-prod.secrets.yaml
 values-prod.secrets-*.yaml
 charts/monitoring/charts/
 *.lock
+.claude
+.claude-flow
