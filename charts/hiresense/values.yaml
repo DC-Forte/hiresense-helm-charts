@@ -111,7 +111,7 @@ env:
   # content hash instead of re-running the LLM — saves the call and
   # sidesteps run-to-run classification variance for unchanged input.
   # Set to "false" to force every report request through a fresh analysis.
-  REPORT_CACHE_BY_CONTENT_ENABLED: "true"
+  REPORT_CACHE_BY_CONTENT_ENABLED: "false"
   # Caches per-skill DIRECT/ADJACENT/CLAIM-ONLY disambiguation guidance keyed
   # by normalized skill name (not by job) — generated once per skill name and
   # reused across every future JD/candidate that references it, injected into
