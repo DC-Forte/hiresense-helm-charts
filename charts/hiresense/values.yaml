@@ -107,6 +107,11 @@ env:
   # package), so this only affects classification quality, not arithmetic —
   # set to A/B test a stronger model without paying for it on every call.
   # OPENAI_ANALYSIS_MODEL: "gpt-4.1"
+  # Reuses a prior jd_vs_resume_analysis for an identical (job, resume)
+  # content hash instead of re-running the LLM — saves the call and
+  # sidesteps run-to-run classification variance for unchanged input.
+  # Set to "false" to force every report request through a fresh analysis.
+  REPORT_CACHE_BY_CONTENT_ENABLED: "true"
   LIVEKIT_URL: "wss://dc-forte-c3qnkc6a.livekit.cloud"
   LIVEKIT_AGENT_NAME: "dc-forte-voice-agent"
   SMTP_HOST: "smtp.gmail.com"
