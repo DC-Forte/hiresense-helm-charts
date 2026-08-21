@@ -35,4 +35,16 @@ entries:
     urls:
     - https://github.com/DC-Forte/hiresense-helm-charts/releases/download/hiresense-monitoring-0.1.0/hiresense-monitoring-0.1.0.tgz
     version: 0.1.0
-generated: "2026-06-27T07:28:07.887575708Z"
+  recruiter-report:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2026-08-21T16:01:04.809491466Z"
+    description: Recruiter Report — standalone async LLM report enqueue + processor/sender,
+      extracted from hiresense
+    digest: e240514ba5db75878016c4c1378fbfa1d52181f8c307f3e62031b762d480e157
+    name: recruiter-report
+    type: application
+    urls:
+    - https://github.com/DC-Forte/hiresense-helm-charts/releases/download/recruiter-report-0.1.0/recruiter-report-0.1.0.tgz
+    version: 0.1.0
+generated: "2026-08-21T16:01:04.809496633Z"
