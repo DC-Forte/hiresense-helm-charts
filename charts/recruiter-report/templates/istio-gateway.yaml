@@ -15,10 +15,15 @@ spec:
         protocol: HTTP
       hosts:
         - {{ .Values.host | quote }}
-      {{- if .Values.tls.enabled }}
-      tls:
-        httpsRedirect: true
-      {{- end }}
+      # No httpsRedirect here (unlike hiresense's chart) — that's a blanket
+      # listener-level setting with no path exceptions, and it breaks
+      # cert-manager's own HTTP-01 self-check (which requests plain HTTP and
+      # gets redirected into a TLS handshake with no valid cert yet —
+      # "connection reset by peer"). hiresense's chart gets away with it only
+      # because manageCertManager: false there — its cert was adopted, not
+      # issued through this same HTTP-01 flow. HTTPS enforcement for real
+      # traffic happens at the VirtualService level instead (see
+      # istio-virtualservice.yaml), which can exclude the challenge path.
     {{- if .Values.tls.enabled }}
     - port:
         number: 443

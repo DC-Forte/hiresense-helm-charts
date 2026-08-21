@@ -43,6 +43,11 @@ tls:
   # true (unlike hiresense's chart) — this is a brand new domain with no
   # pre-existing manually-adopted cert, so cert-manager owns it from day one.
   manageCertManager: true
+  # Classic Istio Gateway CRD resolves credentialName against the ingress
+  # gateway workload's own namespace, not the Gateway resource's namespace —
+  # the Certificate (and its resulting Secret) must live here, not in
+  # global.namespace. Matches where the ingress gateway pods actually run.
+  gatewayNamespace: istio-system
 
 # Non-secret env. Secrets are below in `secrets:`, populated via
 # values-{env}.secrets.yaml (gitignored).

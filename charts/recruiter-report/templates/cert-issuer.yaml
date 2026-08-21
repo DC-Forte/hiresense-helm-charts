@@ -1,9 +1,17 @@
 {{- if and .Values.tls.enabled .Values.tls.manageCertManager }}
+# Deliberately namespaced to the gateway's own namespace, NOT
+# .Values.global.namespace: classic Istio Gateway CRD's credentialName
+# resolves against the ingress gateway WORKLOAD's namespace (istio-system),
+# not the Gateway resource's namespace — confirmed by how hiresense-tls
+# actually lives in istio-system, not hiresense-app, despite the Gateway
+# object itself being in hiresense-app. A Certificate here would otherwise
+# produce a secret Istio can never find (see RECRUITER_REPORT_EXTRACTION_PLAN.md
+# — this exact bug: TLS handshake reset, "secret istio-system/... not found").
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: {{ .Values.tls.secretName }}
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.tls.gatewayNamespace }}
   labels: {{- include "recruiter-report.labels" . | nindent 4 }}
 spec:
   secretName: {{ .Values.tls.secretName }}
