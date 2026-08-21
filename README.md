@@ -10,6 +10,7 @@ Helm charts for deploying [HireSense](https://hiresense.dc-forte.com) — an AI 
 |-------|-------------|
 | `charts/hiresense` | App: Go backend, Python AI engine, React frontend, worker |
 | `charts/monitoring` | Observability: Prometheus, Grafana, Loki, Tempo, Promtail, Pyroscope, metrics-server |
+| `charts/recruiter-report` | Standalone recruiter-report service — own namespace/DB/TLS cert per env, reusing this same cluster. See [`RECRUITER_REPORT_EXTRACTION_PLAN.md`](https://github.com/DC-Forte/chapter-interview-backend-go/blob/develop/RECRUITER_REPORT_EXTRACTION_PLAN.md) in the backend repo. |
 
 ## How it observes itself
 
@@ -76,6 +77,21 @@ helm upgrade --install hiresense ./charts/hiresense -n hiresense-app \
   -f charts/hiresense/values-prod.yaml \
   -f charts/hiresense/values-prod.secrets.yaml
 ```
+
+## Deploying `charts/recruiter-report`
+
+Standalone chart, not a subchart of `charts/hiresense` — own namespace, own DB, own TLS cert per env (`staging`/`prod`), same shared cluster. `scripts/bootstrap-recruiter-report.sh <staging|prod> <namespace|postgres|deploy|verify|all>` parameterizes the same namespace/DB/deploy steps `scripts/` already has for the main app, scoped to this service.
+
+```bash
+./scripts/bootstrap-recruiter-report.sh staging namespace
+./scripts/bootstrap-recruiter-report.sh staging postgres   # provisions a dedicated DO PG cluster + DB
+# populate charts/recruiter-report/values-staging.secrets.yaml, run cmd/recruiterreportmigrate up
+./scripts/bootstrap-recruiter-report.sh staging deploy <image-tag>
+```
+
+**Cross-namespace TLS gotcha worth knowing before touching this chart:** classic Istio `Gateway` CRD resolves `credentialName` against the ingress gateway *workload's* namespace (`istio-system` here), not the `Gateway` resource's own namespace. `templates/cert-issuer.yaml` deliberately creates the `Certificate` (and its resulting Secret) in `.Values.tls.gatewayNamespace` (`istio-system`), not the chart's own namespace — putting it in the app namespace produces a Secret Istio can never find, which manifests as TLS handshakes resetting on `ClientHello` with `secret istio-system/<name> not found` in istiod's logs. Confirmed by checking where the existing `hiresense-tls` secret actually lives (`istio-system`, not `hiresense-app`) despite that `Gateway` object living in `hiresense-app`.
+
+Also unlike `charts/hiresense`'s `Gateway`, this chart's port-80 server does **not** set `tls.httpsRedirect` — that's a blanket per-listener setting with no path exceptions, and it breaks cert-manager's own HTTP-01 self-check (redirects the ACME challenge request into a TLS handshake with no cert issued yet → connection reset, cert never issues). `manageCertManager: false` on `charts/hiresense` sidesteps this because its cert was manually adopted, not issued through this flow.
 
 ## Secrets
 
