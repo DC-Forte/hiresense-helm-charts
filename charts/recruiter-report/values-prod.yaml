@@ -1,0 +1,13 @@
+# Prod overrides. Pair with values-prod.secrets.yaml (gitignored).
+global:
+  namespace: recruiter-report-prod
+
+host: recruiter-report-api.dc-forte.com
+
+tls:
+  secretName: recruiter-report-tls
+
+replicas: 1
+
+env:
+  ENVIRONMENT: production

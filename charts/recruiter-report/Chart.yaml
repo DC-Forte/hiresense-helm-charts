@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: 0.1.0
+description: Recruiter Report — standalone async LLM report enqueue + processor/sender, extracted from hiresense
+name: recruiter-report
+type: application
+version: 0.1.0

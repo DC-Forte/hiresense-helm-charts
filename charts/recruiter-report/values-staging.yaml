@@ -1,0 +1,14 @@
+# Staging overrides. Pair with values-staging.secrets.yaml (gitignored).
+global:
+  namespace: recruiter-report-staging
+
+host: recruiter-report-api-staging.dc-forte.com
+
+tls:
+  secretName: recruiter-report-staging-tls
+
+replicas: 1
+
+env:
+  ENVIRONMENT: staging
+  DB_SSL_MODE: require

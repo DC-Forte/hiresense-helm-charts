@@ -1,0 +1,20 @@
+{{- if .Values.istio.enabled }}
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: recruiter-report
+  namespace: {{ .Values.global.namespace }}
+  labels: {{- include "recruiter-report.labels" . | nindent 4 }}
+spec:
+  hosts:
+    - {{ .Values.host | quote }}
+  gateways:
+    - {{ .Values.istio.gateway }}
+  http:
+    - route:
+        - destination:
+            host: recruiter-report.{{ .Values.global.namespace }}.svc.cluster.local
+            port:
+              number: 80
+      timeout: 120s
+{{- end }}

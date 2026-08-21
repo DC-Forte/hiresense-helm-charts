@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: recruiter-report
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "recruiter-report.labels" . | nindent 4 }}
+    app: recruiter-report
+spec:
+  type: ClusterIP
+  selector:
+    app: recruiter-report
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

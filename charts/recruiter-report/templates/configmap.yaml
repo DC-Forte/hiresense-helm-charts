@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: recruiter-report-env
+  namespace: {{ .Values.global.namespace }}
+  labels: {{- include "recruiter-report.labels" . | nindent 4 }}
+data:
+{{- range $k, $v := .Values.env }}
+  {{ $k }}: {{ $v | quote }}
+{{- end }}
+  {{- if .Values.monitoring.otlpEndpoint }}
+  OTLP_ENDPOINT: {{ .Values.monitoring.otlpEndpoint | quote }}
+  {{- end }}
+  {{- if .Values.monitoring.pyroscopeServerAddress }}
+  PYROSCOPE_SERVER_ADDRESS: {{ .Values.monitoring.pyroscopeServerAddress | quote }}
+  {{- end }}

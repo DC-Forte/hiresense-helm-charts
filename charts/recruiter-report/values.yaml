@@ -1,0 +1,86 @@
+# Default values for the recruiter-report chart. Base values here are
+# environment-agnostic; values-staging.yaml / values-prod.yaml override the
+# per-env bits (namespace, host, replicas). Secrets are never here — see
+# values-staging.secrets.example.yaml / values-prod.secrets.example.yaml.
+#
+# This chart is deliberately standalone, not a subchart of ../hiresense — own
+# namespace, own DB, own TLS cert, own release. Same k8s cluster is reused
+# (see RECRUITER_REPORT_EXTRACTION_PLAN.md) but nothing here references the
+# hiresense chart's resources.
+
+global:
+  namespace: recruiter-report-prod # overridden per env
+  registry: ghcr.io/dc-forte
+  imagePullPolicy: Always
+  imagePullSecret: ghcr-pull
+
+image:
+  repository: chapter-interview-go-recruiterreport
+  tag: latest
+
+replicas: 1 # ClaimPendingReportJobs uses FOR UPDATE SKIP LOCKED — safe to scale up, no code change needed
+port: 5000
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+host: recruiter-report-api.dc-forte.com # overridden per env
+
+istio:
+  enabled: true
+  gateway: recruiter-report-gateway # own gateway — not shared with hiresense's
+  ingressSelector:
+    istio: ingressgateway
+
+tls:
+  enabled: true
+  issuer: letsencrypt-prod
+  secretName: recruiter-report-tls
+  # true (unlike hiresense's chart) — this is a brand new domain with no
+  # pre-existing manually-adopted cert, so cert-manager owns it from day one.
+  manageCertManager: true
+
+# Non-secret env. Secrets are below in `secrets:`, populated via
+# values-{env}.secrets.yaml (gitignored).
+env:
+  ENVIRONMENT: production
+  PORT: "5000"
+  DB_SSL_MODE: require
+  ALLOW_PROMPT_FILE_FALLBACK: "true" # no `prompts` table in this DB — see schema.sql
+  REPORT_CACHE_BY_CONTENT_ENABLED: "true"
+  SKILL_GUIDANCE_ENABLED: "true"
+  OPENAI_MODEL: "gpt-4.1"
+  # OPENAI_ANALYSIS_MODEL: ""   # optional override, see cmd/worker README
+  LLM_TIMEOUT_MS: "120000"
+  LLM_RETRY_COUNT: "2"
+  RECRUITER_REPORT_POLL_INTERVAL_SECONDS: "15"
+  RECRUITER_REPORT_BATCH_SIZE: "3"
+
+# All values below are placeholders. Real values come from
+# values-{env}.secrets.yaml (gitignored).
+secrets:
+  databaseUrl: "" # postgresql://user:pw@host:25060/recruiter_report?sslmode=require — separate DB cluster per env (recruiter-report-pgsql / recruiter-report-dev-pgsql)
+  recruiterReportWebhookUrl: ""
+  internalServiceToken: "" # shared secret with Mobius (core-api.mobius.dc-forte.com) — distinct from hiresense's own INTERNAL_SERVICE_TOKEN
+  encryptionKey: "" # AES key for resume_json/job_json at rest — distinct from hiresense's own ENCRYPTION_KEY, see task #5
+  openaiApiKey: ""
+  azureOpenaiApiKey: ""
+  azureOpenaiEndpoint: ""
+  azureOpenaiDeploymentName: ""
+  azureOpenaiApiVersion: ""
+
+# Reuses the cluster's existing monitoring stack (same cluster as hiresense) —
+# no new Prometheus/Grafana/Loki/Tempo install needed.
+monitoring:
+  otlpEndpoint: "tempo.monitoring.svc.cluster.local:4318"
+  pyroscopeServerAddress: "http://pyroscope.monitoring.svc.cluster.local:4040"
+  serviceMonitor:
+    enabled: false
+    labels: {}
+
+certManager:
+  email: ops@dc-forte.com
