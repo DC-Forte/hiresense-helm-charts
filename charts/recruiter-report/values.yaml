@@ -84,7 +84,7 @@ monitoring:
   otlpEndpoint: "tempo.monitoring.svc.cluster.local:4318"
   pyroscopeServerAddress: "http://pyroscope.monitoring.svc.cluster.local:4040"
   serviceMonitor:
-    enabled: false
+    enabled: true
     labels: {}
 
 certManager:

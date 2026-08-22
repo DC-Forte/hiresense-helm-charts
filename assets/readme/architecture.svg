@@ -2,7 +2,7 @@
      width="1200" height="460" viewBox="0 0 1200 460"
      role="img" aria-labelledby="arch-title arch-desc">
   <title id="arch-title">Telemetry flow from HireSense workloads into the monitoring chart</title>
-  <desc id="arch-desc">The Go backend and worker send metrics to Prometheus, structured logs via Promtail to Loki, OTLP traces to Tempo, and continuous profiles to Pyroscope. All four are queried from one Grafana instance, with a direct trace-to-profile link between Tempo and Pyroscope.</desc>
+  <desc id="arch-desc">The Go backend + worker (charts/hiresense) and the standalone recruiter-report service (charts/recruiter-report, staging + prod) both send metrics to Prometheus, structured logs via Promtail to Loki, OTLP traces to Tempo, and continuous profiles to Pyroscope. All four are queried from one Grafana instance, with a direct trace-to-profile link between Tempo and Pyroscope.</desc>
 
   <defs>
     <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -16,14 +16,14 @@
   <rect width="1200" height="460" rx="26" fill="#0B0D0F"/>
   <rect x="1" y="1" width="1198" height="458" rx="25" fill="none" stroke="#1E2226" stroke-width="1"/>
 
-  <text x="56" y="46" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" letter-spacing="1.6" fill="#6B7280">SIGNAL FLOW · internal/telemetry → charts/monitoring</text>
+  <text x="56" y="46" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" letter-spacing="1.6" fill="#6B7280">SIGNAL FLOW · charts/hiresense + charts/recruiter-report → charts/monitoring</text>
 
-  <!-- Connector fan: workload -> stores -->
+  <!-- Connector fan: workloads -> stores -->
   <g stroke="#4A5057" stroke-width="1.25" fill="none">
-    <path d="M256 230 C 360 230, 360 89, 470 89"   marker-end="url(#arrow)"/>
-    <path d="M256 230 C 360 230, 360 183, 470 183"  marker-end="url(#arrow)"/>
-    <path d="M256 230 C 360 230, 360 277, 470 277"  marker-end="url(#arrow)"/>
-    <path d="M256 230 C 360 230, 360 371, 470 371" stroke="#FF6B35" marker-end="url(#arrow-accent)"/>
+    <path d="M296 230 C 375 230, 375 89, 470 89"   marker-end="url(#arrow)"/>
+    <path d="M296 230 C 375 230, 375 183, 470 183"  marker-end="url(#arrow)"/>
+    <path d="M296 230 C 375 230, 375 277, 470 277"  marker-end="url(#arrow)"/>
+    <path d="M296 230 C 375 230, 375 371, 470 371" stroke="#FF6B35" marker-end="url(#arrow-accent)"/>
   </g>
 
   <!-- Connector fan: stores -> grafana -->
@@ -40,21 +40,28 @@
 
   <!-- signal labels -->
   <g font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" fill="#8A8F98">
-    <text x="330" y="130">metrics</text>
-    <text x="286" y="196" font-size="11">structured logs · promtail</text>
-    <text x="318" y="255">OTLP traces</text>
-    <text x="292" y="320" fill="#FF9466">CPU / mem profiles</text>
+    <text x="350" y="130">metrics</text>
+    <text x="306" y="196" font-size="11">structured logs · promtail</text>
+    <text x="338" y="255">OTLP traces</text>
+    <text x="312" y="320" fill="#FF9466">CPU / mem profiles</text>
   </g>
 
-  <!-- Col 1: workload -->
-  <g transform="translate(56,160)">
-    <rect width="200" height="140" rx="12" fill="#14171A" stroke="#262B31" stroke-width="1.25"/>
+  <!-- Col 1: workloads (two independently-deployed sources, one shared telemetry destination) -->
+  <g transform="translate(56,125)">
+    <rect width="240" height="210" rx="12" fill="#14171A" stroke="#262B31" stroke-width="1.25"/>
+
     <circle cx="22" cy="30" r="4" fill="#F5F3EE"/>
     <text x="36" y="35" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="15" font-weight="600" fill="#F5F3EE">backend + worker</text>
     <text x="22" y="58" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="12.5" fill="#8A8F98">charts/hiresense</text>
-    <text x="22" y="86" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" fill="#6B7280">internal/telemetry</text>
-    <text x="22" y="106" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" fill="#6B7280">go.opentelemetry.io</text>
-    <text x="22" y="126" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" fill="#6B7280">grafana/pyroscope-go</text>
+    <text x="22" y="82" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" fill="#6B7280">internal/telemetry</text>
+
+    <line x1="16" y1="100" x2="224" y2="100" stroke="#262B31" stroke-width="1"/>
+
+    <circle cx="22" cy="122" r="4" fill="#F5F3EE"/>
+    <text x="36" y="127" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="15" font-weight="600" fill="#F5F3EE">recruiter-report</text>
+    <text x="22" y="150" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="12.5" fill="#8A8F98">charts/recruiter-report</text>
+    <text x="22" y="174" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" fill="#6B7280">staging + prod</text>
+    <text x="22" y="194" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" fill="#6B7280">own DB/TLS · shared stack</text>
   </g>
 
   <!-- Col 2: stores -->

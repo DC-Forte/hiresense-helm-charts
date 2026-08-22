@@ -12,6 +12,18 @@ Helm charts for deploying [HireSense](https://hiresense.dc-forte.com) — an AI 
 | `charts/monitoring` | Observability: Prometheus, Grafana, Loki, Tempo, Promtail, Pyroscope, metrics-server |
 | `charts/recruiter-report` | Standalone recruiter-report service — own namespace/DB/TLS cert per env, reusing this same cluster. See [`RECRUITER_REPORT_EXTRACTION_PLAN.md`](https://github.com/DC-Forte/chapter-interview-backend-go/blob/develop/RECRUITER_REPORT_EXTRACTION_PLAN.md) in the backend repo. |
 
+### Namespaces
+
+One shared cluster, one namespace per release (`recruiter-report` deploys twice — staging and prod are fully separate namespaces, not one namespace with an env label):
+
+| Namespace | Release | Chart |
+|-----------|---------|-------|
+| `hiresense-app` | `hiresense` | `charts/hiresense` |
+| `monitoring` | `monitoring` | `charts/monitoring` |
+| `recruiter-report-staging` | `recruiter-report-staging` | `charts/recruiter-report` |
+| `recruiter-report-prod` | `recruiter-report-prod` | `charts/recruiter-report` |
+| `istio-system` | (cluster-managed, not this repo) | — TLS `Certificate`/Secret for `recruiter-report` lives here too, see the cross-namespace TLS gotcha below |
+
 ## How it observes itself
 
 The backend and worker (both Go) push every signal into the monitoring chart, correlated in one Grafana:
@@ -92,6 +104,91 @@ Standalone chart, not a subchart of `charts/hiresense` — own namespace, own DB
 **Cross-namespace TLS gotcha worth knowing before touching this chart:** classic Istio `Gateway` CRD resolves `credentialName` against the ingress gateway *workload's* namespace (`istio-system` here), not the `Gateway` resource's own namespace. `templates/cert-issuer.yaml` deliberately creates the `Certificate` (and its resulting Secret) in `.Values.tls.gatewayNamespace` (`istio-system`), not the chart's own namespace — putting it in the app namespace produces a Secret Istio can never find, which manifests as TLS handshakes resetting on `ClientHello` with `secret istio-system/<name> not found` in istiod's logs. Confirmed by checking where the existing `hiresense-tls` secret actually lives (`istio-system`, not `hiresense-app`) despite that `Gateway` object living in `hiresense-app`.
 
 Also unlike `charts/hiresense`'s `Gateway`, this chart's port-80 server does **not** set `tls.httpsRedirect` — that's a blanket per-listener setting with no path exceptions, and it breaks cert-manager's own HTTP-01 self-check (redirects the ACME challenge request into a TLS handshake with no cert issued yet → connection reset, cert never issues). `manageCertManager: false` on `charts/hiresense` sidesteps this because its cert was manually adopted, not issued through this flow.
+
+**⚠️ `image.tag` drift — read before running a plain `helm upgrade` on this chart.** `values.yaml`'s `image.tag: latest` is a placeholder. The real running tag is set out-of-band by CI's `kubectl set image` (`build-recruiterreport.yml`) — prod pins a commit SHA (e.g. `ffc97df`), staging tracks a mutable `:staging` tag. Helm has no idea this happened, so **any `helm upgrade` without `--set image.tag=...` silently reverts to `latest` — a tag that was never pushed — and breaks the running pods** (`ErrImagePull`/`ImagePullBackOff`). This bit us doing an unrelated monitoring change; see issue #16 in `RECRUITER_REPORT_EXTRACTION_ISSUES.md`. Always pass the real tag:
+
+```bash
+# read the real tag off a live pod first
+kubectl get pod -n recruiter-report-prod -l app=recruiter-report \
+  -o jsonpath='{.items[0].spec.containers[0].image}'
+
+helm upgrade recruiter-report-prod ./charts/recruiter-report -n recruiter-report-prod \
+  -f charts/recruiter-report/values.yaml \
+  -f charts/recruiter-report/values-prod.yaml \
+  -f charts/recruiter-report/values-prod.secrets.yaml \
+  --set image.tag=<real-tag-from-above> \
+  --force-conflicts
+```
+
+**Monitoring:** `monitoring.serviceMonitor.enabled: true` (chart default) — Prometheus picks it up cluster-wide (`serviceMonitorNamespaceSelector: {}` in `charts/monitoring`). Dashboard lives in `charts/monitoring/templates/dashboards.yaml` (uid `recruiter-report`, folder `HireSense`) — HTTP enqueue rate/latency/errors, Go runtime, pod health, logs, both namespaces overlaid by legend. Redeploying it is a `charts/monitoring` upgrade (see below), not this chart.
+
+## Common commands
+
+Release names ≠ chart names — `helm list -A` to confirm before upgrading anything:
+
+```bash
+helm list -A
+# hiresense                  hiresense-app             (chart: hiresense)
+# monitoring                 monitoring                (chart: hiresense-monitoring)
+# recruiter-report-staging   recruiter-report-staging  (chart: recruiter-report)
+# recruiter-report-prod      recruiter-report-prod     (chart: recruiter-report)
+```
+
+Redeploy the app (prod):
+
+```bash
+helm upgrade hiresense ./charts/hiresense -n hiresense-app \
+  -f charts/hiresense/values-prod.yaml \
+  -f charts/hiresense/values-prod.secrets.yaml \
+  --force-conflicts   # kubectl set image (CI) and helm both own spec.template — see recruiter-report note above, same pattern here
+```
+
+Redeploy monitoring (dashboards, alerting rules, Prometheus/Grafana config):
+
+```bash
+helm upgrade monitoring ./charts/monitoring -n monitoring \
+  -f charts/monitoring/values-prod.yaml \
+  -f charts/monitoring/values-prod.secrets.yaml \
+  --force-conflicts
+```
+
+Redeploy recruiter-report (staging/prod) — **always pin `image.tag`, see the drift warning above**:
+
+```bash
+kubectl get pod -n recruiter-report-<env> -l app=recruiter-report \
+  -o jsonpath='{.items[0].spec.containers[0].image}'   # read real tag first
+
+helm upgrade recruiter-report-<env> ./charts/recruiter-report -n recruiter-report-<env> \
+  -f charts/recruiter-report/values.yaml \
+  -f charts/recruiter-report/values-<env>.yaml \
+  -f charts/recruiter-report/values-<env>.secrets.yaml \
+  --set image.tag=<real-tag> \
+  --force-conflicts
+```
+
+Check what's actually running / restarting:
+
+```bash
+kubectl get pods -n hiresense-app
+kubectl get pods -n recruiter-report-staging
+kubectl get pods -n recruiter-report-prod
+kubectl rollout status deployment/<name> -n <namespace>
+kubectl rollout undo deployment/<name> -n <namespace>   # fastest rollback if a bad rollout is serving traffic
+```
+
+Confirm a ServiceMonitor is actually being scraped (don't assume — `enabled: true` in values doesn't mean Prometheus found it):
+
+```bash
+kubectl get servicemonitor -n <namespace>
+# then, via Grafana's Prometheus datasource (uid "prometheus"):
+#   up{namespace="<namespace>"}   → 1 per pod means scraping; empty result means it isn't
+```
+
+Tail logs without waiting on Loki's scrape/ingest delay:
+
+```bash
+kubectl logs -n <namespace> -l app=<app-label> -f --tail=100
+```
 
 ## Secrets
 

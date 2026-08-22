@@ -165,6 +165,183 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  name: recruiter-report-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "HireSense"
+data:
+  recruiter-report.json: |
+    {
+      "title": "Recruiter Report",
+      "uid": "recruiter-report",
+      "description": "Standalone recruiter-report service (staging + prod) — see RECRUITER_REPORT_EXTRACTION_PLAN.md",
+      "schemaVersion": 38,
+      "refresh": "30s",
+      "time": { "from": "now-24h", "to": "now" },
+      "panels": [
+        {
+          "id": 1,
+          "type": "row",
+          "title": "HTTP — Enqueue endpoint",
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }
+        },
+        {
+          "id": 2,
+          "title": "Request Rate (req/s)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 1 },
+          "targets": [{
+            "expr": "sum(rate(recruiterreport_request_duration_seconds_count{namespace=~\"recruiter-report-.*\"}[2m])) by (namespace)",
+            "legendFormat": "{{ "{{" }}namespace{{ "}}" }}",
+            "datasource": { "type": "prometheus" }
+          }],
+          "fieldConfig": { "defaults": { "unit": "reqps" } }
+        },
+        {
+          "id": 3,
+          "title": "Latency p50 / p95 / p99 (ms)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 1 },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.50, sum(rate(recruiterreport_request_duration_seconds_bucket{namespace=~\"recruiter-report-.*\"}[2m])) by (le, namespace)) * 1000",
+              "legendFormat": "p50 {{ "{{" }}namespace{{ "}}" }}",
+              "datasource": { "type": "prometheus" }
+            },
+            {
+              "expr": "histogram_quantile(0.95, sum(rate(recruiterreport_request_duration_seconds_bucket{namespace=~\"recruiter-report-.*\"}[2m])) by (le, namespace)) * 1000",
+              "legendFormat": "p95 {{ "{{" }}namespace{{ "}}" }}",
+              "datasource": { "type": "prometheus" }
+            },
+            {
+              "expr": "histogram_quantile(0.99, sum(rate(recruiterreport_request_duration_seconds_bucket{namespace=~\"recruiter-report-.*\"}[2m])) by (le, namespace)) * 1000",
+              "legendFormat": "p99 {{ "{{" }}namespace{{ "}}" }}",
+              "datasource": { "type": "prometheus" }
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "ms" } }
+        },
+        {
+          "id": 4,
+          "title": "Enqueue Errors (rate/min)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 1 },
+          "targets": [{
+            "expr": "sum(rate(recruiterreport_request_errors_total{namespace=~\"recruiter-report-.*\"}[5m])) by (namespace) * 60",
+            "legendFormat": "{{ "{{" }}namespace{{ "}}" }}",
+            "datasource": { "type": "prometheus" }
+          }],
+          "fieldConfig": { "defaults": { "unit": "short" } }
+        },
+        {
+          "id": 5,
+          "type": "row",
+          "title": "Runtime (Go)",
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 9 }
+        },
+        {
+          "id": 6,
+          "title": "Goroutines",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 10 },
+          "targets": [{
+            "expr": "go_goroutines{namespace=~\"recruiter-report-.*\"}",
+            "legendFormat": "{{ "{{" }}namespace{{ "}}" }} {{ "{{" }}pod{{ "}}" }}",
+            "datasource": { "type": "prometheus" }
+          }],
+          "fieldConfig": { "defaults": { "unit": "short" } }
+        },
+        {
+          "id": 7,
+          "title": "Heap Memory In-Use",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 10 },
+          "targets": [{
+            "expr": "go_memstats_heap_inuse_bytes{namespace=~\"recruiter-report-.*\"}",
+            "legendFormat": "{{ "{{" }}namespace{{ "}}" }} {{ "{{" }}pod{{ "}}" }}",
+            "datasource": { "type": "prometheus" }
+          }],
+          "fieldConfig": { "defaults": { "unit": "bytes" } }
+        },
+        {
+          "id": 8,
+          "title": "GC Pause Rate",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 10 },
+          "targets": [{
+            "expr": "sum(rate(go_gc_duration_seconds_sum{namespace=~\"recruiter-report-.*\"}[2m])) by (namespace)",
+            "legendFormat": "{{ "{{" }}namespace{{ "}}" }}",
+            "datasource": { "type": "prometheus" }
+          }],
+          "fieldConfig": { "defaults": { "unit": "s" } }
+        },
+        {
+          "id": 9,
+          "type": "row",
+          "title": "Pod Health",
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 18 }
+        },
+        {
+          "id": 10,
+          "title": "Pod Restarts (15m)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 19 },
+          "targets": [{
+            "expr": "increase(kube_pod_container_status_restarts_total{namespace=~\"recruiter-report-.*\"}[15m])",
+            "legendFormat": "{{ "{{" }}namespace{{ "}}" }}/{{ "{{" }}pod{{ "}}" }}",
+            "datasource": { "type": "prometheus" }
+          }],
+          "fieldConfig": { "defaults": { "unit": "short" } }
+        },
+        {
+          "id": 11,
+          "title": "Container CPU Usage",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 19 },
+          "targets": [{
+            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"recruiter-report-.*\",container!=\"\",container!=\"POD\"}[2m])) by (namespace, pod)",
+            "legendFormat": "{{ "{{" }}namespace{{ "}}" }}/{{ "{{" }}pod{{ "}}" }}",
+            "datasource": { "type": "prometheus" }
+          }],
+          "fieldConfig": { "defaults": { "unit": "cores" } }
+        },
+        {
+          "id": 12,
+          "title": "Container Memory Usage",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 19 },
+          "targets": [{
+            "expr": "sum(container_memory_working_set_bytes{namespace=~\"recruiter-report-.*\",container!=\"\",container!=\"POD\"}) by (namespace, pod)",
+            "legendFormat": "{{ "{{" }}namespace{{ "}}" }}/{{ "{{" }}pod{{ "}}" }}",
+            "datasource": { "type": "prometheus" }
+          }],
+          "fieldConfig": { "defaults": { "unit": "bytes" } }
+        },
+        {
+          "id": 13,
+          "type": "row",
+          "title": "Logs",
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 27 }
+        },
+        {
+          "id": 14,
+          "title": "Service Logs",
+          "type": "logs",
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 28 },
+          "options": { "dedupStrategy": "none", "showLabels": true, "showTime": true, "wrapLogMessage": true },
+          "targets": [{
+            "expr": "{namespace=~\"recruiter-report-.*\", app=\"recruiter-report\"} | json",
+            "datasource": { "type": "loki" }
+          }]
+        }
+      ]
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
   name: go-metrics-dashboard
   namespace: monitoring
   labels:

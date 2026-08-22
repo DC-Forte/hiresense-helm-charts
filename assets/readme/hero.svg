@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg"
-     width="1200" height="380" viewBox="0 0 1200 380"
+     width="1200" height="480" viewBox="0 0 1200 480"
      role="img" aria-labelledby="hero-title hero-desc">
   <title id="hero-title">hiresense-helm-charts</title>
-  <desc id="hero-desc">Two Helm charts deploy HireSense, an AI interview platform, plus a complete observability stack, onto a DigitalOcean Kubernetes cluster.</desc>
+  <desc id="hero-desc">Three Helm charts deploy HireSense, an AI interview platform, a standalone recruiter-report service, plus a complete observability stack, onto a DigitalOcean Kubernetes cluster.</desc>
 
   <defs>
     <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
@@ -10,12 +10,12 @@
     </pattern>
   </defs>
 
-  <rect width="1200" height="380" rx="26" fill="#0B0D0F"/>
-  <rect x="1" y="1" width="1198" height="378" rx="25" fill="none" stroke="#1E2226" stroke-width="1"/>
-  <rect x="640" y="0" width="560" height="380" fill="url(#grid)" opacity="0.5"/>
+  <rect width="1200" height="480" rx="26" fill="#0B0D0F"/>
+  <rect x="1" y="1" width="1198" height="478" rx="25" fill="none" stroke="#1E2226" stroke-width="1"/>
+  <rect x="640" y="0" width="560" height="480" fill="url(#grid)" opacity="0.5"/>
 
   <!-- Title block -->
-  <g transform="translate(56,0)" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+  <g transform="translate(56,40)" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
     <!-- motif: simplified chart node mark -->
     <g transform="translate(0,54)">
       <circle cx="8" cy="8" r="7.5" fill="none" stroke="#FF6B35" stroke-width="2"/>
@@ -26,16 +26,16 @@
 
     <text x="0" y="128" font-size="42" font-weight="700" fill="#F5F3EE">hiresense-helm-charts</text>
 
-    <text x="0" y="176" font-size="18" fill="#C7CBD1">Two Helm charts deploy HireSense — an AI</text>
-    <text x="0" y="202" font-size="18" fill="#C7CBD1">interview platform — plus a complete</text>
-    <text x="0" y="228" font-size="18" fill="#C7CBD1">observability stack, on DigitalOcean Kubernetes.</text>
+    <text x="0" y="176" font-size="18" fill="#C7CBD1">Three Helm charts deploy HireSense — an AI</text>
+    <text x="0" y="202" font-size="18" fill="#C7CBD1">interview platform — a standalone recruiter-report</text>
+    <text x="0" y="228" font-size="18" fill="#C7CBD1">service, plus observability, on DigitalOcean K8s.</text>
 
     <text x="0" y="286" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="14" fill="#7C828B" xml:space="preserve">helm v3   ·   kubernetes ≥1.25   ·   digitalocean doks</text>
   </g>
 
   <!-- System map -->
   <g transform="translate(676,50)" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
-    <rect width="468" height="284" rx="16" fill="none" stroke="#2A2F35" stroke-width="1.25" stroke-dasharray="4 4"/>
+    <rect width="468" height="410" rx="16" fill="none" stroke="#2A2F35" stroke-width="1.25" stroke-dasharray="4 4"/>
     <text x="20" y="26" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" letter-spacing="1.6" fill="#6B7280">KUBERNETES CLUSTER · DOKS</text>
 
     <!-- connector -->
@@ -84,6 +84,21 @@
         <text x="57" y="100" text-anchor="middle">promtail</text>
         <rect x="102" y="86" width="120" height="20" rx="10" fill="#1D2124" stroke="#2A2F35"/>
         <text x="162" y="100" text-anchor="middle">metrics-server</text>
+      </g>
+    </g>
+
+    <!-- Card: charts/recruiter-report — standalone, own namespace/DB/TLS per env -->
+    <g transform="translate(20,288)">
+      <rect width="428" height="98" rx="12" fill="#1D1611" stroke="#FF6B35" stroke-opacity="0.5" stroke-width="1.25"/>
+      <circle cx="20" cy="24" r="4" fill="#FF6B35"/>
+      <text x="34" y="29" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="15" font-weight="600" fill="#F5F3EE">charts/recruiter-report</text>
+      <text x="20" y="50" font-size="12.5" fill="#8A8F98">standalone — own namespace, DB, TLS cert per env</text>
+
+      <g font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" fill="#FF9466">
+        <rect x="20" y="60" width="192" height="20" rx="10" fill="#FF6B35" fill-opacity="0.12" stroke="#FF6B35" stroke-opacity="0.5"/>
+        <text x="116" y="74" text-anchor="middle">recruiter-report-staging</text>
+        <rect x="220" y="60" width="176" height="20" rx="10" fill="#FF6B35" fill-opacity="0.12" stroke="#FF6B35" stroke-opacity="0.5"/>
+        <text x="308" y="74" text-anchor="middle">recruiter-report-prod</text>
       </g>
     </g>
   </g>
