@@ -2,6 +2,9 @@
 global:
   namespace: recruiter-report-staging
 
+image:
+  tag: staging
+
 host: recruiter-report-api-staging.dc-forte.com
 
 tls:

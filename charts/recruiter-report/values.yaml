@@ -16,6 +16,8 @@ global:
 
 image:
   repository: chapter-interview-go-recruiterreport
+  # placeholder — ghcr never publishes "latest" for this image (see build-recruiterreport.yml).
+  # values-staging.yaml/values-prod.yaml override with the real env tag; --set image.tag=<sha> to pin.
   tag: latest
 
 replicas: 1 # ClaimPendingReportJobs uses FOR UPDATE SKIP LOCKED — safe to scale up, no code change needed

@@ -2,6 +2,9 @@
 global:
   namespace: recruiter-report-prod
 
+image:
+  tag: prod
+
 host: recruiter-report-api.dc-forte.com
 
 tls:
