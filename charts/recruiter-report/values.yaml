@@ -56,7 +56,7 @@ env:
   PORT: "5000"
   DB_SSL_MODE: require
   ALLOW_PROMPT_FILE_FALLBACK: "true" # no `prompts` table in this DB — see schema.sql
-  REPORT_CACHE_BY_CONTENT_ENABLED: "true"
+  REPORT_CACHE_BY_CONTENT_ENABLED: "false"
   SKILL_GUIDANCE_ENABLED: "true"
   OPENAI_MODEL: "gpt-4.1"
   # OPENAI_ANALYSIS_MODEL: ""   # optional override, see cmd/worker README
