@@ -156,6 +156,11 @@ env:
   OTP_RATE_LIMIT_MAX: "10"
   # Safety
   ALLOW_DEGRADED_PROMPTS: "0"
+  # jdparser (and other promptservice consumers) fall back to the embedded
+  # prompts/*.txt file when DB and Redis both miss. Code default is already
+  # "true" even in production (config.go: getEnvBool default), this just
+  # pins it explicitly instead of relying on that default.
+  ALLOW_PROMPT_FILE_FALLBACK: "true"
 
 # All values below are placeholders. Real values are injected via
 # values-prod.secrets.yaml (gitignored, produced from `terraform output`).
