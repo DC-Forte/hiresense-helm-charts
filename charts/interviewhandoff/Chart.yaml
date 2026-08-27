@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: 0.1.0
+description: Interview Handoff — standalone LiveKit orchestration service, Phase 0+1 of the interview-engine extraction from hiresense
+name: interviewhandoff
+type: application
+version: 0.1.0

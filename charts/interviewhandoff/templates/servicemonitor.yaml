@@ -1,0 +1,20 @@
+{{- if .Values.monitoring.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: interviewhandoff
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "interviewhandoff.labels" . | nindent 4 }}
+    {{- with .Values.monitoring.serviceMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      app: interviewhandoff
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+{{- end }}

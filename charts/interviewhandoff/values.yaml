@@ -1,0 +1,69 @@
+# Default values for the interviewhandoff chart. Base values here are
+# environment-agnostic; values-staging.yaml / values-prod.yaml override the
+# per-env bits (namespace, host, replicas). Secrets are never here — see
+# values-staging.secrets.example.yaml / values-prod.secrets.example.yaml.
+#
+# This chart is deliberately standalone, not a subchart of ../hiresense —
+# same pattern as ../recruiter-report: own namespace, own release. Same k8s
+# cluster is reused, nothing here references the hiresense chart's resources.
+#
+# Phase 0+1 scope only (see chapter-interview-backend-go's
+# docs/superpowers/specs/2026-08-27-interviewhandoff-extraction-design.md and
+# docs/superpowers/plans/2026-08-27-interviewhandoff-phase0-1.md):
+#
+# - No database yet — this service only mints LiveKit tokens and creates
+#   rooms/dispatches agents on behalf of the monolith. No databaseUrl/
+#   encryptionKey/openai secrets here, unlike recruiter-report — those land
+#   when Phase 3+ (candidate-facing interview state) actually needs a DB.
+# - No public ingress/TLS/Istio Gateway, unlike recruiter-report — every
+#   caller today (the monolith's internal/service/livekit HTTP client) is
+#   in-cluster, so this is ClusterIP-only. recruiter-report needs a public
+#   host because Mobius calls it from outside the cluster; interviewhandoff
+#   gets that treatment only when sub-project 2 (Mobius handoff) actually
+#   ships an external-facing endpoint — not yet designed, don't build for it.
+
+global:
+  namespace: interviewhandoff-prod # overridden per env
+  registry: ghcr.io/dc-forte
+  imagePullPolicy: Always
+  imagePullSecret: ghcr-pull
+
+image:
+  repository: chapter-interview-go-interviewhandoff
+  # placeholder — ghcr never publishes "latest" for this image (see build-interviewhandoff.yml).
+  # values-staging.yaml/values-prod.yaml override with the real env tag; --set image.tag=<sha> to pin.
+  tag: latest
+
+replicas: 1
+port: 8090
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# Non-secret env. Secrets are below in `secrets:`, populated via
+# values-{env}.secrets.yaml (gitignored).
+env:
+  APP_ENV: production
+  PORT: "8090"
+
+# All values below are placeholders. Real values come from
+# values-{env}.secrets.yaml (gitignored).
+secrets:
+  internalServiceToken: "" # shared secret the monolith's internal/service/livekit HTTP client sends as X-Internal-Token
+  liveKitUrl: ""
+  liveKitApiKey: ""
+  liveKitApiSecret: ""
+
+# Reuses the cluster's existing monitoring stack (same cluster as hiresense) —
+# no new Prometheus/Grafana/Loki/Tempo install needed.
+monitoring:
+  serviceMonitor:
+    # Disabled: this service doesn't expose /metrics yet (no promhttp wired
+    # up in Phase 0+1) — enabling this now would just scrape 404s. Flip to
+    # true once metrics land.
+    enabled: false
+    labels: {}

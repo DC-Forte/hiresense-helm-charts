@@ -1,0 +1,11 @@
+# Prod overrides. Pair with values-prod.secrets.yaml (gitignored).
+global:
+  namespace: interviewhandoff-prod
+
+image:
+  tag: prod
+
+replicas: 1
+
+env:
+  APP_ENV: production

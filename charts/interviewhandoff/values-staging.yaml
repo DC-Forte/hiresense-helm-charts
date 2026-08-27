@@ -1,0 +1,11 @@
+# Staging overrides. Pair with values-staging.secrets.yaml (gitignored).
+global:
+  namespace: interviewhandoff-staging
+
+image:
+  tag: staging
+
+replicas: 1
+
+env:
+  APP_ENV: staging
