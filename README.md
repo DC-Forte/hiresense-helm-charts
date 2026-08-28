@@ -131,6 +131,22 @@ helm upgrade recruiter-report-prod ./charts/recruiter-report -n recruiter-report
 
 **Monitoring:** `monitoring.serviceMonitor.enabled: true` (chart default) — Prometheus picks it up cluster-wide (`serviceMonitorNamespaceSelector: {}` in `charts/monitoring`). Dashboard lives in `charts/monitoring/templates/dashboards.yaml` (uid `recruiter-report`, folder `HireSense`) — HTTP enqueue rate/latency/errors, Go runtime, pod health, logs, both namespaces overlaid by legend. Redeploying it is a `charts/monitoring` upgrade (see below), not this chart.
 
+## `Makefile` — the authoritative upgrade commands
+
+**Check `make help` / the `Makefile` before running a raw `helm upgrade` by hand.** Every real
+release in this repo has a `make upgrade-*` target with the correct flags already baked in
+(`HELM_UPGRADE_FLAGS := --server-side=true --force-conflicts` — note `--server-side` takes an
+explicit `=true`/`false`/`auto` value in Helm 4, a bare `--server-side` silently resolves to
+`auto` and then `--force-conflicts` fails):
+
+```bash
+make help                              # list every target
+make upgrade-hiresense                 # the live monolith release
+make upgrade-matchengine-staging       # helm upgrade --install, --create-namespace
+make upgrade-interviewhandoff-staging  # helm upgrade --install, --create-namespace
+make upgrade-all                       # everything, in one shot
+```
+
 ## Deploying `charts/interviewhandoff` and `charts/matchengine`
 
 Both standalone, ClusterIP-only, no TLS/Istio Gateway needed (every caller is in-cluster). Unlike
@@ -158,11 +174,9 @@ cp charts/interviewhandoff/values-staging.secrets.example.yaml charts/interviewh
 cp charts/matchengine/values-staging.secrets.example.yaml charts/matchengine/values-staging.secrets.yaml
 # edit both files
 
-# 4. Helm install (creates the namespace)
-helm upgrade --install matchengine ./charts/matchengine -n matchengine-staging --create-namespace \
-  -f charts/matchengine/values.yaml -f charts/matchengine/values-staging.yaml -f charts/matchengine/values-staging.secrets.yaml
-helm upgrade --install interviewhandoff ./charts/interviewhandoff -n interviewhandoff-staging --create-namespace \
-  -f charts/interviewhandoff/values.yaml -f charts/interviewhandoff/values-staging.yaml -f charts/interviewhandoff/values-staging.secrets.yaml
+# 4. Helm install (creates the namespace) — use the Makefile targets above, not raw helm
+make upgrade-matchengine-staging
+make upgrade-interviewhandoff-staging
 
 # 5. Copy the ghcr-pull image-pull secret and create the ci-deployer RoleBinding in each new
 #    namespace — neither crosses namespaces automatically, same gotcha as recruiter-report:
