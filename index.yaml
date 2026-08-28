@@ -35,6 +35,30 @@ entries:
     urls:
     - https://github.com/DC-Forte/hiresense-helm-charts/releases/download/hiresense-monitoring-0.1.0/hiresense-monitoring-0.1.0.tgz
     version: 0.1.0
+  interviewhandoff:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2026-08-28T09:37:41.914771639Z"
+    description: Interview Handoff — standalone LiveKit orchestration service, Phase
+      0+1 of the interview-engine extraction from hiresense
+    digest: 058b90a5efb2a4691f99dd19273ac0f515b51466389b11f82b7455f5187cb996
+    name: interviewhandoff
+    type: application
+    urls:
+    - https://github.com/DC-Forte/hiresense-helm-charts/releases/download/interviewhandoff-0.1.0/interviewhandoff-0.1.0.tgz
+    version: 0.1.0
+  matchengine:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2026-08-28T09:37:42.066818279Z"
+    description: matchengine — standalone resume/JD matching + rubric service, extracted
+      from hiresense's internal/service/matchblend and internal/service/rubricservice
+    digest: c5900a533ba9c6f517d34e35b3ca10731ac7e91772ca991e63b0126245a300ef
+    name: matchengine
+    type: application
+    urls:
+    - https://github.com/DC-Forte/hiresense-helm-charts/releases/download/matchengine-0.1.0/matchengine-0.1.0.tgz
+    version: 0.1.0
   recruiter-report:
   - apiVersion: v2
     appVersion: 0.1.0
@@ -47,4 +71,4 @@ entries:
     urls:
     - https://github.com/DC-Forte/hiresense-helm-charts/releases/download/recruiter-report-0.1.0/recruiter-report-0.1.0.tgz
     version: 0.1.0
-generated: "2026-08-21T16:01:04.809496633Z"
+generated: "2026-08-28T09:37:42.224854556Z"
