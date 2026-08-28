@@ -1,7 +1,7 @@
 # Default values for the matchengine chart. Base values here are
-# environment-agnostic; values-prod.yaml overrides the per-env bits
+# environment-agnostic; values-staging.yaml overrides the per-env bits
 # (namespace, replicas). Secrets are never here — see
-# values-prod.secrets.example.yaml.
+# values-staging.secrets.example.yaml.
 #
 # This chart is deliberately standalone, not a subchart of ../hiresense —
 # same pattern as ../interviewhandoff and ../recruiter-report: own
@@ -12,13 +12,14 @@
 # HTTP clients, and later interviewhandoff) is in-cluster. Unlike
 # recruiter-report, nothing external calls this service.
 #
-# No values-staging.yaml — hiresense and its extracted services have
-# exactly one real environment today (see chapter-interview-backend-go's
-# infra_env_topology notes). Add one only once a real staging environment
+# Only values-staging.yaml exists — hiresense and its extracted services
+# have exactly one real environment today, and dc-forte-db-postgresql-fra1-65749
+# (the DB this chart points at) is that staging DB, not prod — no prod DB
+# has been created yet. Add values-prod.yaml once a real prod environment
 # for hiresense exists.
 
 global:
-  namespace: matchengine-prod # overridden per env
+  namespace: matchengine-staging # overridden per env
   registry: ghcr.io/dc-forte
   imagePullPolicy: Always
   imagePullSecret: ghcr-pull
@@ -26,7 +27,7 @@ global:
 image:
   repository: chapter-interview-go-matchengine
   # placeholder — ghcr never publishes "latest" for this image (see build-matchengine.yml).
-  # values-prod.yaml overrides with the real env tag; --set image.tag=<sha> to pin.
+  # values-staging.yaml overrides with the real env tag; --set image.tag=<sha> to pin.
   tag: latest
 
 replicas: 1
@@ -40,16 +41,16 @@ resources:
     memory: 1Gi
 
 # Non-secret env. Secrets are below in `secrets:`, populated via
-# values-prod.secrets.yaml (gitignored).
+# values-staging.secrets.yaml (gitignored).
 env:
-  APP_ENV: production
+  APP_ENV: staging
   PORT: "8091"
   DB_PORT: "25060"
   DB_SSL_MODE: require
   OPENAI_MODEL: "gpt-4.1"
 
 # All values below are placeholders. Real values come from
-# values-prod.secrets.yaml (gitignored).
+# values-staging.secrets.yaml (gitignored).
 secrets:
   internalServiceToken: "" # shared secret the monolith's + interviewhandoff's HTTP clients send as X-Internal-Token
   dbHost: ""
