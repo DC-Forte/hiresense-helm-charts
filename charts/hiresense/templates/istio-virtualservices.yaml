@@ -58,10 +58,14 @@ spec:
     # Sub-phase 3a-ii cutover: candidate practice flow repointed to the standalone
     # interviewhandoff service. Route-at-a-time flip, per
     # chapter-interview-backend-go's docs/superpowers/plans/2026-08-28-interviewhandoff-practice-flow.md —
-    # verified live in interviewhandoff-staging before this rule was added.
+    # verified live in interviewhandoff-staging before this rule was added. Prefix must match
+    # the FE's real path (/candidate-api/v1/practice, see candidateApiBase.ts) — a bare
+    # /v1/practice match never receives real traffic since the FE always sends the
+    # /candidate-api prefix; caught 2026-08-28 via response-header diffing after an
+    # initial verification curl tested the wrong path.
     - match:
         - uri:
-            prefix: /v1/practice
+            prefix: /candidate-api/v1/practice
       route:
         - destination:
             host: interviewhandoff.interviewhandoff-staging.svc.cluster.local
