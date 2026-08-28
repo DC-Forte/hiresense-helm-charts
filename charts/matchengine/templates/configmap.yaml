@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: matchengine-env
+  namespace: {{ .Values.global.namespace }}
+  labels: {{- include "matchengine.labels" . | nindent 4 }}
+data:
+{{- range $k, $v := .Values.env }}
+  {{ $k }}: {{ $v | quote }}
+{{- end }}

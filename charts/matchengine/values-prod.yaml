@@ -1,0 +1,4 @@
+global:
+  namespace: matchengine-prod
+
+replicas: 1

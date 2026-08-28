@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: 0.1.0
+description: matchengine — standalone resume/JD matching + rubric service, extracted from hiresense's internal/service/matchblend and internal/service/rubricservice
+name: matchengine
+type: application
+version: 0.1.0
