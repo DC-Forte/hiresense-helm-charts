@@ -72,6 +72,19 @@ spec:
             port:
               number: 80
       timeout: 120s
+    # Sub-phase 3b cutover: candidate invite/guest-accept flow repointed to
+    # interviewhandoff. Verified live in interviewhandoff-staging (port-forward,
+    # bypassing Istio) before this rule was added — same full-path-match lesson
+    # as the practice rule above.
+    - match:
+        - uri:
+            prefix: /candidate-api/v1/invite
+      route:
+        - destination:
+            host: interviewhandoff.interviewhandoff-staging.svc.cluster.local
+            port:
+              number: 80
+      timeout: 120s
     - route:
         - destination:
             host: hiresense-backend.{{ .Values.global.namespace }}.svc.cluster.local
