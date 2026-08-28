@@ -11,6 +11,8 @@ Helm charts for deploying [HireSense](https://hiresense.dc-forte.com) — an AI 
 | `charts/hiresense` | App: Go backend, Python AI engine, React frontend, worker |
 | `charts/monitoring` | Observability: Prometheus, Grafana, Loki, Tempo, Promtail, Pyroscope, metrics-server |
 | `charts/recruiter-report` | Standalone recruiter-report service — own namespace/DB/TLS cert per env, reusing this same cluster. See [`RECRUITER_REPORT_EXTRACTION_PLAN.md`](https://github.com/DC-Forte/chapter-interview-backend-go/blob/develop/RECRUITER_REPORT_EXTRACTION_PLAN.md) in the backend repo. |
+| `charts/interviewhandoff` | Standalone interview-engine service (LiveKit provisioning + candidate practice flow) — ClusterIP-only, no public ingress; own DB schema on the *shared* hiresense Postgres instance, not a separate DB cluster. |
+| `charts/matchengine` | Standalone resume↔JD matching + rubric service, called by both `hiresense` and `interviewhandoff` — ClusterIP-only; own schema on the same shared instance. |
 
 ### Namespaces
 
@@ -22,7 +24,14 @@ One shared cluster, one namespace per release (`recruiter-report` deploys twice 
 | `monitoring` | `monitoring` | `charts/monitoring` |
 | `recruiter-report-staging` | `recruiter-report-staging` | `charts/recruiter-report` |
 | `recruiter-report-prod` | `recruiter-report-prod` | `charts/recruiter-report` |
+| `interviewhandoff-staging` | `interviewhandoff` | `charts/interviewhandoff` |
+| `matchengine-staging` | `matchengine` | `charts/matchengine` |
 | `istio-system` | (cluster-managed, not this repo) | — TLS `Certificate`/Secret for `recruiter-report` lives here too, see the cross-namespace TLS gotcha below |
+
+`interviewhandoff`/`matchengine` are staging-only — no prod environment exists yet for the
+hiresense monolith or anything extracted from it (`recruiter-report` is the one service in this
+platform with a real staging/prod split). Don't add `values-prod.*` files or a `-prod` namespace
+for either until that changes.
 
 ## How it observes itself
 
@@ -122,6 +131,56 @@ helm upgrade recruiter-report-prod ./charts/recruiter-report -n recruiter-report
 
 **Monitoring:** `monitoring.serviceMonitor.enabled: true` (chart default) — Prometheus picks it up cluster-wide (`serviceMonitorNamespaceSelector: {}` in `charts/monitoring`). Dashboard lives in `charts/monitoring/templates/dashboards.yaml` (uid `recruiter-report`, folder `HireSense`) — HTTP enqueue rate/latency/errors, Go runtime, pod health, logs, both namespaces overlaid by legend. Redeploying it is a `charts/monitoring` upgrade (see below), not this chart.
 
+## Deploying `charts/interviewhandoff` and `charts/matchengine`
+
+Both standalone, ClusterIP-only, no TLS/Istio Gateway needed (every caller is in-cluster). Unlike
+`charts/recruiter-report`, neither has its own DB cluster — both share the monolith's existing
+Postgres instance, each with its own schema + scoped DB role
+(`interviewhandoff_app`/`matchengine_app`) and cross-schema read-only `GRANT`s onto tables other
+services own. See `chapter-interview-backend-go`'s root README ("Database Migrations" section) for
+the schema/role/GRANT mechanics.
+
+Bootstrap (first deploy only — after this, CI's `kubectl set image` rolling-deploy path takes
+over, same as `recruiter-report`):
+
+```bash
+# 1. Migrate + backfill each service's own schema (run from chapter-interview-backend-go)
+DB_URL="<staging DSN>" go run ./cmd/interviewhandoffmigrate up
+go run ./cmd/interviewhandoffbackfill --monolith-dsn="<staging DSN>" --interviewhandoff-dsn="<staging DSN>"
+DB_URL="<staging DSN>" go run ./cmd/matchenginemigrate up
+go run ./cmd/matchenginebackfill --monolith-dsn="<staging DSN>" --matchengine-dsn="<staging DSN>"
+
+# 2. Create each service's DB role + run its GRANT scripts (see <service>migrations/ops/*.sql)
+
+# 3. Populate secrets (copy shared values — encryptionKey/candidateJwtSecret/openaiApiKey/LiveKit
+#    creds — from charts/hiresense/values-prod.secrets.yaml; they must match the monolith's)
+cp charts/interviewhandoff/values-staging.secrets.example.yaml charts/interviewhandoff/values-staging.secrets.yaml
+cp charts/matchengine/values-staging.secrets.example.yaml charts/matchengine/values-staging.secrets.yaml
+# edit both files
+
+# 4. Helm install (creates the namespace)
+helm upgrade --install matchengine ./charts/matchengine -n matchengine-staging --create-namespace \
+  -f charts/matchengine/values.yaml -f charts/matchengine/values-staging.yaml -f charts/matchengine/values-staging.secrets.yaml
+helm upgrade --install interviewhandoff ./charts/interviewhandoff -n interviewhandoff-staging --create-namespace \
+  -f charts/interviewhandoff/values.yaml -f charts/interviewhandoff/values-staging.yaml -f charts/interviewhandoff/values-staging.secrets.yaml
+
+# 5. Copy the ghcr-pull image-pull secret and create the ci-deployer RoleBinding in each new
+#    namespace — neither crosses namespaces automatically, same gotcha as recruiter-report:
+kubectl get secret ghcr-pull -n recruiter-report-staging -o json \
+  | python3 -c "import json,sys; d=json.load(sys.stdin); d['metadata']={'name':'ghcr-pull','namespace':'matchengine-staging'}; print(json.dumps(d))" \
+  | kubectl apply -f -
+kubectl create rolebinding ci-deployer-rb --clusterrole=edit \
+  --serviceaccount=hiresense-app:ci-deployer -n matchengine-staging
+# repeat both for interviewhandoff-staging
+
+# 6. Push to the `staging` branch (or trigger workflow_dispatch) — build-matchengine.yml /
+#    build-interviewhandoff.yml build+push the image and roll the deployment.
+```
+
+Deploy `matchengine` before `interviewhandoff` — `interviewhandoff` calls it over HTTP
+(`MATCHENGINE_URL`), so it should already be reachable, though a transient startup-order race is
+harmless since neither retries hard at boot.
+
 ## Common commands
 
 Release names ≠ chart names — `helm list -A` to confirm before upgrading anything:
@@ -132,6 +191,8 @@ helm list -A
 # monitoring                 monitoring                (chart: hiresense-monitoring)
 # recruiter-report-staging   recruiter-report-staging  (chart: recruiter-report)
 # recruiter-report-prod      recruiter-report-prod     (chart: recruiter-report)
+# matchengine                matchengine-staging       (chart: matchengine)
+# interviewhandoff           interviewhandoff-staging  (chart: interviewhandoff)
 ```
 
 Redeploy the app (prod):
@@ -172,6 +233,8 @@ Check what's actually running / restarting:
 kubectl get pods -n hiresense-app
 kubectl get pods -n recruiter-report-staging
 kubectl get pods -n recruiter-report-prod
+kubectl get pods -n matchengine-staging
+kubectl get pods -n interviewhandoff-staging
 kubectl rollout status deployment/<name> -n <namespace>
 kubectl rollout undo deployment/<name> -n <namespace>   # fastest rollback if a bad rollout is serving traffic
 ```
