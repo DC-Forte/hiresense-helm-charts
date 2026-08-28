@@ -61,6 +61,7 @@ env:
   LLM_TIMEOUT_SECONDS: "60"
   OPENAI_MODEL: "gpt-4.1"
   MATCHENGINE_URL: "" # set once matchengine is deployed, e.g. http://matchengine.matchengine-staging.svc.cluster.local
+  CANDIDATE_FRONTEND_URL: "https://hiresense.dc-forte.com" # CORS allowlist — must match the monolith's own CANDIDATE_FRONTEND_URL
 
 # All values below are placeholders. Real values come from
 # values-{env}.secrets.yaml (gitignored).
