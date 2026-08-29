@@ -8,11 +8,20 @@ spec:
     server: https://acme-v02.api.letsencrypt.org/directory
     email: {{ .Values.certManager.email | quote }}
     privateKeySecretRef:
-      name: {{ .Values.tls.issuer }}-account-key
+      name: {{ .Values.tls.issuer }}-key
     solvers:
-      - http01:
-          ingress:
-            class: istio
+      # Switched from http01/ingress-class-istio (2026-08-29): this cluster
+      # has no Istio ingress-API sync running (only hand-authored native
+      # VirtualServices), so cert-manager's solver Ingress objects were
+      # never actually routed — challenges sat pending for days, requests
+      # 404ing at whichever backend's catch-all route matched the host.
+      # dns01/cloudflare is cert-manager's standard answer for a mesh with
+      # no ingress-class sync; dc-forte.com's DNS is Cloudflare-hosted.
+      - dns01:
+          cloudflare:
+            apiTokenSecretRef:
+              name: cloudflare-api-token-secret
+              key: api-token
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate

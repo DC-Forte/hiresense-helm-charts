@@ -16,6 +16,9 @@ worker:
 hosts:
   grafana: "grafana.dc-forte.com"
 
+tls:
+  manageCertManager: true
+
 env:
   ENVIRONMENT: production
   LOG_LEVEL: info
