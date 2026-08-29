@@ -88,8 +88,6 @@ secrets:
 # no new Prometheus/Grafana/Loki/Tempo install needed.
 monitoring:
   serviceMonitor:
-    # Disabled: this service doesn't expose /metrics yet (no promhttp wired
-    # up in Phase 0+1) — enabling this now would just scrape 404s. Flip to
-    # true once metrics land.
-    enabled: false
+    # Metrics landed 2026-08-29 (promhttp.Handler() on /metrics).
+    enabled: true
     labels: {}
