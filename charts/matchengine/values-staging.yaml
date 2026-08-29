@@ -1,4 +1,7 @@
 global:
   namespace: matchengine-staging
 
+image:
+  tag: staging
+
 replicas: 1
