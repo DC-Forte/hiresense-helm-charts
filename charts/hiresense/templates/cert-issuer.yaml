@@ -26,7 +26,12 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: hiresense-tls
+  # Must stay "hiresense-cert" — matches the real live object (102+ days
+  # old, working). A prior chart edit drifted this to "hiresense-tls"
+  # without ever being re-applied (manageCertManager was false); re-enabling
+  # it under the drifted name created a second Certificate fighting over
+  # the same secretName, caught 2026-08-29 via "IncorrectCertificate" status.
+  name: hiresense-cert
   namespace: istio-system
 spec:
   secretName: {{ .Values.tls.secretName }}
