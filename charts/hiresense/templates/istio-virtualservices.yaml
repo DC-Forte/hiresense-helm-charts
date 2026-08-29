@@ -85,6 +85,21 @@ spec:
             port:
               number: 80
       timeout: 120s
+    # Sub-phase 3d cutover: real interview execution (getInterview,
+    # start/end, device-check, feedback, invite-token fallback) repointed to
+    # interviewhandoff. Verified live in interviewhandoff-staging
+    # (port-forward, bypassing Istio) before this rule was added — same
+    # full-path-match lesson as the practice/invite rules above. Monolith's
+    # own copy of these six handlers stays dual-served, not deleted.
+    - match:
+        - uri:
+            prefix: /candidate-api/v1/interviews
+      route:
+        - destination:
+            host: interviewhandoff.interviewhandoff-staging.svc.cluster.local
+            port:
+              number: 80
+      timeout: 120s
     - route:
         - destination:
             host: hiresense-backend.{{ .Values.global.namespace }}.svc.cluster.local
