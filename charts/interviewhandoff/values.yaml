@@ -83,6 +83,12 @@ secrets:
   azureOpenaiDeploymentName: ""
   azureOpenaiApiVersion: ""
   matchEngineInternalToken: "" # must match matchengine's own secrets.internalServiceToken
+  s3Bucket: "" # DO Spaces bucket for recording uploads — reuse hiresense chart's secrets.spaces.bucket value ("hiresense"), NOT a new bucket, so the monolith's recording-merge worker can read what candidates upload here
+  s3Region: "" # e.g. fra1
+  s3Endpoint: "" # e.g. https://fra1.digitaloceanspaces.com
+  awsAccessKeyId: "" # reuse hiresense chart's secrets.spaces.accessKey
+  awsSecretAccessKey: "" # reuse hiresense chart's secrets.spaces.secretKey
+  recordingS3Bucket: "" # usually same as s3Bucket
 
 # Reuses the cluster's existing monitoring stack (same cluster as hiresense) —
 # no new Prometheus/Grafana/Loki/Tempo install needed.
