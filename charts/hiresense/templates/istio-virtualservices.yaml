@@ -133,6 +133,25 @@ spec:
             port:
               number: 80
       timeout: 120s
+    # Sub-project 2: Mobius no-signup candidate handoff. Both routes are new
+    # paths that never existed anywhere before, so this is a straightforward
+    # new-block addition (not a same-path cutover like the practice/invite/
+    # interviews/recording rules above). interviewhandoff has no Gateway of
+    # its own — this VirtualService's already-public hiresense-api host is
+    # what makes these two paths externally reachable by Mobius. See
+    # chapter-interview-backend-go's
+    # docs/superpowers/specs/2026-08-31-mobius-hiresense-handoff-v2-design.md.
+    - match:
+        - uri:
+            prefix: /handoff
+        - uri:
+            prefix: /internal/handoff
+      route:
+        - destination:
+            host: interviewhandoff.interviewhandoff-staging.svc.cluster.local
+            port:
+              number: 80
+      timeout: 120s
     - route:
         - destination:
             host: hiresense-backend.{{ .Values.global.namespace }}.svc.cluster.local
