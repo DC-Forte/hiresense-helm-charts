@@ -100,6 +100,22 @@ spec:
             port:
               number: 80
       timeout: 120s
+    # Phase 4 cutover: voice-agent message/completion ingestion repointed to
+    # interviewhandoff. New path, not a reuse of the monolith's existing
+    # /api/livekit-interview mount -- Istio routes by path, not by request
+    # content, so old in-flight rooms (whose metadata still points at the
+    # monolith) and new rooms (pointing here) need genuinely distinct paths.
+    # See chapter-interview-backend-go's
+    # docs/superpowers/specs/2026-08-30-interviewhandoff-livekit-ingest-design.md.
+    - match:
+        - uri:
+            prefix: /api/interviewhandoff/livekit-interview
+      route:
+        - destination:
+            host: interviewhandoff.interviewhandoff-staging.svc.cluster.local
+            port:
+              number: 80
+      timeout: 120s
     - route:
         - destination:
             host: hiresense-backend.{{ .Values.global.namespace }}.svc.cluster.local
