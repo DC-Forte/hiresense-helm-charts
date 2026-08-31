@@ -5,6 +5,10 @@ global:
 image:
   tag: staging
 
+worker:
+  image:
+    tag: staging
+
 replicas: 1
 
 env:

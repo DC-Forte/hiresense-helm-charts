@@ -1,0 +1,39 @@
+{{- if .Values.worker.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: interviewhandoffworker
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "interviewhandoff.labels" . | nindent 4 }}
+    app: interviewhandoffworker
+spec:
+  replicas: {{ .Values.worker.replicas }}
+  selector:
+    matchLabels:
+      app: interviewhandoffworker
+  template:
+    metadata:
+      labels:
+        app: interviewhandoffworker
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.global.imagePullSecret }}
+      containers:
+        - name: interviewhandoffworker
+          image: {{ include "interviewhandoff.workerImage" . }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.worker.metricsPort }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: interviewhandoff-env
+            - secretRef:
+                name: interviewhandoff-secrets
+          resources: {{- toYaml .Values.worker.resources | nindent 12 }}
+{{- end }}

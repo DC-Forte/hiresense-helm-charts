@@ -1,0 +1,20 @@
+{{- if and .Values.worker.enabled .Values.monitoring.serviceMonitor.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: interviewhandoffworker-metrics
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "interviewhandoff.labels" . | nindent 4 }}
+    app: interviewhandoffworker
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app: interviewhandoffworker
+  ports:
+    - name: metrics
+      port: {{ .Values.worker.metricsPort }}
+      targetPort: metrics
+      protocol: TCP
+{{- end }}

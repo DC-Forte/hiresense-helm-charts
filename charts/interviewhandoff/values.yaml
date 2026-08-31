@@ -47,6 +47,24 @@ resources:
     cpu: 500m
     memory: 512Mi
 
+# Phase 6: recording merge worker, a separate binary/Deployment in this same
+# chart (own image, shares interviewhandoff-env/interviewhandoff-secrets —
+# same pattern as the hiresense chart's own worker.* block).
+worker:
+  enabled: true
+  image:
+    repository: chapter-interview-go-interviewhandoffworker
+    tag: latest # values-staging.yaml overrides with the real env tag
+  replicas: 1
+  metricsPort: 9091
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 768Mi
+
 # Non-secret env. Secrets are below in `secrets:`, populated via
 # values-{env}.secrets.yaml (gitignored).
 env:
@@ -63,6 +81,9 @@ env:
   MATCHENGINE_URL: "" # set once matchengine is deployed, e.g. http://matchengine.matchengine-staging.svc.cluster.local
   CANDIDATE_FRONTEND_URL: "https://hiresense.dc-forte.com" # CORS allowlist — must match the monolith's own CANDIDATE_FRONTEND_URL
   PUBLIC_API_BASE_URL: "https://hiresense-api.dc-forte.com" # public host both interviewhandoff and the monolith share — used to build the backend_api_url room-metadata value the voice agent calls back to
+  RECORDING_STORAGE_PROVIDER: "minio" # cosmetic — feeds the /api/recording/status response only
+  RECORDING_CHUNK_DURATION_SECONDS: "5" # cosmetic — feeds the /api/recording/status response only
+  RECORDING_WORKER_POLL_INTERVAL_SECONDS: "60" # read by the interviewhandoffworker Deployment; harmless no-op env var on the HTTP Deployment
 
 # All values below are placeholders. Real values come from
 # values-{env}.secrets.yaml (gitignored).

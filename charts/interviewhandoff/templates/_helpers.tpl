@@ -9,3 +9,7 @@ helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 {{- define "interviewhandoff.image" -}}
 {{- printf "%s/%s:%s" .Values.global.registry .Values.image.repository .Values.image.tag -}}
 {{- end -}}
+
+{{- define "interviewhandoff.workerImage" -}}
+{{- printf "%s/%s:%s" .Values.global.registry .Values.worker.image.repository .Values.worker.image.tag -}}
+{{- end -}}

@@ -116,6 +116,23 @@ spec:
             port:
               number: 80
       timeout: 120s
+    # Phase 6 cutover: session-token chunked-recording-upload routes
+    # repointed to interviewhandoff. Same path as the monolith's own
+    # /api/recording/* mount (browser-called, full-path cutover — same
+    # precedent as the practice/invite/interviews rules above), NOT a new
+    # distinct path like Phase 4's voice-agent rule needed. Verify live in
+    # interviewhandoff-staging (port-forward, bypassing Istio) before this
+    # rule is applied. See chapter-interview-backend-go's
+    # docs/superpowers/specs/2026-08-31-interviewhandoff-recording-pipeline-design.md.
+    - match:
+        - uri:
+            prefix: /api/recording
+      route:
+        - destination:
+            host: interviewhandoff.interviewhandoff-staging.svc.cluster.local
+            port:
+              number: 80
+      timeout: 120s
     - route:
         - destination:
             host: hiresense-backend.{{ .Values.global.namespace }}.svc.cluster.local
