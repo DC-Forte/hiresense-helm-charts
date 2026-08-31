@@ -88,6 +88,10 @@ env:
   FEEDBACK_WORKER_POLL_INTERVAL_SECONDS: "30" # read by interviewhandoffworker's new feedback.Worker instance
   FEEDBACK_WORKER_BATCH_SIZE: "5"
   FEEDBACK_WORKER_MAX_RETRIES: "5"
+  SMTP_HOST: "smtp.gmail.com"
+  SMTP_PORT: "587"
+  SMTP_USER: "engage@dc-forte.com"
+  EMAIL_FROM: "contact@dc-forte.com"
 
 # All values below are placeholders. Real values come from
 # values-{env}.secrets.yaml (gitignored).
@@ -116,11 +120,7 @@ secrets:
   awsSecretAccessKey: "" # reuse hiresense chart's secrets.spaces.secretKey
   recordingS3Bucket: "" # usually same as s3Bucket
   mobiusInternalToken: "" # shared secret with Mobius specifically — deliberately separate from internalServiceToken (that one's shared by first-party internal services; Mobius is an external trust boundary)
-  smtpHost: "" # SMTP relay for interviewhandoffworker's feedback-completion emails — can reuse the monolith's own SMTP_HOST
-  smtpPort: 587
-  smtpUser: ""
-  smtpPassword: ""
-  emailFrom: "noreply@chapterapps.ai"
+  smtpPassword: "" # only the password is sensitive — host/port/user/from live in env: above
 
 # Reuses the cluster's existing monitoring stack (same cluster as hiresense) —
 # no new Prometheus/Grafana/Loki/Tempo install needed.
