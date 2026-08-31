@@ -4,7 +4,7 @@
 backend:
   replicas: 2
   image:
-    tag: latest    # override with --set backend.image.tag=sha-<commit> for a pinned roll
+    tag: staging    # override with --set backend.image.tag=sha-<commit> for a pinned roll
 aiEngine:
   replicas: 2
 frontend:

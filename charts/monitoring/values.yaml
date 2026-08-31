@@ -256,7 +256,12 @@ loki:
             period: 24h
 
     limits_config:
-      retention_period: 168h  # 7 days
+      retention_period: 48h  # default: 2 days, for non-service noise (kiali, grafana, loki, istiod, etc.)
+      retention_stream:
+        # Real services keep 7 days; everything else falls through to retention_period above.
+        - selector: '{namespace=~"hiresense-app|interviewhandoff-.*|matchengine-.*|recruiter-report-.*"}'
+          priority: 1
+          period: 168h
 
     compactor:
       working_directory: /var/loki/compactor
@@ -461,6 +466,14 @@ metrics-server:
   args:
     - --kubelet-preferred-address-types=InternalIP  # DOKS nodes: use InternalIP
     - --kubelet-use-node-status-port                # avoids kubelet port guessing
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Istio tracing — disable for infra workloads (kiali, grafana, loki, tempo,
+# promtail, pyroscope, istiod). Set false for non-Istio dev/local installs
+# where the telemetry.istio.io CRD doesn't exist.
+# ─────────────────────────────────────────────────────────────────────────────
+istioTracing:
+  disableForInfra: true
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Grafana Istio ingress (opt-in)

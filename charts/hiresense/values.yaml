@@ -31,7 +31,7 @@ tls:
 backend:
   image:
     repository: chapter-interview-go-backend
-    tag: latest
+    tag: staging
   replicas: 2
   port: 5000  # HTTP and WS share the same port
   resources:
@@ -74,7 +74,7 @@ worker:
   enabled: true
   image:
     repository: chapter-interview-go-worker  # separate Dockerfile target --target worker
-    tag: latest
+    tag: staging
   replicas: 1
   command: []  # CMD /app/worker is baked into the image; empty = use image default
   resources:
