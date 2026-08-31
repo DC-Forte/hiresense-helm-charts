@@ -126,7 +126,7 @@ env:
   SMTP_USER: "engage@dc-forte.com"
   FROM_EMAIL: "contact@dc-forte.com"
   FEEDBACK_WORKER_ENABLED: "true"
-  RECORDING_WORKER_ENABLED: "true"
+  RECORDING_WORKER_ENABLED: "false"
   RESUME_UPLOAD_WORKER_ENABLED: "true"
   EMAIL_WORKER_ENABLED: "true"
   RECRUITER_REPORT_WORKER_ENABLED: "true"
