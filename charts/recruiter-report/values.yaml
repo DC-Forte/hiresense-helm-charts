@@ -79,6 +79,7 @@ secrets:
   azureOpenaiEndpoint: ""
   azureOpenaiDeploymentName: ""
   azureOpenaiApiVersion: ""
+  redisUrl: ""
 
 # Reuses the cluster's existing monitoring stack (same cluster as hiresense) —
 # no new Prometheus/Grafana/Loki/Tempo install needed.
