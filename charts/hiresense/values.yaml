@@ -91,8 +91,8 @@ env:
   ENVIRONMENT: production
   PORT: "5000"
   DB_SSL_MODE: require
-  DB_POOL_MAX: "25"
-  DB_POOL_MIN: "5"
+  DB_POOL_MAX: "10"
+  DB_POOL_MIN: "1"
   LLM_TIMEOUT_MS: "120000"
   CANDIDATE_AUTH_V2: "true"
   RECORDING_STORAGE_PROVIDER: spaces
