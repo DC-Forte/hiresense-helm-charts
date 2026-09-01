@@ -46,6 +46,8 @@ env:
   APP_ENV: staging
   PORT: "8091"
   DB_PORT: "25061"
+  DB_POOL_MAX: "10"
+  DB_POOL_MIN: "1"
   DB_SSL_MODE: require
   OPENAI_MODEL: "gpt-4.1"
 
