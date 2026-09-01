@@ -121,6 +121,10 @@ env:
   SKILL_GUIDANCE_ENABLED: "true"
   LIVEKIT_URL: "wss://dc-forte-c3qnkc6a.livekit.cloud"
   LIVEKIT_AGENT_NAME: "dc-forte-voice-agent"
+  # Used by unified-interview + livekit wake-probe routes to reach the
+  # interviewhandoff service's /internal/livekit/* endpoints (practice/invite/
+  # interviews routes were cut over via Istio and no longer use this).
+  INTERVIEWHANDOFF_URL: "http://interviewhandoff.interviewhandoff-staging.svc.cluster.local"
   SMTP_HOST: "smtp.gmail.com"
   SMTP_PORT: "587"
   SMTP_USER: "engage@dc-forte.com"
