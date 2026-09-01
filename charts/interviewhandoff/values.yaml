@@ -69,7 +69,7 @@ worker:
 env:
   APP_ENV: production
   PORT: "8090"
-  DB_PORT: "25060"
+  DB_PORT: "25061"
   DB_SSL_MODE: require
   LIVEKIT_AGENT_NAME: "dc-forte-voice-agent" # must match the monolith's own LIVEKIT_AGENT_NAME
   CANDIDATE_AUTH_V2: "true"

@@ -70,7 +70,7 @@ env:
 # All values below are placeholders. Real values come from
 # values-{env}.secrets.yaml (gitignored).
 secrets:
-  databaseUrl: "" # postgresql://user:pw@host:25060/recruiter_report?sslmode=require — separate DB cluster per env (recruiter-report-pgsql / recruiter-report-dev-pgsql)
+  databaseUrl: "" # postgresql://user:pw@host:25061/recruiter_report?sslmode=require — separate DB cluster per env (recruiter-report-pgsql / recruiter-report-dev-pgsql)
   recruiterReportWebhookUrl: ""
   internalServiceToken: "" # shared secret with Mobius (core-api.mobius.dc-forte.com) — distinct from hiresense's own INTERNAL_SERVICE_TOKEN
   encryptionKey: "" # AES key for resume_json/job_json at rest — distinct from hiresense's own ENCRYPTION_KEY, see task #5

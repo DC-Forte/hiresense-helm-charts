@@ -165,7 +165,7 @@ env:
 # All values below are placeholders. Real values are injected via
 # values-prod.secrets.yaml (gitignored, produced from `terraform output`).
 secrets:
-  databaseUrl: ""           # postgresql://user:pw@host:25060/hiresense?sslmode=require
+  databaseUrl: ""           # postgresql://user:pw@host:25061/hiresense?sslmode=require
   redisUrl: ""              # rediss://default:pw@host:25061
   jwtSecret: ""
   candidateJwtSecret: ""

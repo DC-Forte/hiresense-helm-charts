@@ -14,7 +14,7 @@ help:
 	@echo "make upgrade-recruiter-report-prod         # helm upgrade --install recruiter-report-prod (TAG=<sha> to override)"
 	@echo "make upgrade-matchengine-staging           # helm upgrade --install matchengine (staging-only, no prod yet)"
 	@echo "make upgrade-interviewhandoff-staging       # helm upgrade --install interviewhandoff (staging-only, no prod yet)"
-	@echo "make upgrade-all                          # upgrade monitoring, hiresense, recruiter-report (staging+prod), matchengine, interviewhandoff"
+	@echo "make upgrade-all-staging                   # upgrade monitoring, hiresense, recruiter-report, matchengine, interviewhandoff"
 	@echo "make dep-update                           # helm dep update for all charts"
 
 dep-update-monitoring:
@@ -64,4 +64,4 @@ upgrade-interviewhandoff-staging:
 		-f $(CHARTS_DIR)/interviewhandoff/values-staging.secrets.yaml \
 		$(HELM_UPGRADE_FLAGS)
 
-upgrade-all: upgrade-monitoring upgrade-hiresense upgrade-recruiter-report-staging upgrade-recruiter-report-prod upgrade-matchengine-staging upgrade-interviewhandoff-staging
+upgrade-all-staging: upgrade-monitoring upgrade-hiresense upgrade-recruiter-report-staging upgrade-matchengine-staging upgrade-interviewhandoff-staging
