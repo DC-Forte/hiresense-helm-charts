@@ -88,6 +88,7 @@ env:
   FEEDBACK_WORKER_POLL_INTERVAL_SECONDS: "30" # read by interviewhandoffworker's new feedback.Worker instance
   FEEDBACK_WORKER_BATCH_SIZE: "5"
   FEEDBACK_WORKER_MAX_RETRIES: "5"
+  PYTHON_BACKEND_URL: "http://hiresense-ai-engine.hiresense-app.svc.cluster.local:9091/api/v1" # in-cluster AI engine, same value the monolith's own cmd/worker uses for feedback generation -- NOT AGENTIC_API_URL (that's a different, public-facing endpoint used only for /api/v2/templates/status)
   SMTP_HOST: "smtp.gmail.com"
   SMTP_PORT: "587"
   SMTP_USER: "engage@dc-forte.com"
