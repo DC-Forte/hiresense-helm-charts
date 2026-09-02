@@ -47,6 +47,20 @@ spec:
   gateways:
     - {{ .Values.istio.gateway }}
   http:
+    # New /ws/transcript/{sessionToken} route (interviewhandoff's transcript
+    # push socket) must come BEFORE the bare /ws prefix below — Istio's http
+    # match list is first-match-wins, not longest-prefix, so without this
+    # ordering the broader /ws rule (→ the monolith's own legacy WebRTC
+    # signaling socket, which has no /transcript sub-route) would shadow it.
+    - match:
+        - uri:
+            prefix: /ws/transcript
+      route:
+        - destination:
+            host: interviewhandoff.interviewhandoff-staging.svc.cluster.local
+            port:
+              number: 80
+      timeout: 3600s
     - match:
         - uri:
             prefix: /ws
