@@ -125,6 +125,9 @@ env:
   # interviewhandoff service's /internal/livekit/* endpoints (practice/invite/
   # interviews routes were cut over via Istio and no longer use this).
   INTERVIEWHANDOFF_URL: "http://interviewhandoff.interviewhandoff-staging.svc.cluster.local"
+  # Used by matchblend/rubricservice clients (worker + candidateapi + admin
+  # handlers) to reach matchengine's /internal/match/* endpoints.
+  MATCHENGINE_URL: "http://matchengine.matchengine-staging.svc.cluster.local"
   SMTP_HOST: "smtp.gmail.com"
   SMTP_PORT: "587"
   SMTP_USER: "engage@dc-forte.com"
