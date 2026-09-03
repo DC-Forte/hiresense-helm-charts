@@ -8,3 +8,4 @@ charts/monitoring/charts/
 *.lock
 .claude
 .claude-flow
+*.db

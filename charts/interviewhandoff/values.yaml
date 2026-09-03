@@ -81,6 +81,7 @@ env:
   OPENAI_MODEL: "gpt-4.1"
   MATCHENGINE_URL: "" # set once matchengine is deployed, e.g. http://matchengine.matchengine-staging.svc.cluster.local
   CANDIDATE_FRONTEND_URL: "https://hiresense.dc-forte.com" # CORS allowlist — must match the monolith's own CANDIDATE_FRONTEND_URL
+  CANDIDATE_PORTAL_URL: "https://hiresense.dc-forte.com" # base URL for invite links sent by email — must match the monolith's own CANDIDATE_PORTAL_URL, else invites default to stale https://app.chapterapps.ai
   PUBLIC_API_BASE_URL: "https://hiresense-api.dc-forte.com" # public host both interviewhandoff and the monolith share — used to build the backend_api_url room-metadata value the voice agent calls back to
   RECORDING_STORAGE_PROVIDER: "minio" # cosmetic — feeds the /api/recording/status response only
   RECORDING_CHUNK_DURATION_SECONDS: "5" # cosmetic — feeds the /api/recording/status response only
