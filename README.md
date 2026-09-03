@@ -195,6 +195,14 @@ Deploy `matchengine` before `interviewhandoff` — `interviewhandoff` calls it o
 (`MATCHENGINE_URL`), so it should already be reachable, though a transient startup-order race is
 harmless since neither retries hard at boot.
 
+**`CANDIDATE_PORTAL_URL` (fixed 2026-09-03):** `interviewhandoff` builds invite email links from its
+own `CANDIDATE_PORTAL_URL` env var — it does not inherit the monolith's. `values.yaml` only had
+`CANDIDATE_FRONTEND_URL` (CORS allowlist only), so this defaulted to a stale hardcoded fallback in
+Go (`https://app.chapterapps.ai`) and every invite email shipped a broken link. Now set explicitly
+alongside `CANDIDATE_FRONTEND_URL`, matching `charts/hiresense`'s `hosts.candidate` value
+(`hiresense.dc-forte.com`). If `hosts.candidate` ever changes, update `interviewhandoff`'s
+`CANDIDATE_PORTAL_URL` in the same PR — it isn't templated off the shared value.
+
 ## Common commands
 
 Release names ≠ chart names — `helm list -A` to confirm before upgrading anything:
