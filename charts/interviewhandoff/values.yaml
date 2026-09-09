@@ -82,10 +82,10 @@ env:
   MATCHENGINE_URL: "" # set once matchengine is deployed, e.g. http://matchengine.matchengine-staging.svc.cluster.local
   CANDIDATE_FRONTEND_URL: "https://hiresense.dc-forte.com" # CORS allowlist — must match the monolith's own CANDIDATE_FRONTEND_URL
   CANDIDATE_PORTAL_URL: "https://hiresense.dc-forte.com" # base URL for invite links sent by email — must match the monolith's own CANDIDATE_PORTAL_URL, else invites default to stale https://app.chapterapps.ai
+  ALLOWED_ORIGINS: "" # CORS override for the embedded-handoff flow (POST /handoff/{token}/open + /candidate-api/v1/interviews/* called cross-origin from a partner's own frontend). Empty = getAllowedOrigins falls back to CANDIDATE_FRONTEND_URL/CANDIDATE_PORTAL_URL + localhost dev origins only, which does NOT include any partner origin. When a partner (e.g. Mobius) embeds, set this to the FULL comma-separated allowlist — it REPLACES the fallback rather than adding to it, so include CANDIDATE_FRONTEND_URL/CANDIDATE_PORTAL_URL's values here too, e.g. "https://hiresense.dc-forte.com,https://app.mobius.example.com"
   PUBLIC_API_BASE_URL: "https://hiresense-api.dc-forte.com" # public host both interviewhandoff and the monolith share — used to build the backend_api_url room-metadata value the voice agent calls back to
   RECORDING_STORAGE_PROVIDER: "minio" # cosmetic — feeds the /api/recording/status response only
   RECORDING_CHUNK_DURATION_SECONDS: "5" # cosmetic — feeds the /api/recording/status response only
-  RECORDING_WORKER_POLL_INTERVAL_SECONDS: "60" # read by the interviewhandoffworker Deployment; harmless no-op env var on the HTTP Deployment
   MOBIUS_WEBHOOK_URL: "" # set once Mobius's webhook receiver exists; empty disables the sender (see cmd/interviewhandoffworker/main.go)
   MOBIUS_WEBHOOK_POLL_INTERVAL_SECONDS: "30"
   FEEDBACK_WORKER_POLL_INTERVAL_SECONDS: "30" # read by interviewhandoffworker's new feedback.Worker instance

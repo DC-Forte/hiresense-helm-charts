@@ -133,7 +133,6 @@ env:
   SMTP_USER: "engage@dc-forte.com"
   FROM_EMAIL: "contact@dc-forte.com"
   FEEDBACK_WORKER_ENABLED: "true"
-  RECORDING_WORKER_ENABLED: "false"
   RESUME_UPLOAD_WORKER_ENABLED: "true"
   EMAIL_WORKER_ENABLED: "true"
   RECRUITER_REPORT_WORKER_ENABLED: "true"
@@ -141,7 +140,6 @@ env:
   FEEDBACK_WORKER_POLL_INTERVAL_SECONDS: "30"
   FEEDBACK_WORKER_BATCH_SIZE: "5"
   FEEDBACK_WORKER_MAX_RETRIES: "5"
-  RECORDING_WORKER_POLL_INTERVAL_SECONDS: "60"
   # Max sessions ffmpeg-merging concurrently per pod (backend + worker both
   # read this — ffmpeg encoding is CPU-heavy enough to starve/OOM a pod if
   # unbounded).
