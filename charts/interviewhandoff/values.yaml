@@ -124,6 +124,7 @@ secrets:
   awsSecretAccessKey: "" # reuse hiresense chart's secrets.spaces.secretKey
   recordingS3Bucket: "" # usually same as s3Bucket
   mobiusInternalToken: "" # shared secret with Mobius specifically — deliberately separate from internalServiceToken (that one's shared by first-party internal services; Mobius is an external trust boundary)
+  incProcInternalToken: "" # shared secret with incProc (proctoring vendor) — recording-playback route only, same external-trust-boundary reasoning as mobiusInternalToken above
   smtpPassword: "" # only the password is sensitive — host/port/user/from live in env: above
 
 # Reuses the cluster's existing monitoring stack (same cluster as hiresense) —
