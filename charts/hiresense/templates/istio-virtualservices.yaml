@@ -166,6 +166,22 @@ spec:
             port:
               number: 80
       timeout: 120s
+    # LiveKit Cloud's egress webhook (server-to-server, called directly by
+    # LiveKit, not the FE) was missing from this route list, so it fell
+    # through to the catch-all below and hit the monolith, which has no
+    # handler for it -- egress recordings uploaded to Spaces fine, but
+    # interviewhandoff's DB never learned the object key existed (found
+    # 2026-09-10 while sourcing an incProc sample: a real recording sat in
+    # Spaces with zero matching `recording_egress_key` row in `interviews`).
+    - match:
+        - uri:
+            prefix: /internal/livekit-egress-webhook
+      route:
+        - destination:
+            host: interviewhandoff.interviewhandoff-staging.svc.cluster.local
+            port:
+              number: 80
+      timeout: 120s
     - route:
         - destination:
             host: hiresense-backend.{{ .Values.global.namespace }}.svc.cluster.local
