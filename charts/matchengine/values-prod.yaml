@@ -1,0 +1,10 @@
+# Prod overrides. Pair with values-prod.secrets.yaml (gitignored).
+# New real prod environment (2026-09-11 buildout, see
+# docs/superpowers/specs/2026-09-11-hiresense-staging-prod-buildout-design.md).
+global:
+  namespace: matchengine-prod
+
+image:
+  tag: prod
+
+replicas: 1

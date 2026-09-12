@@ -1,9 +1,12 @@
 # Production overrides for hiresense-monitoring.
 # Non-secret. Secrets (Grafana admin password, Spaces keys) go in values-prod.secrets.yaml.
 #
-# Requires two pre-created DigitalOcean Spaces buckets:
-#   doctl spaces create hiresense-loki   --region fra1
-#   doctl spaces create hiresense-tempo  --region fra1
+# Loki + Tempo share one dedicated DigitalOcean Spaces bucket,
+# "hiresense-monitoring-data" (created 2026-09-11, separate from the app's
+# own "hiresense"/"hiresense-staging"/"hiresense-prod" buckets — monitoring
+# is one shared install across all envs, not split per-env). Old data under
+# hiresense/loki/ and hiresense/tempo/ (pre-cutover) is deliberately left
+# behind, not migrated.
 #
 # Install:
 #   helm upgrade --install monitoring ./charts/monitoring -n monitoring \
@@ -64,9 +67,9 @@ loki:
       type: s3
       use_thanos_objstore: true  # chunks storage below; legacy aws.S3Config dropped the `prefix` field in Loki 3.x
       bucketNames:
-        chunks: hiresense
-        ruler: hiresense
-        admin: hiresense
+        chunks: hiresense-monitoring-data
+        ruler: hiresense-monitoring-data
+        admin: hiresense-monitoring-data
       s3:
         # Legacy client — still used for ruler/admin API storage, which have no thanos_objstore support.
         # No prefix here: ruler/admin write to bucket root now (ruler unused in this deployment).
@@ -80,7 +83,7 @@ loki:
 
       object_store:
         # Thanos-based client for chunks storage — the only path that still supports a bucket prefix,
-        # letting loki and tempo/ share the "hiresense" bucket.
+        # letting loki and tempo share the "hiresense-monitoring-data" bucket.
         # storage_prefix only allows [a-zA-Z0-9-], no slash (unlike the legacy `prefix` field).
         type: s3
         storage_prefix: loki
@@ -136,7 +139,7 @@ tempo:
       trace:
         backend: s3
         s3:
-          bucket: hiresense
+          bucket: hiresense-monitoring-data
           endpoint: fra1.digitaloceanspaces.com
           region: fra1
           prefix: tempo/

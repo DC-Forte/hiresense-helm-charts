@@ -1,27 +1,48 @@
 # Production overrides. Non-secret. Combine at install time with
-# values-prod.secrets.yaml (produced from `terraform output`, gitignored).
+# values-prod.secrets.yaml (gitignored).
+#
+# New real prod environment (2026-09-11 buildout, see
+# docs/superpowers/specs/2026-09-11-hiresense-staging-prod-buildout-design.md).
+# Takes over the clean live domains via a DNS cutover once Phase 5 of that
+# spec runs — hosts.*/frontendEnv base URLs are NOT overridden here because
+# values.yaml's own defaults already ARE the clean domains this release
+# claims. Only what actually differs from staging is set here: namespace,
+# downstream service URLs (interviewhandoff-prod/matchengine-prod, not the
+# *-staging siblings values.yaml defaults to), and the dedicated prod
+# LiveKit Cloud project (`DC-Forte-Prod`, not `DC-Forte`).
+#
+# backend.image.tag/worker.image.tag reference "prod" — that tag path now
+# exists via Phase 3's CI work but hasn't been exercised by a real push yet.
+# Verify the image actually exists in the registry before `helm upgrade
+# --install`ing this release, or ErrImagePull results.
+
+global:
+  namespace: hiresense-app-prod
 
 backend:
   replicas: 2
   image:
-    tag: staging    # override with --set backend.image.tag=sha-<commit> for a pinned roll
+    tag: prod
+worker:
+  enabled: true
+  replicas: 1
+  image:
+    tag: prod
 aiEngine:
   replicas: 2
 frontend:
   replicas: 2
-worker:
-  enabled: true
-  replicas: 1
-
-hosts:
-  grafana: "grafana.dc-forte.com"
-
-tls:
-  manageCertManager: true
 
 env:
   ENVIRONMENT: production
   LOG_LEVEL: info
+  INTERVIEWHANDOFF_URL: "http://interviewhandoff.interviewhandoff-prod.svc.cluster.local"
+  MATCHENGINE_URL: "http://matchengine.matchengine-prod.svc.cluster.local"
+  LIVEKIT_URL: "wss://dc-forte-prod-i9q709p3.livekit.cloud"
+  LIVEKIT_AGENT_NAME: "dc-forte-voice-agent"
+
+frontendEnv:
+  VITE_LIVEKIT_URL: "wss://dc-forte-prod-i9q709p3.livekit.cloud"
 
 monitoring:
   otlpEndpoint: "tempo.monitoring.svc.cluster.local:4318"

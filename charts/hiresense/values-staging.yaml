@@ -1,0 +1,62 @@
+# Staging overrides. Non-secret. Combine at install time with
+# values-staging.secrets.yaml (gitignored).
+#
+# This is TODAY's real, only-ever-existed environment for the monolith —
+# previously deployed via values-prod.yaml despite being staging. See
+# docs/superpowers/specs/2026-09-11-hiresense-staging-prod-buildout-design.md
+# for the full staging+prod buildout this splits off from. Same
+# replicas/monitoring as before; the only real changes are ENVIRONMENT:
+# staging (was mislabeled production) and renaming hosts/frontendEnv to
+# -staging-suffixed hostnames as part of the new prod's domain cutover —
+# INTERVIEWHANDOFF_URL/MATCHENGINE_URL/LIVEKIT_URL already correctly point
+# at the staging siblings via values.yaml's own defaults, unchanged.
+
+backend:
+  replicas: 2
+  image:
+    tag: staging
+aiEngine:
+  replicas: 2
+  image:
+    tag: staging
+frontend:
+  replicas: 2
+  image:
+    tag: staging
+worker:
+  enabled: true
+  replicas: 1
+
+hosts:
+  candidate: hiresense-staging.dc-forte.com
+  recruiter: hiresense-recruiter-staging.dc-forte.com
+  api:       hiresense-api-staging.dc-forte.com
+  ai:        hiresense-ai-staging.dc-forte.com
+  grafana:   "grafana.dc-forte.com"
+
+tls:
+  manageCertManager: true
+
+env:
+  ENVIRONMENT: staging
+  LOG_LEVEL: info
+
+frontendEnv:
+  VITE_API_BASE_URL: "https://hiresense-api-staging.dc-forte.com/api"
+  VITE_ADMIN_API_BASE_URL: "https://hiresense-api-staging.dc-forte.com/api/admin-api"
+  VITE_FRONTEND_URL: "https://hiresense-recruiter-staging.dc-forte.com"
+  VITE_CANDIDATE_PORTAL_URL: "https://hiresense-staging.dc-forte.com"
+  VITE_AGENTIC_API_URL: "https://hiresense-api-staging.dc-forte.com/api/agentic"
+  VITE_AGENTIC_WS_URL: "wss://hiresense-api-staging.dc-forte.com/ws/interview"
+  VITE_PYTHON_API_URL: "https://hiresense-ai-staging.dc-forte.com"
+  VITE_PYTHON_URL: "https://hiresense-ai-staging.dc-forte.com"
+  VITE_SIGNALING_URL: "wss://hiresense-api-staging.dc-forte.com"
+  VITE_WS_URL: "wss://hiresense-api-staging.dc-forte.com"
+  VITE_ENV: "staging"
+
+monitoring:
+  otlpEndpoint: "tempo.monitoring.svc.cluster.local:4318"
+  pyroscopeServerAddress: "http://pyroscope.monitoring.svc.cluster.local:4040"
+  workerMetricsPort: "9091"
+  serviceMonitor:
+    enabled: true

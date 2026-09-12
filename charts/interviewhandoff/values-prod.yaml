@@ -1,11 +1,23 @@
 # Prod overrides. Pair with values-prod.secrets.yaml (gitignored).
+# New real prod environment (2026-09-11 buildout, see
+# docs/superpowers/specs/2026-09-11-hiresense-staging-prod-buildout-design.md).
 global:
   namespace: interviewhandoff-prod
 
 image:
   tag: prod
 
+worker:
+  image:
+    tag: prod
+
 replicas: 1
 
 env:
   APP_ENV: production
+  MATCHENGINE_URL: "http://matchengine.matchengine-prod.svc.cluster.local"
+  LIVEKIT_AGENT_NAME: "dc-forte-voice-agent"
+  CANDIDATE_FRONTEND_URL: "https://hiresense.dc-forte.com"
+  CANDIDATE_PORTAL_URL: "https://hiresense.dc-forte.com"
+  PUBLIC_API_BASE_URL: "https://hiresense-api.dc-forte.com"
+  PYTHON_BACKEND_URL: "http://hiresense-ai-engine.hiresense-app-prod.svc.cluster.local:9091/api/v1"

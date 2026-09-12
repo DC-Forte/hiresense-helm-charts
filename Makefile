@@ -2,19 +2,24 @@ CHARTS_DIR := charts
 HELM_UPGRADE_FLAGS := --server-side=true --force-conflicts
 
 .PHONY: help dep-update dep-update-monitoring \
-	upgrade-monitoring upgrade-hiresense \
+	upgrade-monitoring upgrade-hiresense-staging upgrade-hiresense-prod \
 	upgrade-recruiter-report-staging upgrade-recruiter-report-prod \
-	upgrade-matchengine-staging upgrade-interviewhandoff-staging \
-	upgrade-all
+	upgrade-matchengine-staging upgrade-matchengine-prod \
+	upgrade-interviewhandoff-staging upgrade-interviewhandoff-prod \
+	upgrade-all-staging upgrade-all-prod
 
 help:
 	@echo "make upgrade-monitoring                  # helm upgrade --install monitoring"
-	@echo "make upgrade-hiresense                    # helm upgrade --install hiresense"
+	@echo "make upgrade-hiresense-staging            # helm upgrade --install hiresense (staging)"
+	@echo "make upgrade-hiresense-prod               # helm upgrade --install hiresense-prod (prod)"
 	@echo "make upgrade-recruiter-report-staging      # helm upgrade --install recruiter-report-staging (TAG=<sha> to override)"
 	@echo "make upgrade-recruiter-report-prod         # helm upgrade --install recruiter-report-prod (TAG=<sha> to override)"
-	@echo "make upgrade-matchengine-staging           # helm upgrade --install matchengine (staging-only, no prod yet)"
-	@echo "make upgrade-interviewhandoff-staging       # helm upgrade --install interviewhandoff (staging-only, no prod yet)"
-	@echo "make upgrade-all-staging                   # upgrade monitoring, hiresense, recruiter-report, matchengine, interviewhandoff"
+	@echo "make upgrade-matchengine-staging           # helm upgrade --install matchengine (staging)"
+	@echo "make upgrade-matchengine-prod              # helm upgrade --install matchengine-prod (prod)"
+	@echo "make upgrade-interviewhandoff-staging       # helm upgrade --install interviewhandoff (staging)"
+	@echo "make upgrade-interviewhandoff-prod          # helm upgrade --install interviewhandoff-prod (prod)"
+	@echo "make upgrade-all-staging                   # upgrade monitoring, hiresense, recruiter-report, matchengine, interviewhandoff (staging)"
+	@echo "make upgrade-all-prod                      # upgrade hiresense, recruiter-report, matchengine, interviewhandoff (prod)"
 	@echo "make dep-update                           # helm dep update for all charts"
 
 dep-update-monitoring:
@@ -28,8 +33,16 @@ upgrade-monitoring: dep-update-monitoring
 		-f $(CHARTS_DIR)/monitoring/values-prod.secrets.yaml \
 		$(HELM_UPGRADE_FLAGS)
 
-upgrade-hiresense:
+upgrade-hiresense-staging:
 	helm upgrade --install hiresense $(CHARTS_DIR)/hiresense -n hiresense-app \
+		-f $(CHARTS_DIR)/hiresense/values-staging.yaml \
+		-f $(CHARTS_DIR)/hiresense/values-staging.secrets.yaml \
+		$(HELM_UPGRADE_FLAGS)
+
+# Do not run until build.yml (go-backend) ships a real :prod image tag —
+# see docs/superpowers/specs/2026-09-11-hiresense-staging-prod-buildout-design.md Phase 4.
+upgrade-hiresense-prod:
+	helm upgrade --install hiresense-prod $(CHARTS_DIR)/hiresense -n hiresense-app-prod --create-namespace \
 		-f $(CHARTS_DIR)/hiresense/values-prod.yaml \
 		-f $(CHARTS_DIR)/hiresense/values-prod.secrets.yaml \
 		$(HELM_UPGRADE_FLAGS)
@@ -57,6 +70,13 @@ upgrade-matchengine-staging:
 		-f $(CHARTS_DIR)/matchengine/values-staging.secrets.yaml \
 		$(HELM_UPGRADE_FLAGS)
 
+upgrade-matchengine-prod:
+	helm upgrade --install matchengine-prod $(CHARTS_DIR)/matchengine -n matchengine-prod --create-namespace \
+		-f $(CHARTS_DIR)/matchengine/values.yaml \
+		-f $(CHARTS_DIR)/matchengine/values-prod.yaml \
+		-f $(CHARTS_DIR)/matchengine/values-prod.secrets.yaml \
+		$(HELM_UPGRADE_FLAGS)
+
 upgrade-interviewhandoff-staging:
 	helm upgrade --install interviewhandoff $(CHARTS_DIR)/interviewhandoff -n interviewhandoff-staging --create-namespace \
 		-f $(CHARTS_DIR)/interviewhandoff/values.yaml \
@@ -64,4 +84,13 @@ upgrade-interviewhandoff-staging:
 		-f $(CHARTS_DIR)/interviewhandoff/values-staging.secrets.yaml \
 		$(HELM_UPGRADE_FLAGS)
 
-upgrade-all-staging: upgrade-monitoring upgrade-hiresense upgrade-recruiter-report-staging upgrade-matchengine-staging upgrade-interviewhandoff-staging
+upgrade-interviewhandoff-prod:
+	helm upgrade --install interviewhandoff-prod $(CHARTS_DIR)/interviewhandoff -n interviewhandoff-prod --create-namespace \
+		-f $(CHARTS_DIR)/interviewhandoff/values.yaml \
+		-f $(CHARTS_DIR)/interviewhandoff/values-prod.yaml \
+		-f $(CHARTS_DIR)/interviewhandoff/values-prod.secrets.yaml \
+		$(HELM_UPGRADE_FLAGS)
+
+upgrade-all-staging: upgrade-monitoring upgrade-hiresense-staging upgrade-recruiter-report-staging upgrade-matchengine-staging upgrade-interviewhandoff-staging
+
+upgrade-all-prod: upgrade-hiresense-prod upgrade-matchengine-prod upgrade-interviewhandoff-prod
