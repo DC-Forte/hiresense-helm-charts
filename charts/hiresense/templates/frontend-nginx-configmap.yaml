@@ -55,7 +55,7 @@ data:
         # Candidate UI
         server {
             listen 80;
-            server_name {{ .Values.hosts.candidate }};
+            server_name {{ .Values.hosts.candidate }}{{ if .Values.hosts.aliases }}{{ if .Values.hosts.aliases.candidate }} {{ .Values.hosts.aliases.candidate }}{{ end }}{{ end }};
             root /usr/share/nginx/html/candidate;
             index index.html;
             add_header X-Frame-Options "DENY" always;
@@ -87,7 +87,7 @@ data:
         # Recruiter UI
         server {
             listen 80;
-            server_name {{ .Values.hosts.recruiter }};
+            server_name {{ .Values.hosts.recruiter }}{{ if .Values.hosts.aliases }}{{ if .Values.hosts.aliases.recruiter }} {{ .Values.hosts.aliases.recruiter }}{{ end }}{{ end }};
             root /usr/share/nginx/html/admin;
             index index.html;
             add_header X-Frame-Options "DENY" always;

@@ -19,6 +19,17 @@
 global:
   namespace: hiresense-app-prod
 
+# PHASE 5 DOMAIN CUTOVER — executed 2026-09-12, user-confirmed, real data
+# consequence understood: this release's DB has zero real business data
+# (schema-only bootstrap) — real users hitting these domains from this point
+# on see an empty app until data is migrated/seeded. hiresense-app (the real,
+# data-backed release) moved to the -staging domains — see values-staging.yaml.
+hosts:
+  candidate: hiresense.dc-forte.com
+  recruiter: hiresense-recruiter.dc-forte.com
+  api:       hiresense-api.dc-forte.com
+  ai:        hiresense-ai.dc-forte.com
+
 backend:
   replicas: 2
   image:

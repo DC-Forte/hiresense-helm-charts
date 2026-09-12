@@ -8,6 +8,11 @@ metadata:
 spec:
   hosts:
     - {{ .Values.hosts.candidate | quote }}
+    {{- if .Values.hosts.aliases }}
+    {{- if .Values.hosts.aliases.candidate }}
+    - {{ .Values.hosts.aliases.candidate | quote }}
+    {{- end }}
+    {{- end }}
   gateways:
     - {{ .Values.istio.gateway }}
   http:
@@ -26,6 +31,11 @@ metadata:
 spec:
   hosts:
     - {{ .Values.hosts.recruiter | quote }}
+    {{- if .Values.hosts.aliases }}
+    {{- if .Values.hosts.aliases.recruiter }}
+    - {{ .Values.hosts.aliases.recruiter | quote }}
+    {{- end }}
+    {{- end }}
   gateways:
     - {{ .Values.istio.gateway }}
   http:
@@ -44,6 +54,11 @@ metadata:
 spec:
   hosts:
     - {{ .Values.hosts.api | quote }}
+    {{- if .Values.hosts.aliases }}
+    {{- if .Values.hosts.aliases.api }}
+    - {{ .Values.hosts.aliases.api | quote }}
+    {{- end }}
+    {{- end }}
   gateways:
     - {{ .Values.istio.gateway }}
   http:
@@ -198,6 +213,11 @@ metadata:
 spec:
   hosts:
     - {{ .Values.hosts.ai | quote }}
+    {{- if .Values.hosts.aliases }}
+    {{- if .Values.hosts.aliases.ai }}
+    - {{ .Values.hosts.aliases.ai | quote }}
+    {{- end }}
+    {{- end }}
   gateways:
     - {{ .Values.istio.gateway }}
   http:

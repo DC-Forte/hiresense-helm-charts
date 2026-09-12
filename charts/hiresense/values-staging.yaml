@@ -27,6 +27,10 @@ worker:
   enabled: true
   replicas: 1
 
+# PHASE 5 DOMAIN CUTOVER — executed 2026-09-12, user-confirmed, real data
+# consequence understood: hiresense-recruiter-staging.dc-forte.com (etc) is
+# now canonical for THIS release (real DB, real data); the clean domains moved
+# to hiresense-app-prod (new, empty-of-business-data DB) — see values-prod.yaml.
 hosts:
   candidate: hiresense-staging.dc-forte.com
   recruiter: hiresense-recruiter-staging.dc-forte.com
@@ -35,7 +39,14 @@ hosts:
   grafana:   "grafana.dc-forte.com"
 
 tls:
-  manageCertManager: true
+  # false, not true: the chart's Certificate template (cert-issuer.yaml) hardcodes
+  # name: hiresense-cert and builds dnsNames only from THIS release's own hosts.*
+  # — it isn't scoped per-release. Setting this true here overwrote the shared
+  # cert's SAN list down to just the 4 -staging hosts, dropping the live clean
+  # domains and breaking real traffic's TLS (caught + hand-patched 2026-09-12).
+  # Leave cert management to the pre-existing out-of-band process until Phase 5
+  # (domain cutover) redesigns how staging+prod share — or split — this cert.
+  manageCertManager: false
 
 env:
   ENVIRONMENT: staging

@@ -21,6 +21,20 @@ spec:
         {{- if .Values.hosts.grafana }}
         - {{ .Values.hosts.grafana | quote }}
         {{- end }}
+        {{- if .Values.hosts.aliases }}
+        {{- if .Values.hosts.aliases.candidate }}
+        - {{ .Values.hosts.aliases.candidate | quote }}
+        {{- end }}
+        {{- if .Values.hosts.aliases.recruiter }}
+        - {{ .Values.hosts.aliases.recruiter | quote }}
+        {{- end }}
+        {{- if .Values.hosts.aliases.api }}
+        - {{ .Values.hosts.aliases.api | quote }}
+        {{- end }}
+        {{- if .Values.hosts.aliases.ai }}
+        - {{ .Values.hosts.aliases.ai | quote }}
+        {{- end }}
+        {{- end }}
       {{- if .Values.tls.enabled }}
       tls:
         httpsRedirect: true
@@ -37,6 +51,20 @@ spec:
         - {{ .Values.hosts.ai | quote }}
         {{- if .Values.hosts.grafana }}
         - {{ .Values.hosts.grafana | quote }}
+        {{- end }}
+        {{- if .Values.hosts.aliases }}
+        {{- if .Values.hosts.aliases.candidate }}
+        - {{ .Values.hosts.aliases.candidate | quote }}
+        {{- end }}
+        {{- if .Values.hosts.aliases.recruiter }}
+        - {{ .Values.hosts.aliases.recruiter | quote }}
+        {{- end }}
+        {{- if .Values.hosts.aliases.api }}
+        - {{ .Values.hosts.aliases.api | quote }}
+        {{- end }}
+        {{- if .Values.hosts.aliases.ai }}
+        - {{ .Values.hosts.aliases.ai | quote }}
+        {{- end }}
         {{- end }}
       tls:
         mode: SIMPLE

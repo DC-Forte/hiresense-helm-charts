@@ -12,6 +12,7 @@ data:
     {
       "title": "HireSense App",
       "uid": "hiresense-app",
+      "description": "Monolith (hiresense-app / hiresense-app-prod) — staging + prod on one dashboard, split by namespace",
       "schemaVersion": 38,
       "refresh": "30s",
       "time": { "from": "now-1h", "to": "now" },
@@ -28,8 +29,8 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 0, "y": 1 },
           "targets": [{
-            "expr": "sum(rate(http_server_request_duration_seconds_count{namespace=\"hiresense-app\",job=~\"hiresense-backend.*\"}[2m])) by (http_route, http_request_method)",
-            "legendFormat": "{{ "{{" }}http_request_method{{ "}}" }} {{ "{{" }}http_route{{ "}}" }}",
+            "expr": "sum(rate(http_server_request_duration_seconds_count{namespace=~\"hiresense-app.*\",job=~\"hiresense-backend.*\"}[2m])) by (namespace, http_route, http_request_method)",
+            "legendFormat": "{{ "{{" }}namespace{{ "}}" }} {{ "{{" }}http_request_method{{ "}}" }} {{ "{{" }}http_route{{ "}}" }}",
             "datasource": { "type": "prometheus" }
           }],
           "fieldConfig": { "defaults": { "unit": "reqps" } }
@@ -41,18 +42,18 @@ data:
           "gridPos": { "h": 8, "w": 8, "x": 8, "y": 1 },
           "targets": [
             {
-              "expr": "histogram_quantile(0.50, sum(rate(http_server_request_duration_seconds_bucket{namespace=\"hiresense-app\",job=~\"hiresense-backend.*\"}[2m])) by (le)) * 1000",
-              "legendFormat": "p50",
+              "expr": "histogram_quantile(0.50, sum(rate(http_server_request_duration_seconds_bucket{namespace=~\"hiresense-app.*\",job=~\"hiresense-backend.*\"}[2m])) by (le, namespace)) * 1000",
+              "legendFormat": "p50 {{ "{{" }}namespace{{ "}}" }}",
               "datasource": { "type": "prometheus" }
             },
             {
-              "expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{namespace=\"hiresense-app\",job=~\"hiresense-backend.*\"}[2m])) by (le)) * 1000",
-              "legendFormat": "p95",
+              "expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{namespace=~\"hiresense-app.*\",job=~\"hiresense-backend.*\"}[2m])) by (le, namespace)) * 1000",
+              "legendFormat": "p95 {{ "{{" }}namespace{{ "}}" }}",
               "datasource": { "type": "prometheus" }
             },
             {
-              "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{namespace=\"hiresense-app\",job=~\"hiresense-backend.*\"}[2m])) by (le)) * 1000",
-              "legendFormat": "p99",
+              "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{namespace=~\"hiresense-app.*\",job=~\"hiresense-backend.*\"}[2m])) by (le, namespace)) * 1000",
+              "legendFormat": "p99 {{ "{{" }}namespace{{ "}}" }}",
               "datasource": { "type": "prometheus" }
             }
           ],
@@ -64,8 +65,8 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 16, "y": 1 },
           "targets": [{
-            "expr": "100 * sum(rate(http_server_request_duration_seconds_count{namespace=\"hiresense-app\",job=~\"hiresense-backend.*\",http_response_status_code=~\"5..\"}[2m])) / sum(rate(http_server_request_duration_seconds_count{namespace=\"hiresense-app\",job=~\"hiresense-backend.*\"}[2m]))",
-            "legendFormat": "error %",
+            "expr": "100 * sum(rate(http_server_request_duration_seconds_count{namespace=~\"hiresense-app.*\",job=~\"hiresense-backend.*\",http_response_status_code=~\"5..\"}[2m])) by (namespace) / sum(rate(http_server_request_duration_seconds_count{namespace=~\"hiresense-app.*\",job=~\"hiresense-backend.*\"}[2m])) by (namespace)",
+            "legendFormat": "{{ "{{" }}namespace{{ "}}" }} error %",
             "datasource": { "type": "prometheus" }
           }],
           "fieldConfig": { "defaults": { "unit": "percent", "max": 100, "min": 0 } }
@@ -82,8 +83,8 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 0, "y": 10 },
           "targets": [{
-            "expr": "go_goroutines{namespace=\"hiresense-app\",job=~\"hiresense-worker.*\"}",
-            "legendFormat": "goroutines",
+            "expr": "go_goroutines{namespace=~\"hiresense-app.*\",job=~\"hiresense-worker.*\"}",
+            "legendFormat": "{{ "{{" }}namespace{{ "}}" }} {{ "{{" }}pod{{ "}}" }}",
             "datasource": { "type": "prometheus" }
           }],
           "fieldConfig": { "defaults": { "unit": "short" } }
@@ -94,8 +95,8 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 8, "y": 10 },
           "targets": [{
-            "expr": "go_memstats_heap_inuse_bytes{namespace=\"hiresense-app\",job=~\"hiresense-worker.*\"}",
-            "legendFormat": "heap in-use",
+            "expr": "go_memstats_heap_inuse_bytes{namespace=~\"hiresense-app.*\",job=~\"hiresense-worker.*\"}",
+            "legendFormat": "{{ "{{" }}namespace{{ "}}" }} {{ "{{" }}pod{{ "}}" }}",
             "datasource": { "type": "prometheus" }
           }],
           "fieldConfig": { "defaults": { "unit": "bytes" } }
@@ -106,8 +107,8 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 16, "y": 10 },
           "targets": [{
-            "expr": "rate(go_gc_duration_seconds_sum{namespace=\"hiresense-app\",job=~\"hiresense-worker.*\"}[2m])",
-            "legendFormat": "gc pause rate",
+            "expr": "sum(rate(go_gc_duration_seconds_sum{namespace=~\"hiresense-app.*\",job=~\"hiresense-worker.*\"}[2m])) by (namespace)",
+            "legendFormat": "{{ "{{" }}namespace{{ "}}" }}",
             "datasource": { "type": "prometheus" }
           }],
           "fieldConfig": { "defaults": { "unit": "s" } }
@@ -124,8 +125,8 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 0, "y": 19 },
           "targets": [{
-            "expr": "increase(kube_pod_container_status_restarts_total{namespace=\"hiresense-app\"}[15m])",
-            "legendFormat": "{{ "{{" }}pod{{ "}}" }}",
+            "expr": "increase(kube_pod_container_status_restarts_total{namespace=~\"hiresense-app.*\"}[15m])",
+            "legendFormat": "{{ "{{" }}namespace{{ "}}" }}/{{ "{{" }}pod{{ "}}" }}",
             "datasource": { "type": "prometheus" }
           }],
           "fieldConfig": { "defaults": { "unit": "short" } }
@@ -136,8 +137,8 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 12, "y": 19 },
           "targets": [{
-            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"hiresense-app\",container!=\"\",container!=\"POD\"}[2m])) by (pod)",
-            "legendFormat": "{{ "{{" }}pod{{ "}}" }}",
+            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"hiresense-app.*\",container!=\"\",container!=\"POD\"}[2m])) by (namespace, pod)",
+            "legendFormat": "{{ "{{" }}namespace{{ "}}" }}/{{ "{{" }}pod{{ "}}" }}",
             "datasource": { "type": "prometheus" }
           }],
           "fieldConfig": { "defaults": { "unit": "cores" } }
@@ -153,13 +154,49 @@ data:
           "title": "Backend Logs",
           "type": "logs",
           "gridPos": { "h": 10, "w": 24, "x": 0, "y": 28 },
-          "options": { "dedupStrategy": "none", "showLabels": false, "showTime": true, "wrapLogMessage": true },
+          "options": { "dedupStrategy": "none", "showLabels": true, "showTime": true, "wrapLogMessage": true },
           "targets": [{
-            "expr": "{namespace=\"hiresense-app\", app=\"hiresense-backend\"} | json",
+            "expr": "{namespace=~\"hiresense-app.*\", app=\"hiresense-backend\"} | json",
             "datasource": { "type": "loki" }
           }]
+        },
+        {
+          "id": 14,
+          "type": "row",
+          "title": "Traces",
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 38 }
+        },
+        {
+          "id": 15,
+          "title": "Backend Traces ($environment)",
+          "type": "traces",
+          "description": "Filtered by deployment.environment.name — requires the telemetry fix shipped 2026-09-12 (commit c799df7) to be deployed; older traces predate this tag and won't show here.",
+          "gridPos": { "h": 12, "w": 24, "x": 0, "y": 39 },
+          "targets": [{
+            "query": "{resource.service.name=~\"interview-backend.*\" && resource.deployment.environment.name=\"$environment\"}",
+            "queryType": "traceql",
+            "datasource": { "type": "tempo" }
+          }]
         }
-      ]
+      ],
+      "templating": {
+        "list": [
+          {
+            "name": "environment",
+            "type": "custom",
+            "label": "Environment (traces)",
+            "query": "staging,production",
+            "current": { "text": "staging", "value": "staging" },
+            "options": [
+              { "text": "staging", "value": "staging", "selected": true },
+              { "text": "production", "value": "production", "selected": false }
+            ],
+            "multi": false,
+            "includeAll": false,
+            "hide": 0
+          }
+        ]
+      }
     }
 ---
 apiVersion: v1
@@ -335,8 +372,44 @@ data:
             "expr": "{namespace=~\"recruiter-report-.*\", app=\"recruiter-report\"} | json",
             "datasource": { "type": "loki" }
           }]
+        },
+        {
+          "id": 15,
+          "type": "row",
+          "title": "Traces",
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 38 }
+        },
+        {
+          "id": 16,
+          "title": "Service Traces ($environment)",
+          "type": "traces",
+          "description": "Filtered by deployment.environment.name — requires the telemetry fix shipped 2026-09-12 (commit c799df7) to be deployed; older traces predate this tag and won't show here.",
+          "gridPos": { "h": 12, "w": 24, "x": 0, "y": 39 },
+          "targets": [{
+            "query": "{resource.service.name=\"recruiter-report\" && resource.deployment.environment.name=\"$environment\"}",
+            "queryType": "traceql",
+            "datasource": { "type": "tempo" }
+          }]
         }
-      ]
+      ],
+      "templating": {
+        "list": [
+          {
+            "name": "environment",
+            "type": "custom",
+            "label": "Environment (traces)",
+            "query": "staging,production",
+            "current": { "text": "staging", "value": "staging" },
+            "options": [
+              { "text": "staging", "value": "staging", "selected": true },
+              { "text": "production", "value": "production", "selected": false }
+            ],
+            "multi": false,
+            "includeAll": false,
+            "hide": 0
+          }
+        ]
+      }
     }
 ---
 apiVersion: v1
