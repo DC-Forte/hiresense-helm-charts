@@ -14,3 +14,13 @@ replicas: 1
 env:
   APP_ENV: staging
   MATCHENGINE_URL: "http://matchengine.matchengine-staging.svc.cluster.local"
+  # base values.yaml's defaults for these are the CLEAN domains, which the
+  # 2026-09-12 Phase 5 domain cutover reassigned to prod (see
+  # hiresense/values-prod.yaml) -- this release (the real, data-backed one,
+  # per that same cutover note) needs the -staging domains explicitly, or it
+  # silently falls back to prod's hostnames (found live 2026-09-13: configmap
+  # showed all four still on hiresense.dc-forte.com/hiresense-api.dc-forte.com).
+  AGENTIC_API_URL: "https://hiresense-api-staging.dc-forte.com/api/agentic"
+  CANDIDATE_FRONTEND_URL: "https://hiresense-staging.dc-forte.com"
+  CANDIDATE_PORTAL_URL: "https://hiresense-staging.dc-forte.com"
+  PUBLIC_API_BASE_URL: "https://hiresense-api-staging.dc-forte.com"

@@ -19,6 +19,9 @@
 global:
   namespace: hiresense-app-prod
 
+interviewhandoff:
+  namespace: interviewhandoff-prod
+
 # PHASE 5 DOMAIN CUTOVER — executed 2026-09-12, user-confirmed, real data
 # consequence understood: this release's DB has zero real business data
 # (schema-only bootstrap) — real users hitting these domains from this point

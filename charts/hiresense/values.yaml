@@ -7,6 +7,13 @@ global:
   imagePullPolicy: Always
   imagePullSecret: ghcr-pull
 
+# Namespace of the interviewhandoff service this release's Istio routes
+# (candidate-api practice/invite/interviews, livekit-ingest, recording,
+# handoff, egress-webhook) target. Override to interviewhandoff-prod in
+# values-prod.yaml -- keep in sync with env.INTERVIEWHANDOFF_URL below.
+interviewhandoff:
+  namespace: interviewhandoff-staging
+
 hosts:
   candidate: hiresense.dc-forte.com
   recruiter: hiresense-recruiter.dc-forte.com

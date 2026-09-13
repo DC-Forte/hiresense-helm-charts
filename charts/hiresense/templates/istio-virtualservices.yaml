@@ -72,7 +72,7 @@ spec:
             prefix: /ws/transcript
       route:
         - destination:
-            host: interviewhandoff.interviewhandoff-staging.svc.cluster.local
+            host: interviewhandoff.{{ .Values.interviewhandoff.namespace }}.svc.cluster.local
             port:
               number: 80
       timeout: 3600s
@@ -97,7 +97,7 @@ spec:
             prefix: /candidate-api/v1/practice
       route:
         - destination:
-            host: interviewhandoff.interviewhandoff-staging.svc.cluster.local
+            host: interviewhandoff.{{ .Values.interviewhandoff.namespace }}.svc.cluster.local
             port:
               number: 80
       timeout: 120s
@@ -110,7 +110,7 @@ spec:
             prefix: /candidate-api/v1/invite
       route:
         - destination:
-            host: interviewhandoff.interviewhandoff-staging.svc.cluster.local
+            host: interviewhandoff.{{ .Values.interviewhandoff.namespace }}.svc.cluster.local
             port:
               number: 80
       timeout: 120s
@@ -125,7 +125,7 @@ spec:
             prefix: /candidate-api/v1/interviews
       route:
         - destination:
-            host: interviewhandoff.interviewhandoff-staging.svc.cluster.local
+            host: interviewhandoff.{{ .Values.interviewhandoff.namespace }}.svc.cluster.local
             port:
               number: 80
       timeout: 120s
@@ -141,7 +141,7 @@ spec:
             prefix: /api/interviewhandoff/livekit-interview
       route:
         - destination:
-            host: interviewhandoff.interviewhandoff-staging.svc.cluster.local
+            host: interviewhandoff.{{ .Values.interviewhandoff.namespace }}.svc.cluster.local
             port:
               number: 80
       timeout: 120s
@@ -158,7 +158,7 @@ spec:
             prefix: /api/recording
       route:
         - destination:
-            host: interviewhandoff.interviewhandoff-staging.svc.cluster.local
+            host: interviewhandoff.{{ .Values.interviewhandoff.namespace }}.svc.cluster.local
             port:
               number: 80
       timeout: 120s
@@ -177,7 +177,7 @@ spec:
             prefix: /internal/handoff
       route:
         - destination:
-            host: interviewhandoff.interviewhandoff-staging.svc.cluster.local
+            host: interviewhandoff.{{ .Values.interviewhandoff.namespace }}.svc.cluster.local
             port:
               number: 80
       timeout: 120s
@@ -193,7 +193,7 @@ spec:
             prefix: /internal/livekit-egress-webhook
       route:
         - destination:
-            host: interviewhandoff.interviewhandoff-staging.svc.cluster.local
+            host: interviewhandoff.{{ .Values.interviewhandoff.namespace }}.svc.cluster.local
             port:
               number: 80
       timeout: 120s
