@@ -487,7 +487,7 @@ grafana:
       istio: ingressgateway
     tls:
       enabled: false
+      # Must be its own cert, not shared with the hiresense chart's certs —
+      # see hiresense/values.yaml's tls block for why (HTTP/2 connection
+      # coalescing across hosts sharing one SAN + IP). Set in values-prod.yaml.
       secretName: "grafana-tls"
-    # Reference the hiresense app gateway (namespace/name) to handle HTTP/2
-    # connection coalescing when grafana shares the same TLS cert + IP.
-    hiresenseGateway: ""

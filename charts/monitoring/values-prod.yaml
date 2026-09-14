@@ -278,8 +278,12 @@ grafana:
       istio: ingressgateway
     tls:
       enabled: true
-      secretName: "hiresense-tls"
-    # Fix HTTP/2 coalescing: grafana shares hiresense-tls cert + IP, so Chrome
-    # reuses the hiresense connection. Attaching to both gateways ensures Istio
-    # routes the request regardless of which SNI the connection was opened with.
-    hiresenseGateway: "hiresense-app/hiresense-gateway"
+      # PHASE 5 CERT SPLIT (2026-09-14): used to be hiresense-tls, shared with
+      # both hiresense releases. The dual-gateway "fix" this used to have
+      # (attaching this VS to hiresense-app/hiresense-gateway too) didn't work —
+      # Envoy picks its filter chain/route table once, by SNI, at handshake
+      # time; being listed in a second Gateway's VS bindings doesn't change
+      # which table an already-coalesced connection is bound to. The actual
+      # fix is a cert with a SAN that doesn't overlap any other service's, so
+      # Chrome has no cert+IP match to coalesce on. See hiresense/values.yaml.
+      secretName: "monitoring-grafana-tls"

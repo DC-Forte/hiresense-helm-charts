@@ -36,16 +36,21 @@ hosts:
   recruiter: hiresense-recruiter-staging.dc-forte.com
   api:       hiresense-api-staging.dc-forte.com
   ai:        hiresense-ai-staging.dc-forte.com
-  grafana:   "grafana.dc-forte.com"
 
 tls:
-  # false, not true: the chart's Certificate template (cert-issuer.yaml) hardcodes
-  # name: hiresense-cert and builds dnsNames only from THIS release's own hosts.*
-  # — it isn't scoped per-release. Setting this true here overwrote the shared
-  # cert's SAN list down to just the 4 -staging hosts, dropping the live clean
-  # domains and breaking real traffic's TLS (caught + hand-patched 2026-09-12).
-  # Leave cert management to the pre-existing out-of-band process until Phase 5
-  # (domain cutover) redesigns how staging+prod share — or split — this cert.
+  # PHASE 5 CERT SPLIT (2026-09-14): this release used to share hiresense-tls
+  # (one Certificate object, name hardcoded in cert-issuer.yaml) with the prod
+  # release AND grafana. Two releases of the same chart both trying to own one
+  # cluster-scoped Certificate name repeatedly clobbered each other's SAN list
+  # (2026-08-29, 2026-09-12), and the overlap with grafana's SAN let Chrome's
+  # HTTP/2 connection coalescing reuse a connection across hosts that route
+  # through different Envoy filter chains — deterministic 404s until the reused
+  # connection went idle. Fixed by giving every release/service its own
+  # non-overlapping certName+secretName; see monitoring/values-prod.yaml for
+  # grafana's own cert. Cert management itself stays out-of-band
+  # (manageCertManager: false) — only the naming changed.
+  certName: hiresense-staging-cert
+  secretName: hiresense-staging-tls
   manageCertManager: false
 
 env:

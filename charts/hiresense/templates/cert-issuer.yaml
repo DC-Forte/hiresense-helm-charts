@@ -26,12 +26,15 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  # Must stay "hiresense-cert" — matches the real live object (102+ days
-  # old, working). A prior chart edit drifted this to "hiresense-tls"
-  # without ever being re-applied (manageCertManager was false); re-enabling
-  # it under the drifted name created a second Certificate fighting over
-  # the same secretName, caught 2026-08-29 via "IncorrectCertificate" status.
-  name: hiresense-cert
+  # Templated per-release (was hardcoded "hiresense-cert" — a cluster-scoped
+  # name in the shared istio-system namespace, so the prod and staging
+  # releases of this same chart fought over ownership of one object, each
+  # upgrade clobbering the other's dnsNames/SAN list down to just its own
+  # hosts. Root cause of the 2026-09-12/13 shared-cert incidents and the
+  # HTTP/2 connection-coalescing 404s across hiresense-recruiter/grafana.
+  # tls.certName must be unique per release (set in values-prod.yaml /
+  # values-staging.yaml) so each release owns its own object.
+  name: {{ .Values.tls.certName }}
   namespace: istio-system
 spec:
   secretName: {{ .Values.tls.secretName }}
@@ -44,9 +47,6 @@ spec:
     - {{ .Values.hosts.recruiter | quote }}
     - {{ .Values.hosts.api | quote }}
     - {{ .Values.hosts.ai | quote }}
-    {{- if .Values.hosts.grafana }}
-    - {{ .Values.hosts.grafana | quote }}
-    {{- end }}
     {{- if .Values.hosts.aliases }}
     {{- if .Values.hosts.aliases.candidate }}
     - {{ .Values.hosts.aliases.candidate | quote }}

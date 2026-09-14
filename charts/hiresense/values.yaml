@@ -19,7 +19,6 @@ hosts:
   recruiter: hiresense-recruiter.dc-forte.com
   api:       hiresense-api.dc-forte.com
   ai:        hiresense-ai.dc-forte.com
-  grafana:   ""  # set in values-prod.yaml to add grafana.dc-forte.com to TLS cert
 
 istio:
   enabled: true
@@ -30,7 +29,16 @@ istio:
 tls:
   enabled: true
   issuer: letsencrypt-prod
-  secretName: hiresense-tls
+  # Each release (prod/staging) must use its own certName/secretName — never
+  # share one across releases or with the monitoring chart's grafana cert.
+  # A shared cert's SAN spanning multiple independently-routed hosts lets
+  # Chrome's HTTP/2 connection coalescing reuse a socket opened under one
+  # host's SNI for another host's request; Envoy picks its route table once,
+  # by SNI, at handshake time, so the reused connection 404s until it goes
+  # idle and a fresh one opens with the right SNI. Root cause of the
+  # 2026-09 hiresense-recruiter/grafana intermittent 404 incident.
+  certName: hiresense-prod-cert
+  secretName: hiresense-prod-tls
   # Set true if you want Helm to also create the ClusterIssuer + Certificate.
   # Default false because we adopted pre-existing cert-manager resources.
   manageCertManager: false
