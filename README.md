@@ -21,17 +21,23 @@ One shared cluster, one namespace per release (`recruiter-report` deploys twice 
 | Namespace | Release | Chart |
 |-----------|---------|-------|
 | `hiresense-app` | `hiresense` | `charts/hiresense` |
+| `hiresense-app-prod` | `hiresense-prod` | `charts/hiresense` |
 | `monitoring` | `monitoring` | `charts/monitoring` |
 | `recruiter-report-staging` | `recruiter-report-staging` | `charts/recruiter-report` |
 | `recruiter-report-prod` | `recruiter-report-prod` | `charts/recruiter-report` |
 | `interviewhandoff-staging` | `interviewhandoff` | `charts/interviewhandoff` |
+| `interviewhandoff-prod` | `interviewhandoff-prod` | `charts/interviewhandoff` |
 | `matchengine-staging` | `matchengine` | `charts/matchengine` |
+| `matchengine-prod` | `matchengine-prod` | `charts/matchengine` |
 | `istio-system` | (cluster-managed, not this repo) | — TLS `Certificate`/Secret for `recruiter-report` lives here too, see the cross-namespace TLS gotcha below |
 
-`interviewhandoff`/`matchengine` are staging-only — no prod environment exists yet for the
-hiresense monolith or anything extracted from it (`recruiter-report` is the one service in this
-platform with a real staging/prod split). Don't add `values-prod.*` files or a `-prod` namespace
-for either until that changes.
+**Updated 2026-09-16 — every service now has a real staging+prod split.** hiresense (the
+monolith), `interviewhandoff`, and `matchengine` all cut over to a live `-prod` namespace during
+the 2026-09-11/12 buildout (each with its own dedicated Postgres cluster, separate from the old
+shared instance staging still uses — see `chapter-interview-backend-go`'s root README, "Database
+Migrations" section). `recruiter-report` is no longer the only service with a real prod — this
+section previously said the opposite; don't trust the age of a claim like that without checking
+`kubectl get ns` first.
 
 ## How it observes itself
 
