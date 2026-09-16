@@ -76,7 +76,7 @@ env:
   LIVEKIT_AGENT_NAME: "dc-forte-voice-agent" # must match the monolith's own LIVEKIT_AGENT_NAME
   CANDIDATE_AUTH_V2: "true"
   ALLOW_INTERVIEW_WITHOUT_AGENT: "false"
-  AGENTIC_API_URL: "https://hiresense-api.dc-forte.com/api/agentic" # chapter-interview-backend-python, same base URL the monolith's own AGENTIC_API_URL uses
+  AGENTIC_API_URL: "https://hiresense-ai.dc-forte.com" # chapter-interview-backend-python (hiresense-ai-engine), reached via the hiresense-ai VirtualService -- fixed 2026-09-16, the old hiresense-api/api/agentic value had no matching Istio route (fell through to the monolith catch-all, 404 "Route not found" on every resume PDF parse, see resume_data_shape_mismatch memory)
   LLM_TIMEOUT_SECONDS: "60"
   OPENAI_MODEL: "gpt-4.1"
   MATCHENGINE_URL: "" # set once matchengine is deployed, e.g. http://matchengine.matchengine-staging.svc.cluster.local

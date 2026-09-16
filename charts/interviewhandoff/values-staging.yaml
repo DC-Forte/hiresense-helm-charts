@@ -20,7 +20,7 @@ env:
   # per that same cutover note) needs the -staging domains explicitly, or it
   # silently falls back to prod's hostnames (found live 2026-09-13: configmap
   # showed all four still on hiresense.dc-forte.com/hiresense-api.dc-forte.com).
-  AGENTIC_API_URL: "https://hiresense-api-staging.dc-forte.com/api/agentic"
+  AGENTIC_API_URL: "https://hiresense-ai-staging.dc-forte.com" # fixed 2026-09-16 -- old value had no matching Istio route, see values.yaml comment
   CANDIDATE_FRONTEND_URL: "https://hiresense-staging.dc-forte.com"
   CANDIDATE_PORTAL_URL: "https://hiresense-staging.dc-forte.com"
   PUBLIC_API_BASE_URL: "https://hiresense-api-staging.dc-forte.com"
