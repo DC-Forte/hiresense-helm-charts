@@ -134,7 +134,7 @@ env:
   # Set to "false" to run that call with only its generic rubric, as before
   # this feature existed.
   SKILL_GUIDANCE_ENABLED: "true"
-  LIVEKIT_URL: "wss://dc-forte-c3qnkc6a.livekit.cloud"
+  LIVEKIT_URL: "wss://dc-forte-fgeujncj.livekit.cloud"
   LIVEKIT_AGENT_NAME: "dc-forte-voice-agent"
   # Used by unified-interview + livekit wake-probe routes to reach the
   # interviewhandoff service's /internal/livekit/* endpoints (practice/invite/
@@ -215,7 +215,7 @@ frontendEnv:
   VITE_ADMIN_API_BASE_URL: "https://hiresense-api.dc-forte.com/api/admin-api"
   VITE_FRONTEND_URL: "https://hiresense-recruiter.dc-forte.com"
   VITE_CANDIDATE_PORTAL_URL: "https://hiresense.dc-forte.com"
-  VITE_LIVEKIT_URL: "wss://dc-forte-c3qnkc6a.livekit.cloud"
+  VITE_LIVEKIT_URL: "wss://dc-forte-fgeujncj.livekit.cloud"
   VITE_AGENTIC_API_URL: "https://hiresense-api.dc-forte.com/api/agentic"
   VITE_AGENTIC_WS_URL: "wss://hiresense-api.dc-forte.com/ws/interview"
   VITE_PYTHON_API_URL: "https://hiresense-ai.dc-forte.com"
