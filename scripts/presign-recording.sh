@@ -53,14 +53,13 @@ endpoint="$(get_field endpoint)"
 region="$(get_field region)"
 bucket="$(get_field bucket)"
 
-for field_name in access_key secret_key endpoint region; do
+for field_name in access_key secret_key endpoint region bucket; do
   [[ -n "${!field_name}" ]] || { echo "Missing spaces.$field_name in $secrets_file" >&2; exit 1; }
 done
 
-# The URLs this project actually serves recordings from use bucket "hiresense",
-# not the "hiresense-prod" value currently in values-prod.secrets.yaml — override
-# with -b if the secrets file's bucket field doesn't match what you need.
-bucket="${BUCKET_OVERRIDE:-hiresense}"
+# Override with BUCKET_OVERRIDE=... if you need a bucket other than what the
+# secrets file names (e.g. testing against a different environment's bucket).
+bucket="${BUCKET_OVERRIDE:-$bucket}"
 
 export AWS_ACCESS_KEY_ID="$access_key"
 export AWS_SECRET_ACCESS_KEY="$secret_key"
