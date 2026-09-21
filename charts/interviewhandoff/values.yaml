@@ -88,6 +88,7 @@ env:
   RECORDING_CHUNK_DURATION_SECONDS: "5" # cosmetic — feeds the /api/recording/status response only
   MOBIUS_WEBHOOK_URL: "https://local.asteam.in/api/jobs/hiresense/interview-callback/" # set once Mobius's webhook receiver exists; empty disables the sender (see cmd/interviewhandoffworker/main.go)
   MOBIUS_WEBHOOK_POLL_INTERVAL_SECONDS: "30"
+  MOBIUS_FRONTEND_ORIGIN: "" # exact scheme+host Mobius embeds @incproctor/proctoring-sdk from -- set once Mobius hands it over (see chapter-interview-backend-go's docs/mobius-integration.md, incProc SDK section). Empty = ensureProctoringSession falls back to CANDIDATE_FRONTEND_URL, which is wrong for Mobius but fails soft (incProc's own origin check rejects the mint)
   FEEDBACK_WORKER_POLL_INTERVAL_SECONDS: "30" # read by interviewhandoffworker's new feedback.Worker instance
   FEEDBACK_WORKER_BATCH_SIZE: "5"
   FEEDBACK_WORKER_MAX_RETRIES: "5"
@@ -125,6 +126,13 @@ secrets:
   recordingS3Bucket: "" # usually same as s3Bucket
   mobiusInternalToken: "" # shared secret with Mobius specifically — deliberately separate from internalServiceToken (that one's shared by first-party internal services; Mobius is an external trust boundary)
   incProcInternalToken: "" # shared secret with incProc (proctoring vendor) — recording-playback route only, same external-trust-boundary reasoning as mobiusInternalToken above
+  # Outbound integration (session mint, video analyze submit/results,
+  # credits) — distinct from incProcInternalToken above, which stays wired
+  # for the old inbound pull-model route only. See docs/incproc-hld.md.
+  incProcBaseURL: ""
+  incProcAPIKey: ""
+  incProcAPISecret: ""
+  incProcWebhookSecret: ""
   smtpPassword: "" # only the password is sensitive — host/port/user/from live in env: above
 
 # Reuses the cluster's existing monitoring stack (same cluster as hiresense) —

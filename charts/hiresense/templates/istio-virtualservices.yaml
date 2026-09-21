@@ -197,6 +197,18 @@ spec:
             port:
               number: 80
       timeout: 120s
+    # incProc's video-analysis completion webhook (server-to-server, called
+    # directly by incProc) -- same shape as the egress webhook above and
+    # added proactively to avoid the same catch-all-swallows-it gap.
+    - match:
+        - uri:
+            prefix: /internal/proctoring-webhook
+      route:
+        - destination:
+            host: interviewhandoff.{{ .Values.interviewhandoff.namespace }}.svc.cluster.local
+            port:
+              number: 80
+      timeout: 120s
     - route:
         - destination:
             host: hiresense-backend.{{ .Values.global.namespace }}.svc.cluster.local

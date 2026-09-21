@@ -21,3 +21,9 @@ env:
   CANDIDATE_PORTAL_URL: "https://hiresense.dc-forte.com"
   PUBLIC_API_BASE_URL: "https://hiresense-api.dc-forte.com"
   PYTHON_BACKEND_URL: "http://hiresense-ai-engine.hiresense-app-prod.svc.cluster.local:9091/api/v1"
+  # Mobius embeds (not hosted-redirect) -- see chapter-interview-backend-go's
+  # docs/mobius-integration.md. ALLOWED_ORIGINS REPLACES the fallback (not
+  # additive), so CANDIDATE_FRONTEND_URL's value must be repeated here too --
+  # see base values.yaml's comment on this var.
+  ALLOWED_ORIGINS: "https://hiresense.dc-forte.com,https://mobius.dc-forte.com"
+  MOBIUS_FRONTEND_ORIGIN: "https://mobius.dc-forte.com"
