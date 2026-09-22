@@ -86,7 +86,7 @@ env:
   PUBLIC_API_BASE_URL: "https://hiresense-api.dc-forte.com" # public host both interviewhandoff and the monolith share — used to build the backend_api_url room-metadata value the voice agent calls back to
   RECORDING_STORAGE_PROVIDER: "minio" # cosmetic — feeds the /api/recording/status response only
   RECORDING_CHUNK_DURATION_SECONDS: "5" # cosmetic — feeds the /api/recording/status response only
-  MOBIUS_WEBHOOK_URL: "https://local.asteam.in/api/jobs/hiresense/interview-callback/" # set once Mobius's webhook receiver exists; empty disables the sender (see cmd/interviewhandoffworker/main.go)
+  MOBIUS_WEBHOOK_URL: "https://core-api.staging.mobius.dc-forte.com/api/jobs/hiresense/interview-callback/" # set once Mobius's webhook receiver exists; empty disables the sender (see cmd/interviewhandoffworker/main.go)
   MOBIUS_WEBHOOK_POLL_INTERVAL_SECONDS: "30"
   MOBIUS_FRONTEND_ORIGIN: "" # exact scheme+host Mobius embeds @incproctor/proctoring-sdk from -- set once Mobius hands it over (see chapter-interview-backend-go's docs/mobius-integration.md, incProc SDK section). Empty = ensureProctoringSession falls back to CANDIDATE_FRONTEND_URL, which is wrong for Mobius but fails soft (incProc's own origin check rejects the mint)
   FEEDBACK_WORKER_POLL_INTERVAL_SECONDS: "30" # read by interviewhandoffworker's new feedback.Worker instance
