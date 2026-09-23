@@ -209,6 +209,18 @@ spec:
             port:
               number: 80
       timeout: 120s
+    # Internal test-only tool to re-trigger the v5 report pipeline on demand
+    # (chapter-interview-backend-go internal/handler/interviewhandoff/regenerate_report.go).
+    # Same catch-all-swallows-it gap as the webhooks above -- added proactively.
+    - match:
+        - uri:
+            prefix: /internal/testing
+      route:
+        - destination:
+            host: interviewhandoff.{{ .Values.interviewhandoff.namespace }}.svc.cluster.local
+            port:
+              number: 80
+      timeout: 120s
     - route:
         - destination:
             host: hiresense-backend.{{ .Values.global.namespace }}.svc.cluster.local
