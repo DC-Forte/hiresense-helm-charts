@@ -229,7 +229,7 @@ frontendEnv:
   VITE_ENV: "production"
 
 certManager:
-  email: ops@dc-forte.com
+  email: product@dc-forte.com
 
 # Monitoring integration — connects the app to the monitoring chart.
 monitoring:
