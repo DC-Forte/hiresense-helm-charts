@@ -129,7 +129,12 @@ secrets:
   # Outbound integration (session mint, video analyze submit/results,
   # credits) — distinct from incProcInternalToken above, which stays wired
   # for the old inbound pull-model route only. See docs/incproc-hld.md.
+  # incProc issues two separate key pairs: SDK for browser-session mint
+  # (opening sessions), API for video-analyze/results/credits — one pair
+  # doesn't authenticate the other's endpoints.
   incProcBaseURL: ""
+  incProcSDKKey: ""
+  incProcSDKSecret: ""
   incProcAPIKey: ""
   incProcAPISecret: ""
   incProcWebhookSecret: ""
