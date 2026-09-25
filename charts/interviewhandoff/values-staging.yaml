@@ -21,6 +21,7 @@ env:
   # silently falls back to prod's hostnames (found live 2026-09-13: configmap
   # showed all four still on hiresense.dc-forte.com/hiresense-api.dc-forte.com).
   AGENTIC_API_URL: "https://hiresense-ai-staging.dc-forte.com" # fixed 2026-09-16 -- old value had no matching Istio route, see values.yaml comment
+  LIVEKIT_KEEPALIVE_ENABLED: "false"
   CANDIDATE_FRONTEND_URL: "https://hiresense-staging.dc-forte.com"
   CANDIDATE_PORTAL_URL: "https://hiresense-staging.dc-forte.com"
   PUBLIC_API_BASE_URL: "https://hiresense-api-staging.dc-forte.com"
@@ -30,3 +31,4 @@ env:
   # see base values.yaml's comment on this var.
   ALLOWED_ORIGINS: "https://hiresense-staging.dc-forte.com,https://staging.mobius.dc-forte.com"
   MOBIUS_FRONTEND_ORIGIN: "https://staging.mobius.dc-forte.com"
+  OTLP_ENDPOINT: "tempo.monitoring.svc.cluster.local:4318" # same Tempo instance charts/hiresense points at

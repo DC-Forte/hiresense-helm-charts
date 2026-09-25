@@ -17,6 +17,13 @@ env:
   APP_ENV: production
   MATCHENGINE_URL: "http://matchengine.matchengine-prod.svc.cluster.local"
   LIVEKIT_AGENT_NAME: "dc-forte-voice-agent"
+  # Prod's LiveKit Cloud project (dc-forte-prod-jd8u7jsc) is confirmed on
+  # the paid Ship plan, which keeps the agent warm without artificial
+  # pings -- disable the 8-min agent-wake-probe ticker here. Staging keeps
+  # it enabled (its own values-staging.yaml has no override, default
+  # true) since staging is currently pointed at this same prod project as
+  # a temp stop-gap -- see project memory livekit_freetier_quota_cutover.md.
+  LIVEKIT_KEEPALIVE_ENABLED: "false"
   CANDIDATE_FRONTEND_URL: "https://hiresense.dc-forte.com"
   CANDIDATE_PORTAL_URL: "https://hiresense.dc-forte.com"
   PUBLIC_API_BASE_URL: "https://hiresense-api.dc-forte.com"
@@ -27,3 +34,4 @@ env:
   # see base values.yaml's comment on this var.
   ALLOWED_ORIGINS: "https://hiresense.dc-forte.com,https://mobius.dc-forte.com"
   MOBIUS_FRONTEND_ORIGIN: "https://mobius.dc-forte.com"
+  OTLP_ENDPOINT: "tempo.monitoring.svc.cluster.local:4318" # same Tempo instance charts/hiresense points at

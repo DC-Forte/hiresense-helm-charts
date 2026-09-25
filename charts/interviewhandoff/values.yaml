@@ -87,6 +87,7 @@ env:
   RECORDING_STORAGE_PROVIDER: "minio" # cosmetic — feeds the /api/recording/status response only
   RECORDING_CHUNK_DURATION_SECONDS: "5" # cosmetic — feeds the /api/recording/status response only
   MOBIUS_WEBHOOK_URL: "https://core-api.staging.mobius.dc-forte.com/api/jobs/hiresense/interview-callback/" # set once Mobius's webhook receiver exists; empty disables the sender (see cmd/interviewhandoffworker/main.go)
+  OTLP_ENDPOINT: "" # host:port for the OTLP HTTP trace exporter (Tempo), e.g. tempo.monitoring.svc.cluster.local:4318 — empty disables tracing, same convention as charts/hiresense's monitoring.otlpEndpoint. Set per-env below; this binary never exported any traces before this was wired.
   MOBIUS_WEBHOOK_POLL_INTERVAL_SECONDS: "30"
   MOBIUS_FRONTEND_ORIGIN: "" # exact scheme+host Mobius embeds @incproctor/proctoring-sdk from -- set once Mobius hands it over (see chapter-interview-backend-go's docs/mobius-integration.md, incProc SDK section). Empty = ensureProctoringSession falls back to CANDIDATE_FRONTEND_URL, which is wrong for Mobius but fails soft (incProc's own origin check rejects the mint)
   FEEDBACK_WORKER_POLL_INTERVAL_SECONDS: "30" # read by interviewhandoffworker's new feedback.Worker instance
