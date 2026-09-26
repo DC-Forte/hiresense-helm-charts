@@ -32,6 +32,6 @@ env:
   # docs/mobius-integration.md. ALLOWED_ORIGINS REPLACES the fallback (not
   # additive), so CANDIDATE_FRONTEND_URL's value must be repeated here too --
   # see base values.yaml's comment on this var.
-  ALLOWED_ORIGINS: "https://hiresense.dc-forte.com,https://mobius.dc-forte.com"
-  MOBIUS_FRONTEND_ORIGIN: "https://mobius.dc-forte.com"
+  ALLOWED_ORIGINS: "https://hiresense.dc-forte.com,https://dc-forte.com"
+  MOBIUS_FRONTEND_ORIGIN: "https://dc-forte.com"
   OTLP_ENDPOINT: "tempo.monitoring.svc.cluster.local:4318" # same Tempo instance charts/hiresense points at
