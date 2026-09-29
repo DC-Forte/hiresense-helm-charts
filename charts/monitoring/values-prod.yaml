@@ -200,22 +200,6 @@ promtail:
                   source: msg
                   expression: "^livekit keep-alive.*$"
         - match:
-            # Promotes the forwarded voice-agent runtime logs (see
-            # chapter-interview-backend-go's docs/superpowers/plans/2026-09-29-livekit-voice-agent-log-drain.md
-            # -- livekitLogDrain writes component="voice-agent-log-drain" on
-            # every line it logs) from a buried JSON field to a real Loki
-            # label, so they show up as their own filterable value in
-            # Grafana's Explore UI instead of being indistinguishable from
-            # interviewhandoff's own logs under service_name=interviewhandoff.
-            # Low cardinality (one fixed value or absent) -- safe to label.
-            selector: '{app="interviewhandoff"}'
-            stages:
-              - json:
-                  expressions:
-                    component: component
-              - labels:
-                  component:
-        - match:
             selector: '{app="pyroscope"}'
             stages:
               - logfmt:
