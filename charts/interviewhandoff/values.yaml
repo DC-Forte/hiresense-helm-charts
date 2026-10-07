@@ -7,9 +7,9 @@
 # same pattern as ../recruiter-report: own namespace, own release. Same k8s
 # cluster is reused, nothing here references the hiresense chart's resources.
 #
-# Only values-staging.yaml is real right now — hiresense and its extracted
-# services have exactly one real environment today, and that's staging; no
-# prod DB/environment exists yet. values-prod.yaml is scaffolding for later.
+# Two real environments: staging (shared Postgres instance with the monolith)
+# and prod (live since the 2026-09-11/12 buildout, own dedicated Postgres
+# cluster) — both overlays below are live, not scaffolding.
 #
 # Sub-phases 3-0 through 3a-ii (see chapter-interview-backend-go's
 # docs/superpowers/specs/2026-08-2{7,8}-*.md) added a real DB (own schema +
@@ -53,7 +53,7 @@ worker:
   enabled: true
   image:
     repository: chapter-interview-go-interviewhandoffworker
-    tag: latest # values-staging.yaml overrides with the real env tag
+    tag: latest # values-{staging,prod}.yaml override with the real env tag
   replicas: 1
   metricsPort: 9091
   resources:
@@ -86,7 +86,7 @@ env:
   PUBLIC_API_BASE_URL: "https://hiresense-api.dc-forte.com" # public host both interviewhandoff and the monolith share — used to build the backend_api_url room-metadata value the voice agent calls back to
   RECORDING_STORAGE_PROVIDER: "minio" # cosmetic — feeds the /api/recording/status response only
   RECORDING_CHUNK_DURATION_SECONDS: "5" # cosmetic — feeds the /api/recording/status response only
-  MOBIUS_WEBHOOK_URL: "" # set once Mobius's webhook receiver exists; empty disables the sender (see cmd/interviewhandoffworker/main.go)
+  MOBIUS_WEBHOOK_URL: "" # empty on purpose — set per env in values-{staging,prod}.yaml (each points at its own Mobius core-api); empty disables the sender (see cmd/interviewhandoffworker/main.go)
   OTLP_ENDPOINT: "" # host:port for the OTLP HTTP trace exporter (Tempo), e.g. tempo.monitoring.svc.cluster.local:4318 — empty disables tracing, same convention as charts/hiresense's monitoring.otlpEndpoint. Set per-env below; this binary never exported any traces before this was wired.
   MOBIUS_WEBHOOK_POLL_INTERVAL_SECONDS: "30"
   MOBIUS_FRONTEND_ORIGIN: "" # exact scheme+host Mobius embeds @incproctor/proctoring-sdk from -- set once Mobius hands it over (see chapter-interview-backend-go's docs/mobius-integration.md, incProc SDK section). Empty = ensureProctoringSession falls back to CANDIDATE_FRONTEND_URL, which is wrong for Mobius but fails soft (incProc's own origin check rejects the mint)
@@ -108,7 +108,7 @@ secrets:
   liveKitApiSecret: ""
   candidateJwtSecret: "" # must match the monolith's own CANDIDATE_JWT_SECRET — verifies the same tokens
   dbHost: ""
-  dbName: "" # hiresense — same shared instance as the monolith and matchengine, own schema
+  dbName: "" # hiresense — same instance as the monolith and matchengine (shared staging instance / dedicated prod cluster), own schema
   dbUser: ""
   dbPassword: ""
   encryptionKey: "" # AES key for decrypting resumes/job_descriptions/users — must match the monolith's ENCRYPTION_KEY, same encrypted columns

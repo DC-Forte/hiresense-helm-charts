@@ -147,10 +147,11 @@ explicit `=true`/`false`/`auto` value in Helm 4, a bare `--server-side` silently
 
 ```bash
 make help                              # list every target
-make upgrade-hiresense                 # the live monolith release
-make upgrade-matchengine-staging       # helm upgrade --install, --create-namespace
-make upgrade-interviewhandoff-staging  # helm upgrade --install, --create-namespace
-make upgrade-all                       # everything, in one shot
+make upgrade-hiresense-staging         # the monolith, staging (-prod for prod)
+make upgrade-matchengine-staging       # helm upgrade --install, --create-namespace (-prod for prod)
+make upgrade-interviewhandoff-staging  # helm upgrade --install, --create-namespace (-prod for prod)
+make upgrade-all-staging               # every staging release, in one shot
+make upgrade-all-prod                  # every prod release (hiresense, matchengine, interviewhandoff)
 ```
 
 ## Deploying `charts/interviewhandoff` and `charts/matchengine`
@@ -163,7 +164,11 @@ services own. See `chapter-interview-backend-go`'s root README ("Database Migrat
 the schema/role/GRANT mechanics.
 
 Bootstrap (first deploy only — after this, CI's `kubectl set image` rolling-deploy path takes
-over, same as `recruiter-report`):
+over, same as `recruiter-report`). The steps below show **staging**; for **prod** swap every
+`staging` for `prod` (secrets files `values-prod.secrets.yaml` from the matching
+`values-prod.secrets.example.yaml`, DSNs pointing at the prod Postgres cluster, targets
+`make upgrade-matchengine-prod` / `make upgrade-interviewhandoff-prod`, namespaces
+`matchengine-prod` / `interviewhandoff-prod`):
 
 ```bash
 # 1. Migrate + backfill each service's own schema (run from chapter-interview-backend-go)

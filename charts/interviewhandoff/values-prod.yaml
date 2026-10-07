@@ -19,10 +19,10 @@ env:
   LIVEKIT_AGENT_NAME: "dc-forte-voice-agent"
   # Prod's LiveKit Cloud project (dc-forte-prod-jd8u7jsc) is confirmed on
   # the paid Ship plan, which keeps the agent warm without artificial
-  # pings -- disable the 8-min agent-wake-probe ticker here. Staging keeps
-  # it enabled (its own values-staging.yaml has no override, default
-  # true) since staging is currently pointed at this same prod project as
-  # a temp stop-gap -- see project memory livekit_freetier_quota_cutover.md.
+  # pings -- disable the 8-min agent-wake-probe ticker here. Staging also
+  # sets it to "false" in its own values-staging.yaml (staging is currently
+  # pointed at this same prod project as a temp stop-gap -- see project
+  # memory livekit_freetier_quota_cutover.md).
   LIVEKIT_KEEPALIVE_ENABLED: "false"
   CANDIDATE_FRONTEND_URL: "https://hiresense.dc-forte.com"
   CANDIDATE_PORTAL_URL: "https://hiresense.dc-forte.com"

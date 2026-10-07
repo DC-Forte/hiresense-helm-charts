@@ -1,7 +1,7 @@
 # Default values for the matchengine chart. Base values here are
-# environment-agnostic; values-staging.yaml overrides the per-env bits
-# (namespace, replicas). Secrets are never here — see
-# values-staging.secrets.example.yaml.
+# environment-agnostic; values-staging.yaml / values-prod.yaml override the
+# per-env bits (namespace, image tag, replicas). Secrets are never here — see
+# values-staging.secrets.example.yaml / values-prod.secrets.example.yaml.
 #
 # This chart is deliberately standalone, not a subchart of ../hiresense —
 # same pattern as ../interviewhandoff and ../recruiter-report: own
@@ -12,11 +12,10 @@
 # HTTP clients, and later interviewhandoff) is in-cluster. Unlike
 # recruiter-report, nothing external calls this service.
 #
-# Only values-staging.yaml exists — hiresense and its extracted services
-# have exactly one real environment today, and dc-forte-db-postgresql-fra1-65749
-# (the DB this chart points at) is that staging DB, not prod — no prod DB
-# has been created yet. Add values-prod.yaml once a real prod environment
-# for hiresense exists.
+# Two real environments: staging points at dc-forte-db-postgresql-fra1-65749
+# (the shared instance with the monolith), prod (live since the 2026-09-11/12
+# buildout) points at its own dedicated Postgres cluster. Both overlays are
+# live — values-staging.yaml and values-prod.yaml.
 
 global:
   namespace: matchengine-staging # overridden per env
@@ -27,7 +26,7 @@ global:
 image:
   repository: chapter-interview-go-matchengine
   # placeholder — ghcr never publishes "latest" for this image (see build-matchengine.yml).
-  # values-staging.yaml overrides with the real env tag; --set image.tag=<sha> to pin.
+  # values-staging.yaml/values-prod.yaml override with the real env tag; --set image.tag=<sha> to pin.
   tag: latest
 
 replicas: 1
@@ -41,7 +40,7 @@ resources:
     memory: 1Gi
 
 # Non-secret env. Secrets are below in `secrets:`, populated via
-# values-staging.secrets.yaml (gitignored).
+# values-{env}.secrets.yaml (gitignored).
 env:
   APP_ENV: staging
   PORT: "8091"
@@ -52,11 +51,11 @@ env:
   OPENAI_MODEL: "gpt-4.1"
 
 # All values below are placeholders. Real values come from
-# values-staging.secrets.yaml (gitignored).
+# values-{env}.secrets.yaml (gitignored).
 secrets:
   internalServiceToken: "" # shared secret the monolith's + interviewhandoff's HTTP clients send as X-Internal-Token
   dbHost: ""
-  dbName: "" # hiresense — same shared instance/DB as the monolith and interviewhandoff, own schema
+  dbName: "" # hiresense — same instance/DB as the monolith and interviewhandoff (shared staging instance / dedicated prod cluster), own schema
   dbUser: ""
   dbPassword: ""
   encryptionKey: "" # AES key for decrypting resumes/job_descriptions — must match the monolith's/interviewhandoff's ENCRYPTION_KEY, same encrypted columns
