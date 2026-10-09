@@ -78,7 +78,10 @@ env:
   ALLOW_INTERVIEW_WITHOUT_AGENT: "false"
   AGENTIC_API_URL: "https://hiresense-ai.dc-forte.com" # chapter-interview-backend-python (hiresense-ai-engine), reached via the hiresense-ai VirtualService -- fixed 2026-09-16, the old hiresense-api/api/agentic value had no matching Istio route (fell through to the monolith catch-all, 404 "Route not found" on every resume PDF parse, see resume_data_shape_mismatch memory)
   LLM_TIMEOUT_SECONDS: "60"
-  OPENAI_MODEL: "gpt-4.1"
+  OPENAI_MODEL: "gpt-4.1" # shared by the report pipeline, matchengine etc. -- do NOT point this at a reasoning model; template generation has its own TEMPLATE_MODEL below
+  TEMPLATE_BACKEND: "python" # where per-job interview templates are generated: "python" (hiresense-ai-engine via AGENTIC_API_URL) or "go" (interviewhandoff enqueues, interviewhandoffworker generates). One ConfigMap feeds both Deployments, so they always agree. Flip to "go" per env in values-{staging,prod}.yaml; before prod, confirm the interview_template_* rows exist in that env's prompts table (seeded by the Go migration) and the parity eval was reviewed (chapter-interview-backend-go tools/templateeval)
+  TEMPLATE_MODEL: "gpt-6-luna" # model used only for template generation when TEMPLATE_BACKEND=go (reasoning model: the Go client drops temperature/seed for it). Empty = OPENAI_MODEL
+  TEMPLATE_MODEL_EFFORT: "medium" # reasoning_effort for TEMPLATE_MODEL (none|low|medium|high|...); empty = API default (medium for gpt-6-luna)
   MATCHENGINE_URL: "" # set once matchengine is deployed, e.g. http://matchengine.matchengine-staging.svc.cluster.local
   CANDIDATE_FRONTEND_URL: "https://hiresense.dc-forte.com" # CORS allowlist — must match the monolith's own CANDIDATE_FRONTEND_URL
   CANDIDATE_PORTAL_URL: "https://hiresense.dc-forte.com" # base URL for invite links sent by email — must match the monolith's own CANDIDATE_PORTAL_URL, else invites default to stale https://app.chapterapps.ai
