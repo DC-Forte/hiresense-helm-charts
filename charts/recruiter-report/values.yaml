@@ -65,6 +65,8 @@ env:
   ANALYSIS_CONSENSUS_SAMPLES: "3" # >1 majority-votes that many parallel jd_vs_resume_analysis samples per job, see internal/worker/reportjob/README.md
   OPENAI_MODEL: "gpt-4.1"
   # OPENAI_ANALYSIS_MODEL: ""   # optional override, see cmd/worker README
+  JD_RESUME_REPORT_MODEL: "gpt-6-luna" # model for the whole JD-vs-resume report pipeline (analysis, recruiter_report, skill guidance); empty = OPENAI_MODEL. A reasoning model: the Go client drops temperature/seed for it. Calls take ~20-55s, inside the 120s parser timeout
+  JD_RESUME_REPORT_MODEL_EFFORT: "medium" # reasoning_effort for JD_RESUME_REPORT_MODEL: none|low|medium|high|...; empty = API default (medium for gpt-6-luna); ignored by ordinary models
   LLM_TIMEOUT_MS: "120000"
   LLM_RETRY_COUNT: "2"
   RECRUITER_REPORT_POLL_INTERVAL_SECONDS: "15"
