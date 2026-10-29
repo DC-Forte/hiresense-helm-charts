@@ -12,6 +12,36 @@ entries:
     urls:
     - https://github.com/DC-Forte/hiresense-helm-charts/releases/download/hiresense-0.1.1/hiresense-0.1.1.tgz
     version: 0.1.1
+  hiresense-cert-manager:
+  - apiVersion: v2
+    created: "2026-10-29T06:25:38.125205415Z"
+    dependencies:
+    - name: cert-manager
+      repository: https://charts.jetstack.io
+      version: v1.20.2
+    description: cert-manager (values for the existing `cert-manager` release, now
+      kept in git)
+    digest: 742e73a8cecb05bca2c2c48db2326cf71a5febb8134d0614623c6bdac23062d4
+    name: hiresense-cert-manager
+    type: application
+    urls:
+    - https://github.com/DC-Forte/hiresense-helm-charts/releases/download/hiresense-cert-manager-0.1.0/hiresense-cert-manager-0.1.0.tgz
+    version: 0.1.0
+  hiresense-istio-gateway:
+  - apiVersion: v2
+    created: "2026-10-29T06:25:38.289361842Z"
+    dependencies:
+    - name: gateway
+      repository: https://istio-release.storage.googleapis.com/charts
+      version: 1.29.2
+    description: Istio ingress gateway (adopted in place from the original istioctl
+      install)
+    digest: 8a7ab7c47f29a8119fa079821dee965bc22b5a21f27d5616cda2ec57a8ff7fed
+    name: hiresense-istio-gateway
+    type: application
+    urls:
+    - https://github.com/DC-Forte/hiresense-helm-charts/releases/download/hiresense-istio-gateway-0.1.0/hiresense-istio-gateway-0.1.0.tgz
+    version: 0.1.0
   hiresense-monitoring:
   - apiVersion: v2
     created: "2026-06-27T07:28:07.887560796Z"
@@ -71,4 +101,4 @@ entries:
     urls:
     - https://github.com/DC-Forte/hiresense-helm-charts/releases/download/recruiter-report-0.1.0/recruiter-report-0.1.0.tgz
     version: 0.1.0
-generated: "2026-08-28T09:37:42.224854556Z"
+generated: "2026-10-29T06:25:39.460123558Z"
