@@ -73,6 +73,32 @@ No blockers found for 1.36.5. DOKS offers exactly one target from 1.35.9:
 - Everything is pushed. `main` should match `origin/main` and the deployed
   chart versions.
 
+## DO pre-upgrade warnings
+
+Expected list (all accepted, none block the upgrade):
+
+- hostPath volumes on node-exporter and Promtail. Both read host files.
+- Grafana pod uses a block volume without a StatefulSet. Moving it would lose
+  the Grafana SQLite data, including the service account token.
+
+The injector webhook warning ("Mutating webhook is configured in such a way
+that it may be problematic during upgrades") was cleared on 2026-10-29. DO's
+open source `clusterlint` raises it when a webhook is not `Ignore`, covers
+pods, and its namespace selector matches `kube-system`. The `rev.object` and
+`object` injector webhooks matched every unlabelled namespace. The fix is a
+label that lives only in the cluster, not in any chart:
+
+```bash
+kubectl --context do-fra1-hiresense-k8s-fra1 label namespace kube-system \
+  istio-injection=disabled
+```
+
+- Do not label `istio-system`. The ingress gateway pods live there and need
+  the `object` webhook for injection.
+- If the warning returns, check that `kube-system` still has the label.
+- The chart keeps `failurePolicy: Fail` on purpose. `Ignore` would let a
+  gateway pod start un-injected and stick on image `auto`.
+
 ## Pre-flight commands
 
 All read-only. Expect clean output.
