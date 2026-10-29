@@ -1,0 +1,39 @@
+# Istio ingress gateway, values chosen to match the object that `istioctl install`
+# created (so Helm can adopt it in place and the LoadBalancer IP/DO LB survive).
+# First-time adoption steps: see the comment block in the Makefile target
+# `adopt-istio-gateway`.
+gateway:
+  # Deployment selector is immutable and live is {app: istio-ingressgateway,
+  # istio: ingressgateway}; the chart derives both from this name.
+  name: istio-ingressgateway
+
+  # No HPA: the chart's default targets 80% of a 10m CPU request, which would
+  # pin the gateway at maxReplicas. Fixed 2 replicas + PDB instead.
+  autoscaling:
+    enabled: false
+  replicaCount: 2
+
+  podDisruptionBudget:
+    minAvailable: 1
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 40Mi
+    limits:
+      cpu: "2"
+      memory: 1Gi
+
+  service:
+    type: LoadBalancer
+    annotations:
+      # Pinned to the existing DO load balancer so adoption keeps the public IP.
+      kubernetes.digitalocean.com/load-balancer-id: e017cf0f-a306-4ce4-853d-2aaa66e734d3
+      service.beta.kubernetes.io/do-loadbalancer-type: REGIONAL_NETWORK
+    # istioctl's layout: pods listen on 8080/8443 (unprivileged), not 80/443.
+    ports:
+      - {name: status-port, port: 15021, protocol: TCP, targetPort: 15021}
+      - {name: http2, port: 80, protocol: TCP, targetPort: 8080}
+      - {name: https, port: 443, protocol: TCP, targetPort: 8443}
+      - {name: tcp, port: 31400, protocol: TCP, targetPort: 31400}
+      - {name: tls, port: 15443, protocol: TCP, targetPort: 15443}

@@ -1,0 +1,13 @@
+apiVersion: v2
+name: hiresense-istio-gateway
+description: Istio ingress gateway (adopted in place from the original istioctl install)
+type: application
+version: 0.1.0
+
+# Keep in lockstep with the istiod/proxy version in the cluster (1.29.2).
+# Update with:
+#   helm search repo istio/gateway --versions
+dependencies:
+  - name: gateway
+    version: "1.29.2"
+    repository: https://istio-release.storage.googleapis.com/charts

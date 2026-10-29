@@ -2,7 +2,8 @@ CHARTS_DIR := charts
 HELM_UPGRADE_FLAGS := --server-side=true --force-conflicts
 
 .PHONY: help dep-update dep-update-monitoring \
-	upgrade-monitoring upgrade-hiresense-staging upgrade-hiresense-prod \
+	upgrade-monitoring adopt-istio-gateway upgrade-istio-gateway \
+	upgrade-hiresense-staging upgrade-hiresense-prod \
 	upgrade-recruiter-report-staging upgrade-recruiter-report-prod \
 	upgrade-matchengine-staging upgrade-matchengine-prod \
 	upgrade-interviewhandoff-staging upgrade-interviewhandoff-prod \
@@ -10,6 +11,8 @@ HELM_UPGRADE_FLAGS := --server-side=true --force-conflicts
 
 help:
 	@echo "make upgrade-monitoring                  # helm upgrade --install monitoring"
+	@echo "make adopt-istio-gateway                 # ONE-TIME: annotate live gateway objects so Helm can adopt them"
+	@echo "make upgrade-istio-gateway               # helm upgrade --install istio-gateway"
 	@echo "make upgrade-hiresense-staging            # helm upgrade --install hiresense (staging)"
 	@echo "make upgrade-hiresense-prod               # helm upgrade --install hiresense-prod (prod)"
 	@echo "make upgrade-recruiter-report-staging      # helm upgrade --install recruiter-report-staging (TAG=<sha> to override)"
@@ -25,7 +28,26 @@ help:
 dep-update-monitoring:
 	helm dep update $(CHARTS_DIR)/monitoring
 
-dep-update: dep-update-monitoring
+dep-update-istio-gateway:
+	helm dep update $(CHARTS_DIR)/istio-gateway
+
+dep-update: dep-update-monitoring dep-update-istio-gateway
+
+# ONE-TIME, before the first upgrade-istio-gateway. Only same-named objects need
+# adopting (Deployment, Service, PDB); the chart creates its own SA/Role/RoleBinding.
+# PREREQ: istiod must be HA first. The chart uses gateway injection (image: auto)
+# and the injector webhook is failurePolicy=Ignore: a gateway pod created while
+# istiod is down starts un-injected and sticks in ImagePullBackOff.
+adopt-istio-gateway:
+	for r in deploy/istio-ingressgateway svc/istio-ingressgateway pdb/istio-ingressgateway; do \
+		kubectl -n istio-system annotate $$r meta.helm.sh/release-name=istio-gateway meta.helm.sh/release-namespace=istio-system --overwrite && \
+		kubectl -n istio-system label $$r app.kubernetes.io/managed-by=Helm --overwrite; \
+	done
+
+upgrade-istio-gateway: dep-update-istio-gateway
+	helm upgrade --install istio-gateway $(CHARTS_DIR)/istio-gateway -n istio-system \
+		-f $(CHARTS_DIR)/istio-gateway/values.yaml \
+		$(HELM_UPGRADE_FLAGS)
 
 upgrade-monitoring: dep-update-monitoring
 	helm upgrade --install monitoring $(CHARTS_DIR)/monitoring -n monitoring \
