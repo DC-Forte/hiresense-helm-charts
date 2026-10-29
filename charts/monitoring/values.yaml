@@ -64,6 +64,28 @@ kube-prometheus-stack:
   alertmanager:
     enabled: false
 
+  # Requests/limits for the stack's helper containers (sized from live usage,
+  # 2026-10-29) — without them DOKS' pre-upgrade check flags every one and the
+  # scheduler can't place them honestly.
+  prometheusOperator:
+    resources:
+      requests: {cpu: 50m, memory: 64Mi}
+      limits: {cpu: 200m, memory: 256Mi}
+    prometheusConfigReloader:
+      resources:
+        requests: {cpu: 10m, memory: 32Mi}
+        limits: {cpu: 100m, memory: 64Mi}
+
+  kube-state-metrics:
+    resources:
+      requests: {cpu: 20m, memory: 64Mi}
+      limits: {cpu: 200m, memory: 256Mi}
+
+  prometheus-node-exporter:
+    resources:
+      requests: {cpu: 20m, memory: 32Mi}
+      limits: {cpu: 200m, memory: 128Mi}
+
   # Disable components not reachable in managed k8s (DOKS)
   kubeProxy:
     enabled: false
@@ -87,6 +109,12 @@ kube-prometheus-stack:
       storageClassName: ""  # cluster default; override in values-prod
       size: 1Gi
 
+    # RWO block-storage PVC: a RollingUpdate (or node drain during a cluster
+    # upgrade) can start the new pod on another node while the old one still
+    # holds the volume -> Multi-Attach error, pod stuck ContainerCreating.
+    deploymentStrategy:
+      type: Recreate
+
     service:
       type: ClusterIP
 
@@ -100,7 +128,20 @@ kube-prometheus-stack:
 
     # Sidecar discovers ConfigMaps labelled grafana_dashboard=1 in any namespace
     # and auto-imports them into Grafana.
+    initChownData:
+      resources:
+        requests: {cpu: 10m, memory: 16Mi}
+        limits: {cpu: 100m, memory: 128Mi}
+
+    downloadDashboards:
+      resources:
+        requests: {cpu: 10m, memory: 32Mi}
+        limits: {cpu: 100m, memory: 128Mi}
+
     sidecar:
+      resources:
+        requests: {cpu: 50m, memory: 96Mi}
+        limits: {cpu: 200m, memory: 256Mi}
       dashboards:
         enabled: true
         label: grafana_dashboard
@@ -284,6 +325,12 @@ loki:
         cpu: 500m
         memory: 1Gi
 
+  # k8s-sidecar that reloads rules ConfigMaps (loki-sc-rules container)
+  sidecar:
+    resources:
+      requests: {cpu: 25m, memory: 96Mi}
+      limits: {cpu: 200m, memory: 256Mi}
+
   # Disable scalable-mode components (not used in SingleBinary)
   backend:
     replicas: 0
@@ -309,6 +356,16 @@ tempo:
   fullnameOverride: tempo  # → service: tempo.monitoring.svc.cluster.local:3200
 
   tempo:
+    # The chart reads container resources from tempo.resources (this nesting);
+    # a top-level `resources:` here is ignored, which left the pod with none.
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+
     reportingEnabled: false
     multitenancyEnabled: false
 
@@ -360,14 +417,6 @@ tempo:
     storageClassName: ""  # cluster default; override in values-prod
     size: 10Gi
 
-  resources:
-    requests:
-      cpu: 100m
-      memory: 256Mi
-    limits:
-      cpu: 500m
-      memory: 1Gi
-
   service:
     type: ClusterIP
     port: 3100
@@ -405,6 +454,13 @@ pyroscope:
       limits:
         cpu: 500m
         memory: 1Gi
+
+  # Alloy StatefulSet bundled in the pyroscope chart (scrapes profiles)
+  alloy:
+    alloy:
+      resources:
+        requests: {cpu: 50m, memory: 128Mi}
+        limits: {cpu: 500m, memory: 512Mi}
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Promtail  (log shipper — DaemonSet)

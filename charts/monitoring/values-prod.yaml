@@ -135,6 +135,15 @@ tempo:
   tempo:
     retention: 168h   # 7 days in prod
 
+    # Must live under tempo.tempo — a top-level `resources:` is ignored by the chart.
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 1
+        memory: 2Gi
+
     storage:
       trace:
         backend: s3
@@ -155,14 +164,6 @@ tempo:
     enabled: true
     storageClassName: do-block-storage
     size: 5Gi   # WAL only; blocks go to Spaces
-
-  resources:
-    requests:
-      cpu: 200m
-      memory: 512Mi
-    limits:
-      cpu: 1
-      memory: 2Gi
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Promtail

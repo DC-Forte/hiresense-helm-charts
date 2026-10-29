@@ -26,6 +26,13 @@ spec:
           image: {{ include "hiresense.image" (dict "Values" .Values "repository" .Values.aiEngine.image.repository "tag" .Values.aiEngine.image.tag) }}
           imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           command: ["sh", "-c", "cp -an /app/prompts/. /writable-prompts/ 2>/dev/null; true"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
           volumeMounts:
             - name: prompts
               mountPath: /writable-prompts
