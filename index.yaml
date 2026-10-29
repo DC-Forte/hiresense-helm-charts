@@ -27,6 +27,21 @@ entries:
     urls:
     - https://github.com/DC-Forte/hiresense-helm-charts/releases/download/hiresense-cert-manager-0.1.0/hiresense-cert-manager-0.1.0.tgz
     version: 0.1.0
+  hiresense-istio-base:
+  - apiVersion: v2
+    created: "2026-10-29T07:45:39.728195429Z"
+    dependencies:
+    - name: base
+      repository: https://istio-release.storage.googleapis.com/charts
+      version: 1.29.2
+    description: Istio base (CRDs, default validating webhook, reader SA), adopted
+      in place from the original istioctl install
+    digest: 09b00ef97bb529af157014c5f8ee1355eef860d9b3b18dfc154eff3822f84d1d
+    name: hiresense-istio-base
+    type: application
+    urls:
+    - https://github.com/DC-Forte/hiresense-helm-charts/releases/download/hiresense-istio-base-0.1.0/hiresense-istio-base-0.1.0.tgz
+    version: 0.1.0
   hiresense-istio-gateway:
   - apiVersion: v2
     created: "2026-10-29T06:25:38.289361842Z"
@@ -41,6 +56,21 @@ entries:
     type: application
     urls:
     - https://github.com/DC-Forte/hiresense-helm-charts/releases/download/hiresense-istio-gateway-0.1.0/hiresense-istio-gateway-0.1.0.tgz
+    version: 0.1.0
+  hiresense-istio-istiod:
+  - apiVersion: v2
+    created: "2026-10-29T07:45:39.900776162Z"
+    dependencies:
+    - name: istiod
+      repository: https://istio-release.storage.googleapis.com/charts
+      version: 1.29.2
+    description: Istio control plane (istiod), adopted in place from the original
+      `istioctl install --set profile=demo`
+    digest: b751d0899a194dd28b0df673cff1ca877c695a420be031a6920b60758bf040f6
+    name: hiresense-istio-istiod
+    type: application
+    urls:
+    - https://github.com/DC-Forte/hiresense-helm-charts/releases/download/hiresense-istio-istiod-0.1.0/hiresense-istio-istiod-0.1.0.tgz
     version: 0.1.0
   hiresense-monitoring:
   - apiVersion: v2
@@ -101,4 +131,4 @@ entries:
     urls:
     - https://github.com/DC-Forte/hiresense-helm-charts/releases/download/recruiter-report-0.1.0/recruiter-report-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-29T06:25:39.460123558Z"
+generated: "2026-10-29T07:45:40.453976826Z"
