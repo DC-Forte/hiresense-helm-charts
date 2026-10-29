@@ -7,7 +7,7 @@ HELM_UPGRADE_FLAGS := --kube-context $(KUBE_CONTEXT) --server-side=true --force-
 
 .PHONY: help dep-update dep-update-monitoring \
 	upgrade-monitoring adopt-istio-gateway upgrade-istio-gateway upgrade-cert-manager \
-	adopt-istio upgrade-istio-base upgrade-istiod \
+	adopt-istio upgrade-istio-base upgrade-istiod cleanup-istio-legacy \
 	upgrade-hiresense-staging upgrade-hiresense-prod \
 	upgrade-recruiter-report-staging upgrade-recruiter-report-prod \
 	upgrade-matchengine-staging upgrade-matchengine-prod \
@@ -30,6 +30,7 @@ help:
 	@echo "make adopt-istio                         # ONE-TIME: annotate live istio base+istiod objects so Helm can adopt them"
 	@echo "make upgrade-istio-base                  # helm upgrade --install istio-base (CRDs; run BEFORE istiod)"
 	@echo "make upgrade-istiod                      # helm upgrade --install istiod"
+	@echo "make cleanup-istio-legacy                # ONE-TIME after istiod: delete legacy istio-revision-tag-default webhook + svc"
 	@echo "make upgrade-hiresense-staging            # helm upgrade --install hiresense (staging)"
 	@echo "make upgrade-hiresense-prod               # helm upgrade --install hiresense-prod (prod)"
 	@echo "make upgrade-recruiter-report-staging      # helm upgrade --install recruiter-report-staging (TAG=<sha> to override)"
@@ -82,6 +83,12 @@ adopt-istio:
 		clusterrole/istiod-clusterrole-istio-system clusterrole/istiod-gateway-controller-istio-system clusterrole/istio-reader-clusterrole-istio-system \
 		clusterrolebinding/istiod-clusterrole-istio-system clusterrolebinding/istiod-gateway-controller-istio-system clusterrolebinding/istio-reader-clusterrole-istio-system \
 		mutatingwebhookconfiguration/istio-sidecar-injector validatingwebhookconfiguration/istio-validator-istio-system
+
+# Run once after upgrade-istiod: removes the legacy istioctl default-tag webhook + service
+# (pinned to KUBE_CONTEXT; a bare `kubectl delete` hits whatever context the shell is on).
+cleanup-istio-legacy:
+	$(KUBECTL) delete mutatingwebhookconfiguration istio-revision-tag-default
+	$(KUBECTL) -n istio-system delete svc istiod-revision-tag-default
 
 upgrade-istio-base: dep-update-istio-base
 	helm upgrade --install istio-base $(CHARTS_DIR)/istio-base -n istio-system \
