@@ -29,6 +29,11 @@ env:
   PUBLIC_API_BASE_URL: "https://hiresense-api.dc-forte.com"
   LOKI_PUSH_URL: "http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push"
   PYTHON_BACKEND_URL: "http://hiresense-ai-engine.hiresense-app-prod.svc.cluster.local:9091/api/v1"
+  # Per-job interview templates are generated in Go (interviewhandoffworker).
+  # Prod checked read-only 2026-10-29: both interview_template_* prompt rows
+  # present and active, TEMPLATE_MODEL set, OPENAI_API_KEY present. Roll back
+  # by setting "python" while the Python engine still serves its old routes.
+  TEMPLATE_BACKEND: "go"
   MOBIUS_WEBHOOK_URL: "https://core-api.mobius.dc-forte.com/api/jobs/hiresense/interview-callback/"
   # Mobius embeds (not hosted-redirect) -- see chapter-interview-backend-go's
   # docs/mobius-integration.md. ALLOWED_ORIGINS REPLACES the fallback (not
