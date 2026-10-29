@@ -44,6 +44,12 @@ worker:
     tag: prod
 aiEngine:
   replicas: 1
+  # CI (python build.yml) pushes :prod and :<sha> on every prod build and rolls
+  # the Deployment by sha. Without this the base default (:latest, a stale
+  # image) is applied by every `helm upgrade` and undoes CI's rollout
+  # (found 2026-10-29: the trimmed 76ce5d7 was rolled back to :latest).
+  image:
+    tag: prod
 frontend:
   replicas: 1
 
