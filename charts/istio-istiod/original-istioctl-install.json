@@ -1,0 +1,26 @@
+{
+  "original-values": {
+    "defaultRevision": "",
+    "gateways": {
+      "istio-egressgateway": {},
+      "istio-ingressgateway": {}
+    },
+    "global": {
+      "configValidation": true,
+      "hub": "docker.io/istio",
+      "istioNamespace": "istio-system",
+      "tag": "1.29.2"
+    },
+    "pilot": {
+      "cni": {
+        "enabled": false
+      },
+      "enabled": true
+    },
+    "profile": "demo",
+    "ztunnel": {
+      "resourceName": "ztunnel"
+    }
+  },
+  "note": "Recorded by istioctl in cm/values (istio-system) before adoption by the istio-base/istio-istiod charts on 2026-10-29. Kept for history; the live cm/values is overwritten on adoption."
+}

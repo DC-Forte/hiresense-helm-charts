@@ -1,0 +1,14 @@
+apiVersion: v2
+name: hiresense-istio-istiod
+description: Istio control plane (istiod), adopted in place from the original `istioctl install --set profile=demo`
+type: application
+version: 0.1.0
+
+# Release name: istiod. Install istio-base first. Keep in lockstep with istio-base
+# and the istio-gateway chart (proxy image tag). Upgrade one minor at a time.
+# Update with:
+#   helm search repo istio/istiod --versions
+dependencies:
+  - name: istiod
+    version: "1.29.2"
+    repository: https://istio-release.storage.googleapis.com/charts

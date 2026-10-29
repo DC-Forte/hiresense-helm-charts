@@ -1,0 +1,15 @@
+apiVersion: v2
+name: hiresense-istio-base
+description: Istio base (CRDs, default validating webhook, reader SA), adopted in place from the original istioctl install
+type: application
+version: 0.1.0
+
+# Release name: istio-base. CRDs are rendered with helm.sh/resource-policy: keep,
+# so `helm uninstall` can never delete the CRDs (and the Gateways/VirtualServices
+# stored in them). Keep in lockstep with istio-istiod.
+# Update with:
+#   helm search repo istio/base --versions
+dependencies:
+  - name: base
+    version: "1.29.2"
+    repository: https://istio-release.storage.googleapis.com/charts

@@ -1,0 +1,41 @@
+# Only what differs from the chart defaults, recovered from the install-time
+# record (`kubectl -n istio-system get cm values`, original-values + merged-values:
+# `istioctl install --set profile=demo`, tag 1.29.2).
+istiod:
+  # Chart default is an HPA at 80% of a 500m request; the live install ran fixed
+  # replicas. Replicas were 1 from the install and raised to 2 by hand on 2026-10-29.
+  autoscaleEnabled: false
+  replicaCount: 2
+
+  # istiod pods: demo profile requests (chart default is 500m/2048Mi).
+  resources:
+    requests:
+      cpu: 10m
+      memory: 100Mi
+
+  # ponytail: demo-profile value kept for zero-diff adoption. No tracing provider is
+  # configured mesh-wide, so nothing is sampled; revisit when dropping the demo profile.
+  traceSampling: 100
+
+  meshConfig:
+    accessLogFile: /dev/stdout   # the hiresense-access-log-filter Telemetry builds on this
+    enablePrometheusMerge: true
+
+  global:
+    istioNamespace: istio-system
+    proxy:
+      # Applied to every injected sidecar (staging namespaces). Live values; chart
+      # default is 100m/128Mi. Sidecars peak ~95Mi against this 40Mi request, so
+      # raising the memory request is a later cleanup.
+      resources:
+        requests:
+          cpu: 10m
+          memory: 40Mi
+        limits:
+          cpu: "2000m"
+          memory: 1024Mi
+
+  # Pin the config-validation webhook to Fail. Without this the chart renders
+  # `Ignore` on a first helm install and relies on istiod patching it to Fail.
+  base:
+    validationFailurePolicy: Fail

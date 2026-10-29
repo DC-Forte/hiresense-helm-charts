@@ -7,6 +7,7 @@ HELM_UPGRADE_FLAGS := --kube-context $(KUBE_CONTEXT) --server-side=true --force-
 
 .PHONY: help dep-update dep-update-monitoring \
 	upgrade-monitoring adopt-istio-gateway upgrade-istio-gateway upgrade-cert-manager \
+	adopt-istio upgrade-istio-base upgrade-istiod \
 	upgrade-hiresense-staging upgrade-hiresense-prod \
 	upgrade-recruiter-report-staging upgrade-recruiter-report-prod \
 	upgrade-matchengine-staging upgrade-matchengine-prod \
@@ -26,6 +27,9 @@ help:
 	@echo "make adopt-istio-gateway                 # ONE-TIME: annotate live gateway objects so Helm can adopt them"
 	@echo "make upgrade-istio-gateway               # helm upgrade --install istio-gateway"
 	@echo "make upgrade-cert-manager                # helm upgrade --install cert-manager"
+	@echo "make adopt-istio                         # ONE-TIME: annotate live istio base+istiod objects so Helm can adopt them"
+	@echo "make upgrade-istio-base                  # helm upgrade --install istio-base (CRDs; run BEFORE istiod)"
+	@echo "make upgrade-istiod                      # helm upgrade --install istiod"
 	@echo "make upgrade-hiresense-staging            # helm upgrade --install hiresense (staging)"
 	@echo "make upgrade-hiresense-prod               # helm upgrade --install hiresense-prod (prod)"
 	@echo "make upgrade-recruiter-report-staging      # helm upgrade --install recruiter-report-staging (TAG=<sha> to override)"
@@ -47,7 +51,47 @@ dep-update-istio-gateway:
 dep-update-cert-manager:
 	helm dep update $(CHARTS_DIR)/cert-manager
 
-dep-update: dep-update-monitoring dep-update-istio-gateway dep-update-cert-manager
+dep-update-istio-base:
+	helm dep update $(CHARTS_DIR)/istio-base
+
+dep-update-istiod:
+	helm dep update $(CHARTS_DIR)/istio-istiod
+
+dep-update: dep-update-monitoring dep-update-istio-gateway dep-update-cert-manager dep-update-istio-base dep-update-istiod
+
+# Istio control plane, adopted in place from the original `istioctl install`.
+# ONE-TIME order:  make adopt-istio  ->  make upgrade-istio-base  ->  make upgrade-istiod
+# Then clean up the two legacy "default revision tag" objects istioctl created. They
+# would double-inject next to the chart's active istio-sidecar-injector webhook
+# (injection is idempotent, so it is harmless, just redundant):
+#   kubectl --context $(KUBE_CONTEXT) delete mutatingwebhookconfiguration istio-revision-tag-default
+#   kubectl --context $(KUBE_CONTEXT) -n istio-system delete svc istiod-revision-tag-default
+# Behavior change to know about: the chart's injector webhook is failurePolicy=Fail
+# (live tag webhook was Ignore). A pod needing injection can no longer be created
+# un-injected while istiod is down; it fails and is retried. Keep istiod at 2 replicas.
+adopt-istio:
+	@set -e; \
+	adopt() { rel=$$1; shift; for r in "$$@"; do \
+		$(KUBECTL) -n istio-system annotate $$r meta.helm.sh/release-name=$$rel meta.helm.sh/release-namespace=istio-system --overwrite; \
+		$(KUBECTL) -n istio-system label $$r app.kubernetes.io/managed-by=Helm --overwrite; \
+	done; }; \
+	adopt istio-base $$($(KUBECTL) get crd -o name | grep 'istio.io') \
+		serviceaccount/istio-reader-service-account validatingwebhookconfiguration/istiod-default-validator; \
+	adopt istiod deployment/istiod service/istiod serviceaccount/istiod role/istiod rolebinding/istiod \
+		configmap/istio configmap/istio-sidecar-injector configmap/values poddisruptionbudget/istiod \
+		clusterrole/istiod-clusterrole-istio-system clusterrole/istiod-gateway-controller-istio-system clusterrole/istio-reader-clusterrole-istio-system \
+		clusterrolebinding/istiod-clusterrole-istio-system clusterrolebinding/istiod-gateway-controller-istio-system clusterrolebinding/istio-reader-clusterrole-istio-system \
+		mutatingwebhookconfiguration/istio-sidecar-injector validatingwebhookconfiguration/istio-validator-istio-system
+
+upgrade-istio-base: dep-update-istio-base
+	helm upgrade --install istio-base $(CHARTS_DIR)/istio-base -n istio-system \
+		-f $(CHARTS_DIR)/istio-base/values.yaml \
+		$(HELM_UPGRADE_FLAGS)
+
+upgrade-istiod: dep-update-istiod
+	helm upgrade --install istiod $(CHARTS_DIR)/istio-istiod -n istio-system \
+		-f $(CHARTS_DIR)/istio-istiod/values.yaml \
+		$(HELM_UPGRADE_FLAGS)
 
 # Release name MUST stay `cert-manager` (matches the live release; keeps resource names).
 upgrade-cert-manager: dep-update-cert-manager

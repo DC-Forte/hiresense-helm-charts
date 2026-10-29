@@ -1,0 +1,9 @@
+# Defaults match the live install (chart defaults already render the same 14
+# CRDs, the reader ServiceAccount and the istiod-default-validator webhook).
+base:
+  global:
+    istioNamespace: istio-system
+
+  # Same as the istiod chart: render Fail, not Ignore, on a first helm install.
+  base:
+    validationFailurePolicy: Fail
