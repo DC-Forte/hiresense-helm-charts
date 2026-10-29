@@ -1,0 +1,13 @@
+apiVersion: v2
+name: hiresense-cert-manager
+description: cert-manager (values for the existing `cert-manager` release, now kept in git)
+type: application
+version: 0.1.0
+
+# Release name must stay `cert-manager` so the subchart's resource names don't change.
+# Update with:
+#   helm search repo jetstack/cert-manager --versions
+dependencies:
+  - name: cert-manager
+    version: "v1.20.2"
+    repository: https://charts.jetstack.io

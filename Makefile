@@ -2,7 +2,7 @@ CHARTS_DIR := charts
 HELM_UPGRADE_FLAGS := --server-side=true --force-conflicts
 
 .PHONY: help dep-update dep-update-monitoring \
-	upgrade-monitoring adopt-istio-gateway upgrade-istio-gateway \
+	upgrade-monitoring adopt-istio-gateway upgrade-istio-gateway upgrade-cert-manager \
 	upgrade-hiresense-staging upgrade-hiresense-prod \
 	upgrade-recruiter-report-staging upgrade-recruiter-report-prod \
 	upgrade-matchengine-staging upgrade-matchengine-prod \
@@ -13,6 +13,7 @@ help:
 	@echo "make upgrade-monitoring                  # helm upgrade --install monitoring"
 	@echo "make adopt-istio-gateway                 # ONE-TIME: annotate live gateway objects so Helm can adopt them"
 	@echo "make upgrade-istio-gateway               # helm upgrade --install istio-gateway"
+	@echo "make upgrade-cert-manager                # helm upgrade --install cert-manager"
 	@echo "make upgrade-hiresense-staging            # helm upgrade --install hiresense (staging)"
 	@echo "make upgrade-hiresense-prod               # helm upgrade --install hiresense-prod (prod)"
 	@echo "make upgrade-recruiter-report-staging      # helm upgrade --install recruiter-report-staging (TAG=<sha> to override)"
@@ -31,7 +32,16 @@ dep-update-monitoring:
 dep-update-istio-gateway:
 	helm dep update $(CHARTS_DIR)/istio-gateway
 
-dep-update: dep-update-monitoring dep-update-istio-gateway
+dep-update-cert-manager:
+	helm dep update $(CHARTS_DIR)/cert-manager
+
+dep-update: dep-update-monitoring dep-update-istio-gateway dep-update-cert-manager
+
+# Release name MUST stay `cert-manager` (matches the live release; keeps resource names).
+upgrade-cert-manager: dep-update-cert-manager
+	helm upgrade --install cert-manager $(CHARTS_DIR)/cert-manager -n cert-manager \
+		-f $(CHARTS_DIR)/cert-manager/values.yaml \
+		$(HELM_UPGRADE_FLAGS)
 
 # ONE-TIME, before the first upgrade-istio-gateway. Only same-named objects need
 # adopting (Deployment, Service, PDB); the chart creates its own SA/Role/RoleBinding.

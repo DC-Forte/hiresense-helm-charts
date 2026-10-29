@@ -1,0 +1,33 @@
+# Values the live `cert-manager` release was already running with (recovered with
+# `helm get values cert-manager -n cert-manager`), plus resource requests/limits
+# sized from live usage on 2026-10-29 (69Mi / 97Mi / 38Mi).
+cert-manager:
+  crds:
+    enabled: true
+
+  extraArgs:
+    - --feature-gates=ServerSideApply=true
+
+  resources:
+    requests:
+      cpu: 20m
+      memory: 96Mi
+    limits:
+      memory: 256Mi
+
+  cainjector:
+    resources:
+      requests:
+        cpu: 20m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
+
+  webhook:
+    timeoutSeconds: 10
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        memory: 128Mi
