@@ -52,6 +52,12 @@ aiEngine:
     tag: prod
 frontend:
   replicas: 1
+  # Same reason as aiEngine above: CI pushes :prod and :<sha>; the base default
+  # (:latest) had left prod on the 2026-09-10 build (ce9d6b0), 37 commits behind
+  # the 39248ff build CI deployed on 2026-09-29 (v5 report rendering, incProc
+  # SDK, LiveKit URL field fix).
+  image:
+    tag: prod
 
 env:
   ENVIRONMENT: production
