@@ -22,7 +22,7 @@ data:
   ADMIN_URL: "https://{{ .Values.hosts.recruiter }}"
   NEW_ADMIN_URL: "https://{{ .Values.hosts.recruiter }}"
   PYTHON_BACKEND_URL: "http://hiresense-ai-engine.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.aiEngine.port }}/api/v1"
-  AGENTIC_API_URL: "http://hiresense-ai-engine.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.aiEngine.port }}/api/v1"
+  AGENTIC_API_URL: "http://hiresense-ai-engine.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.aiEngine.port }}"
   AI_ENGINE_TEXT_URL: "http://hiresense-ai-engine.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.aiEngine.port }}/api/v1"
   PYTHON_FEEDBACK_SERVICE_URL: "http://hiresense-ai-engine.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.aiEngine.port }}"
   PYTHON_HEALTH_CHECK_URL: "http://hiresense-ai-engine.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.aiEngine.port }}/api/v1"
