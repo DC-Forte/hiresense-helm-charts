@@ -38,9 +38,11 @@ image:
 
 replicas: 1
 port: 8090
+# requests sized from 30d Prometheus peaks (2026-10-29): peak ~80Mi / p95 CPU ~3m.
+# The worker below is bursty (staging peaked 595Mi / 476m), so it is left as-is.
 resources:
   requests:
-    cpu: 100m
+    cpu: 25m
     memory: 128Mi
   limits:
     cpu: 500m

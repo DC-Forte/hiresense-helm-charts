@@ -49,10 +49,11 @@ backend:
     tag: staging
   replicas: 2
   port: 5000  # HTTP and WS share the same port
+  # requests sized from 30d Prometheus peaks (2026-10-29): peak ~54Mi / p95 CPU ~6m
   resources:
     requests:
-      cpu: 250m
-      memory: 512Mi
+      cpu: 50m
+      memory: 192Mi
     limits:
       cpu: 1
       memory: 1.5Gi
@@ -61,12 +62,13 @@ aiEngine:
   image:
     repository: chapter-interview-python-backend
     tag: latest
-  replicas: 2
+  replicas: 1
   port: 9091
+  # requests sized from 30d Prometheus peaks (2026-10-29): peak ~191Mi / p95 CPU ~26m
   resources:
     requests:
-      cpu: 250m
-      memory: 512Mi
+      cpu: 75m
+      memory: 384Mi
     limits:
       cpu: 1
       memory: 1.5Gi
@@ -75,12 +77,13 @@ frontend:
   image:
     repository: chapter-interview-frontend
     tag: latest
-  replicas: 2
+  replicas: 1
   port: 80
+  # requests sized from 30d Prometheus peaks (2026-10-29): peak ~12Mi / p95 CPU ~9m
   resources:
     requests:
-      cpu: 50m
-      memory: 64Mi
+      cpu: 20m
+      memory: 32Mi
     limits:
       cpu: 200m
       memory: 256Mi
@@ -92,10 +95,11 @@ worker:
     tag: staging
   replicas: 1
   command: []  # CMD /app/worker is baked into the image; empty = use image default
+  # requests sized from 30d Prometheus peaks (2026-10-29): peak ~45Mi / p95 CPU ~4m
   resources:
     requests:
-      cpu: 100m
-      memory: 256Mi
+      cpu: 25m
+      memory: 128Mi
     limits:
       cpu: 500m
       memory: 768Mi

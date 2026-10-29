@@ -22,9 +22,10 @@ image:
 
 replicas: 1 # ClaimPendingReportJobs uses FOR UPDATE SKIP LOCKED — safe to scale up, no code change needed
 port: 5000
+# requests sized from 30d Prometheus peaks (2026-10-29): peak ~54Mi / p95 CPU ~4m
 resources:
   requests:
-    cpu: 100m
+    cpu: 25m
     memory: 128Mi
   limits:
     cpu: 500m

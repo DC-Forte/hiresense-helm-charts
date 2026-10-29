@@ -43,9 +43,9 @@ worker:
   image:
     tag: prod
 aiEngine:
-  replicas: 2
+  replicas: 1
 frontend:
-  replicas: 2
+  replicas: 1
 
 env:
   ENVIRONMENT: production

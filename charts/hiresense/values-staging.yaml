@@ -16,11 +16,11 @@ backend:
   image:
     tag: staging
 aiEngine:
-  replicas: 2
+  replicas: 1
   image:
     tag: staging
 frontend:
-  replicas: 2
+  replicas: 1
   image:
     tag: staging
 worker:

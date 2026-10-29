@@ -31,10 +31,11 @@ image:
 
 replicas: 1
 port: 8091
+# requests sized from 30d Prometheus peaks (2026-10-29): peak ~39Mi / p95 CPU ~1m
 resources:
   requests:
-    cpu: 200m
-    memory: 256Mi
+    cpu: 50m
+    memory: 128Mi
   limits:
     cpu: 1000m
     memory: 1Gi
