@@ -10,5 +10,5 @@ version: 0.1.0
 #   helm search repo istio/istiod --versions
 dependencies:
   - name: istiod
-    version: "1.29.2"
+    version: "1.30.7"
     repository: https://istio-release.storage.googleapis.com/charts
