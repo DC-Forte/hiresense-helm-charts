@@ -65,11 +65,10 @@ No blockers found for 1.36.5. DOKS offers exactly one target from 1.35.9:
 
 ## Cleanup before the day
 
-- Delete the leftover `regtest` pod in `default` (status `Error`).
-- Decide about the unused `istio-egressgateway`. It is an old istioctl
-  Deployment at 1.29.2, owned by no chart, with 0 requests in 24 hours.
-- Optional: remove `default/bookinfo-gateway`, a Gateway left from the deleted
-  Bookinfo app.
+Done 2026-10-29: the leftover `regtest` pod, the unused `istio-egressgateway`
+(0 requests in 24 hours, owned by no chart), the Bookinfo Gateway and
+ServiceAccounts, and the empty `cockroachdb` namespace.
+
 - Everything is pushed. `main` should match `origin/main` and the deployed
   chart versions.
 
