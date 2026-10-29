@@ -524,7 +524,7 @@ metrics-server:
     - --kubelet-use-node-status-port                # avoids kubelet port guessing
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Istio tracing — disable for infra workloads (kiali, grafana, loki, tempo,
+# Istio tracing — disable for infra workloads (grafana, loki, tempo,
 # promtail, pyroscope, istiod). Set false for non-Istio dev/local installs
 # where the telemetry.istio.io CRD doesn't exist.
 # ─────────────────────────────────────────────────────────────────────────────

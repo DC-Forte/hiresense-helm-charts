@@ -1,5 +1,5 @@
 {{- if .Values.istioTracing.disableForInfra }}
-# Stops kiali/grafana/loki/tempo/promtail/pyroscope/istiod from generating trace
+# Stops grafana/loki/tempo/promtail/pyroscope/istiod from generating trace
 # spans, so only real services (hiresense-app, interviewhandoff, matchengine,
 # recruiter-report) show up in Tempo. Mesh-wide tracing default lives outside this
 # repo (cluster-managed istio-system); these Telemetry resources override it.
@@ -14,19 +14,7 @@ spec:
 ---
 # istio-system also hosts istio-ingressgateway (the entry hop for every real
 # user-facing trace), so this is workload-scoped rather than namespace-wide —
-# only kiali and istiod are targeted, ingressgateway keeps the mesh default.
-apiVersion: telemetry.istio.io/v1
-kind: Telemetry
-metadata:
-  name: disable-kiali-tracing
-  namespace: istio-system
-spec:
-  selector:
-    matchLabels:
-      app: kiali
-  tracing:
-    - randomSamplingPercentage: 0
----
+# only istiod is targeted, ingressgateway keeps the mesh default.
 apiVersion: telemetry.istio.io/v1
 kind: Telemetry
 metadata:
