@@ -21,21 +21,6 @@ spec:
     spec:
       imagePullSecrets:
         - name: {{ .Values.global.imagePullSecret }}
-      initContainers:
-        - name: seed-prompts
-          image: {{ include "hiresense.image" (dict "Values" .Values "repository" .Values.aiEngine.image.repository "tag" .Values.aiEngine.image.tag) }}
-          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
-          command: ["sh", "-c", "cp -an /app/prompts/. /writable-prompts/ 2>/dev/null; true"]
-          resources:
-            requests:
-              cpu: 10m
-              memory: 32Mi
-            limits:
-              cpu: 100m
-              memory: 128Mi
-          volumeMounts:
-            - name: prompts
-              mountPath: /writable-prompts
       containers:
         - name: ai-engine
           image: {{ include "hiresense.image" (dict "Values" .Values "repository" .Values.aiEngine.image.repository "tag" .Values.aiEngine.image.tag) }}
@@ -48,9 +33,6 @@ spec:
                 name: hiresense-env
             - secretRef:
                 name: hiresense-secrets
-          volumeMounts:
-            - name: prompts
-              mountPath: /app/prompts
           readinessProbe:
             httpGet:
               path: /api/v1/health
@@ -64,9 +46,6 @@ spec:
             initialDelaySeconds: 60
             periodSeconds: 30
           resources: {{- toYaml .Values.aiEngine.resources | nindent 12 }}
-      volumes:
-        - name: prompts
-          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
