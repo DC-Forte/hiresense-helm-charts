@@ -25,7 +25,7 @@ case "$ENV" in
 esac
 
 DO_REGION="${DO_REGION:-fra1}"
-CLUSTER_NAME="hiresense-k8s-1-33-9-do-5-fra1"  # shared cluster — also runs kalido/sawit/outline/dc-forte, not hiresense-dedicated
+CLUSTER_NAME="hiresense-k8s-fra1"  # HireSense-only cluster (prod + staging by namespace); dc-forte/Mobius live on dc-forte-cluster
 NAMESPACE="${SERVICE}-${ENV}"
 # Separate DB cluster per env, matching this account's real naming convention
 # (dc-forte-pgsql / dc-forte-dev-pgsql, outline-pgsql, ...) rather than one

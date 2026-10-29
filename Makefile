@@ -2,7 +2,7 @@ CHARTS_DIR := charts
 # Every deploy target is pinned to the HireSense DOKS cluster regardless of the
 # shell's current kube context (a stray `docker-desktop` context once got a fresh
 # helm install attempted against it). Override with KUBE_CONTEXT=... if needed.
-KUBE_CONTEXT ?= do-fra1-hiresense-k8s-1-33-9-do-5-fra1
+KUBE_CONTEXT ?= do-fra1-hiresense-k8s-fra1
 HELM_UPGRADE_FLAGS := --kube-context $(KUBE_CONTEXT) --server-side=true --force-conflicts
 
 .PHONY: help dep-update dep-update-monitoring \
