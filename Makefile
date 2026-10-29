@@ -1,5 +1,9 @@
 CHARTS_DIR := charts
-HELM_UPGRADE_FLAGS := --server-side=true --force-conflicts
+# Every deploy target is pinned to the HireSense DOKS cluster regardless of the
+# shell's current kube context (a stray `docker-desktop` context once got a fresh
+# helm install attempted against it). Override with KUBE_CONTEXT=... if needed.
+KUBE_CONTEXT ?= do-fra1-hiresense-k8s-1-33-9-do-5-fra1
+HELM_UPGRADE_FLAGS := --kube-context $(KUBE_CONTEXT) --server-side=true --force-conflicts
 
 .PHONY: help dep-update dep-update-monitoring \
 	upgrade-monitoring adopt-istio-gateway upgrade-istio-gateway upgrade-cert-manager \
@@ -50,8 +54,8 @@ upgrade-cert-manager: dep-update-cert-manager
 # istiod is down starts un-injected and sticks in ImagePullBackOff.
 adopt-istio-gateway:
 	for r in deploy/istio-ingressgateway svc/istio-ingressgateway pdb/istio-ingressgateway; do \
-		kubectl -n istio-system annotate $$r meta.helm.sh/release-name=istio-gateway meta.helm.sh/release-namespace=istio-system --overwrite && \
-		kubectl -n istio-system label $$r app.kubernetes.io/managed-by=Helm --overwrite; \
+		kubectl --context $(KUBE_CONTEXT) -n istio-system annotate $$r meta.helm.sh/release-name=istio-gateway meta.helm.sh/release-namespace=istio-system --overwrite && \
+		kubectl --context $(KUBE_CONTEXT) -n istio-system label $$r app.kubernetes.io/managed-by=Helm --overwrite; \
 	done
 
 upgrade-istio-gateway: dep-update-istio-gateway
