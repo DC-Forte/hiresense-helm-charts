@@ -11,9 +11,17 @@ HELM_UPGRADE_FLAGS := --kube-context $(KUBE_CONTEXT) --server-side=true --force-
 	upgrade-recruiter-report-staging upgrade-recruiter-report-prod \
 	upgrade-matchengine-staging upgrade-matchengine-prod \
 	upgrade-interviewhandoff-staging upgrade-interviewhandoff-prod \
-	upgrade-all-staging upgrade-all-prod
+	upgrade-all-staging upgrade-all-prod \
+	mem mem-nodes mem-requests mem-pods mem-oom
+
+KUBECTL = kubectl --context $(KUBE_CONTEXT)
 
 help:
+	@echo "make mem                                 # all memory checks below"
+	@echo "make mem-nodes                           # actual memory/CPU use per node (metrics-server)"
+	@echo "make mem-requests                        # memory/CPU REQUESTED vs allocatable per node (what the scheduler sees)"
+	@echo "make mem-pods                            # top 20 pods by actual memory use"
+	@echo "make mem-oom                             # pods whose last restart was an OOM kill"
 	@echo "make upgrade-monitoring                  # helm upgrade --install monitoring"
 	@echo "make adopt-istio-gateway                 # ONE-TIME: annotate live gateway objects so Helm can adopt them"
 	@echo "make upgrade-istio-gateway               # helm upgrade --install istio-gateway"
@@ -130,3 +138,23 @@ upgrade-interviewhandoff-prod:
 upgrade-all-staging: upgrade-monitoring upgrade-hiresense-staging upgrade-recruiter-report-staging upgrade-matchengine-staging upgrade-interviewhandoff-staging
 
 upgrade-all-prod: upgrade-hiresense-prod upgrade-matchengine-prod upgrade-interviewhandoff-prod
+# --- memory checks (read-only) -------------------------------------------------
+# Three different numbers: usage (top), requests (what blocks scheduling, e.g. a
+# pinned DaemonSet pod going Pending), limits (the OOM ceiling, ~4x overcommitted).
+mem: mem-nodes mem-requests mem-pods mem-oom
+
+mem-nodes:
+	$(KUBECTL) top nodes
+
+mem-requests:
+	@for n in $$($(KUBECTL) get nodes -o name); do \
+		echo "== $$n"; \
+		$(KUBECTL) describe $$n | grep -A6 'Allocated resources' | grep -E 'cpu|memory'; \
+	done
+
+mem-pods:
+	$(KUBECTL) top pods -A --sort-by=memory | head -21
+
+mem-oom:
+	@out=$$($(KUBECTL) get pods -A -o json | jq -r '.items[] | select(.status.containerStatuses[]?.lastState.terminated.reason=="OOMKilled") | "\(.metadata.namespace)/\(.metadata.name)"' | sort -u); \
+	echo "$${out:-none}"
