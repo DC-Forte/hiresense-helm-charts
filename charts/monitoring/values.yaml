@@ -299,10 +299,12 @@ loki:
     limits_config:
       retention_period: 48h  # default: 2 days, for non-service noise (kiali, grafana, loki, istiod, etc.)
       retention_stream:
-        # Real services keep 7 days; everything else falls through to retention_period above.
-        - selector: '{namespace=~"hiresense-app|interviewhandoff-.*|matchengine-.*|recruiter-report-.*"}'
+        # Real services and the voice agent's log drain (livekit-staging/prod) keep
+        # 14 days; everything else falls through to retention_period above. Loki's
+        # max query range is 30 days, so 14d is queryable in full.
+        - selector: '{namespace=~"hiresense-app|interviewhandoff-.*|matchengine-.*|recruiter-report-.*|livekit-.*"}'
           priority: 1
-          period: 168h
+          period: 336h
 
     compactor:
       working_directory: /var/loki/compactor

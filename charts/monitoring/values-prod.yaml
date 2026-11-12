@@ -107,7 +107,7 @@ loki:
             period: 24h
 
     limits_config:
-      retention_period: 48h  # default: 2 days; retention_stream (base values.yaml) keeps services at 7d
+      retention_period: 48h  # default: 2 days; retention_stream (base values.yaml) keeps services and livekit-* at 14d
 
     compactor:
       working_directory: /var/loki/compactor
