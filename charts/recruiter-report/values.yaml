@@ -70,8 +70,8 @@ env:
   JD_RESUME_REPORT_MODEL_EFFORT: "medium" # reasoning_effort for JD_RESUME_REPORT_MODEL: none|low|medium|high|...; empty = API default (medium for gpt-6-luna); ignored by ordinary models
   LLM_TIMEOUT_MS: "120000"
   LLM_RETRY_COUNT: "2"
-  RECRUITER_REPORT_POLL_INTERVAL_SECONDS: "15"
-  RECRUITER_REPORT_BATCH_SIZE: "3"
+  RECRUITER_REPORT_POLL_INTERVAL_SECONDS: "5"
+  RECRUITER_REPORT_BATCH_SIZE: "8"
 
 # All values below are placeholders. Real values come from
 # values-{env}.secrets.yaml (gitignored).
