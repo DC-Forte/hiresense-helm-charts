@@ -9,3 +9,4 @@ charts/monitoring/charts/
 .claude
 .claude-flow
 *.db
+.swarm
