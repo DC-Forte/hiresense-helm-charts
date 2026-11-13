@@ -36,6 +36,7 @@ data:
         tcp_nodelay on;
         keepalive_timeout 65;
         types_hash_max_size 2048;
+        server_tokens off;
 
         gzip on;
         gzip_vary on;
@@ -64,18 +65,33 @@ data:
             add_header X-XSS-Protection "1; mode=block" always;
 
             location /health { access_log off; return 200 'healthy'; add_header Content-Type text/plain; }
+            # add_header in a location replaces the server-level headers, so each
+            # location that sets its own headers repeats the security trio.
             location = /env-config.js {
+                add_header X-Frame-Options "DENY" always;
+                add_header X-Content-Type-Options "nosniff" always;
+                add_header Referrer-Policy "strict-origin-when-cross-origin" always;
                 add_header Cache-Control "no-cache, no-store, must-revalidate";
                 add_header Pragma "no-cache";
                 add_header Expires "0";
             }
             location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
                 expires 1y;
+                add_header X-Frame-Options "DENY" always;
+                add_header X-Content-Type-Options "nosniff" always;
+                add_header Referrer-Policy "strict-origin-when-cross-origin" always;
                 add_header Cache-Control "public, immutable";
                 try_files $uri =404;
             }
+            # Real SPA routes never end in these; without this the try_files
+            # fallback answers scanner probes (/key.pem, /backup.sql) with a 200.
+            location = /robots.txt { try_files $uri =404; }
+            location ~* \.(pem|key|sql|bak|env|ya?ml|toml|ini|conf|log|php|aspx?|jsp|tar|gz|zip|txt|xml|json)$ { return 404; }
             location / { try_files $uri $uri/ /index.html; }
             location = /index.html {
+                add_header X-Frame-Options "DENY" always;
+                add_header X-Content-Type-Options "nosniff" always;
+                add_header Referrer-Policy "strict-origin-when-cross-origin" always;
                 add_header Cache-Control "no-cache, no-store, must-revalidate" always;
                 add_header Pragma "no-cache" always;
                 add_header Expires "0" always;
@@ -96,18 +112,33 @@ data:
             add_header X-XSS-Protection "1; mode=block" always;
 
             location /health { access_log off; return 200 'healthy'; add_header Content-Type text/plain; }
+            # add_header in a location replaces the server-level headers, so each
+            # location that sets its own headers repeats the security trio.
             location = /env-config.js {
+                add_header X-Frame-Options "DENY" always;
+                add_header X-Content-Type-Options "nosniff" always;
+                add_header Referrer-Policy "strict-origin-when-cross-origin" always;
                 add_header Cache-Control "no-cache, no-store, must-revalidate";
                 add_header Pragma "no-cache";
                 add_header Expires "0";
             }
             location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
                 expires 1y;
+                add_header X-Frame-Options "DENY" always;
+                add_header X-Content-Type-Options "nosniff" always;
+                add_header Referrer-Policy "strict-origin-when-cross-origin" always;
                 add_header Cache-Control "public, immutable";
                 try_files $uri =404;
             }
+            # Real SPA routes never end in these; without this the try_files
+            # fallback answers scanner probes (/key.pem, /backup.sql) with a 200.
+            location = /robots.txt { try_files $uri =404; }
+            location ~* \.(pem|key|sql|bak|env|ya?ml|toml|ini|conf|log|php|aspx?|jsp|tar|gz|zip|txt|xml|json)$ { return 404; }
             location / { try_files $uri $uri/ /index.html; }
             location = /index.html {
+                add_header X-Frame-Options "DENY" always;
+                add_header X-Content-Type-Options "nosniff" always;
+                add_header Referrer-Policy "strict-origin-when-cross-origin" always;
                 add_header Cache-Control "no-cache, no-store, must-revalidate" always;
                 add_header Pragma "no-cache" always;
                 add_header Expires "0" always;
