@@ -84,7 +84,7 @@ kube-prometheus-stack:
   prometheus-node-exporter:
     resources:
       requests: {cpu: 20m, memory: 32Mi}
-      limits: {cpu: 200m, memory: 128Mi}
+      limits: {cpu: 500m, memory: 128Mi}  # 200m throttled it in 22-32% of periods though it uses ~11m
 
   # Disable components not reachable in managed k8s (DOKS)
   kubeProxy:
@@ -367,6 +367,12 @@ tempo:
       limits:
         cpu: 500m
         memory: 1Gi
+
+    # The chart's default is a 1 GiB Go memory ballast (-mem-ballast-size-mbs=1024), meant for
+    # heavy ingest: it lets ~1 GB of garbage pile up before the GC runs. Here ingest is ~5 spans/s,
+    # live heap ~100 MB, yet the pod sat at ~970 MB resident (heap profile 2026-11-16: 1,024 of
+    # 1,130 MB in-use heap was the ballast). 0 turns it off; expect ~300-400 MB.
+    memBallastSizeMbs: 0
 
     reportingEnabled: false
     multitenancyEnabled: false

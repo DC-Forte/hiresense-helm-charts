@@ -28,10 +28,11 @@ kube-prometheus-stack:
             resources:
               requests:
                 storage: 20Gi
+      # Request matches 30-day use (0.8-1.55 GB); the limit was never near.
       resources:
         requests:
           cpu: 500m
-          memory: 1Gi
+          memory: 1536Mi
         limits:
           cpu: 2
           memory: 4Gi
@@ -50,10 +51,13 @@ kube-prometheus-stack:
         root_url: "https://grafana.dc-forte.com/"
         domain: grafana.dc-forte.com
 
+    # Request sized from 30 days of use (resident 450-600 MB, working set 620-730 MB);
+    # the old 256Mi made Grafana the first pod evicted under node pressure. The limit
+    # stays 1Gi: the chart sets GOMEMLIMIT from it, so raising it only lets the heap drift up.
     resources:
       requests:
         cpu: 200m
-        memory: 256Mi
+        memory: 512Mi
       limits:
         cpu: 1
         memory: 1Gi
