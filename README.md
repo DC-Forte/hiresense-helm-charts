@@ -214,6 +214,30 @@ alongside `CANDIDATE_FRONTEND_URL`, matching `charts/hiresense`'s `hosts.candida
 (`hiresense.dc-forte.com`). If `hosts.candidate` ever changes, update `interviewhandoff`'s
 `CANDIDATE_PORTAL_URL` in the same PR — it isn't templated off the shared value.
 
+## LLM model, effort, wake probe and the cost dashboard
+
+**Model and effort.** `hiresense`, `interviewhandoff`, `matchengine` and `recruiter-report` set
+`OPENAI_MODEL: gpt-6-luna` and `OPENAI_MODEL_EFFORT: none` in their base `values.yaml` (`gpt-4o-mini` and
+`gpt-4.1` shut down on 2027-01-14). `none` matters: the API default effort, `medium`, is far too slow for
+an interactive call. Staging runs exactly that. **Prod is still pinned:** each `values-prod.yaml` sets
+`OPENAI_MODEL: "gpt-4.1"` until prod is swapped (promote images, delete the pins, then deploy), except
+that `recruiter-report` already runs its JD-vs-resume report pipeline on `gpt-6-luna` through
+`JD_RESUME_REPORT_MODEL` (effort `medium`), which the pin does not cover. The voice agent is not in
+these charts: it runs on LiveKit Cloud (`hiresense-voice-agent`, `./deploy.sh staging|prod`).
+
+**Wake probe.** `charts/interviewhandoff` sets `LIVEKIT_KEEPALIVE_ENABLED`: `"true"` in
+`values-staging.yaml`, `"false"` in `values-prod.yaml`. Every 8 minutes the service dispatches the agent
+into a throwaway room so LiveKit Cloud keeps a worker warm and a candidate's first `/start` does not wait
+out a ~60 s cold start. Apply with `make upgrade-interviewhandoff-staging`.
+
+**LLM cost dashboard.** `charts/monitoring/templates/dashboards.yaml` defines `llm-cost` (HireSense
+folder): spend and 30-day run rate at list price, by feature, model, service and token type, the models in
+use, the price table and its age, and the unpriced-requests check. The metrics come from
+`chapter-interview-backend-go/internal/llm` (see its README); the voice agent's calls arrive through
+LiveKit's log drain as `feature=~"voice_.*"`. Only services running an image that has the cost counter
+appear, so prod shows no spend until the Go image is promoted. Deploy dashboard changes with
+`make upgrade-monitoring`.
+
 ## Common commands
 
 Release names ≠ chart names — `helm list -A` to confirm before upgrading anything:
