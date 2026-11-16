@@ -21,7 +21,10 @@ env:
   # silently falls back to prod's hostnames (found live 2026-09-13: configmap
   # showed all four still on hiresense.dc-forte.com/hiresense-api.dc-forte.com).
   AGENTIC_API_URL: "https://hiresense-ai-staging.dc-forte.com" # Python resume parser (staging engine), see values.yaml
-  LIVEKIT_KEEPALIVE_ENABLED: "false"
+  # Wake probe ON for staging only: every 8 min the backend dispatches the agent into a throwaway room so
+  # the LiveKit Cloud worker does not scale to zero between interviews. A cold agent took ~60 s to join on
+  # 2026-11-16, which made /start time out and dispatch the agent three times into one room. Prod stays "false".
+  LIVEKIT_KEEPALIVE_ENABLED: "true"
   CANDIDATE_FRONTEND_URL: "https://hiresense-staging.dc-forte.com"
   CANDIDATE_PORTAL_URL: "https://hiresense-staging.dc-forte.com"
   PUBLIC_API_BASE_URL: "https://hiresense-api-staging.dc-forte.com"
