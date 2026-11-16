@@ -1932,3 +1932,769 @@ data:
       "uid": "k8s-cluster-fixed",
       "weekStart": ""
     }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: llm-cost-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "HireSense"
+data:
+  llm-cost.json: |
+    {
+      "title": "LLM Cost",
+      "uid": "llm-cost",
+      "description": "LLM spend in USD at list price (llm_cost_usd_total), by feature, model and service, with the price table and a check for models that have no price. Prices live in internal/llm/pricing.go.",
+      "tags": [
+        "llm",
+        "cost",
+        "go"
+      ],
+      "schemaVersion": 38,
+      "refresh": "5m",
+      "time": {
+        "from": "now-7d",
+        "to": "now"
+      },
+      "panels": [
+        {
+          "id": 1,
+          "type": "row",
+          "title": "Spend",
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": 2,
+          "type": "stat",
+          "title": "Spend (range)",
+          "description": "LLM spend at list price over the selected time range.",
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 0,
+            "y": 1
+          },
+          "targets": [
+            {
+              "expr": "sum(increase(llm_cost_usd_total{namespace=~\"$namespace\",model=~\"$model\",feature=~\"$feature\"}[$__range]))",
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus"
+              },
+              "instant": true
+            }
+          ],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "currencyUSD",
+              "decimals": 2,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "blue",
+                    "value": null
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 3,
+          "type": "stat",
+          "title": "Run rate (30 days)",
+          "description": "Last day's spend rate extrapolated to 30 days. Noisy on a quiet day.",
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 4,
+            "y": 1
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(llm_cost_usd_total{namespace=~\"$namespace\",model=~\"$model\",feature=~\"$feature\"}[1d])) * 86400 * 30",
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus"
+              },
+              "instant": true
+            }
+          ],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "currencyUSD",
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "blue",
+                    "value": null
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 4,
+          "type": "stat",
+          "title": "Cost per request",
+          "description": "Spend divided by successful requests in the range.",
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 8,
+            "y": 1
+          },
+          "targets": [
+            {
+              "expr": "sum(increase(llm_cost_usd_total{namespace=~\"$namespace\",model=~\"$model\",feature=~\"$feature\"}[$__range])) / sum(increase(llm_requests_total{namespace=~\"$namespace\",model=~\"$model\",feature=~\"$feature\",outcome=\"ok\"}[$__range]))",
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus"
+              },
+              "instant": true
+            }
+          ],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "currencyUSD",
+              "decimals": 4,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "blue",
+                    "value": null
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 5,
+          "type": "stat",
+          "title": "Reasoning share of spend",
+          "description": "Hidden reasoning tokens are billed as output. A high share means the effort setting is the lever.",
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 12,
+            "y": 1
+          },
+          "targets": [
+            {
+              "expr": "sum(increase(llm_cost_usd_total{namespace=~\"$namespace\",model=~\"$model\",feature=~\"$feature\",type=\"reasoning\"}[$__range])) / sum(increase(llm_cost_usd_total{namespace=~\"$namespace\",model=~\"$model\",feature=~\"$feature\"}[$__range]))",
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus"
+              },
+              "instant": true
+            }
+          ],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "decimals": 1,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "blue",
+                    "value": null
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 6,
+          "type": "stat",
+          "title": "Unpriced requests",
+          "description": "Requests to a model with no price in internal/llm/pricing.go. Their cost reads zero. Anything above 0 means the spend here is understated: add the model to the price table.",
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 16,
+            "y": 1
+          },
+          "targets": [
+            {
+              "expr": "sum(increase(llm_unpriced_requests_total{namespace=~\"$namespace\",model=~\"$model\"}[$__range]))",
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus"
+              },
+              "instant": true
+            }
+          ],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 7,
+          "type": "stat",
+          "title": "Price table age",
+          "description": "Days since the price table was checked against developers.openai.com/api/docs/pricing. Prices are edited by hand in internal/llm/pricing.go. Amber after 30 days, red after 60.",
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 20,
+            "y": 1
+          },
+          "targets": [
+            {
+              "expr": "(time() - max(llm_price_table_updated_timestamp_seconds)) / 86400",
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus"
+              },
+              "instant": true
+            }
+          ],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "d",
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 30
+                  },
+                  {
+                    "color": "red",
+                    "value": 60
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 8,
+          "type": "row",
+          "title": "Where the money goes (USD per hour)",
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 5
+          }
+        },
+        {
+          "id": 9,
+          "type": "timeseries",
+          "title": "By feature",
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 6
+          },
+          "targets": [
+            {
+              "expr": "sum by (feature) (rate(llm_cost_usd_total{namespace=~\"$namespace\",model=~\"$model\",feature=~\"$feature\"}[$__rate_interval])) * 3600",
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus"
+              },
+              "legendFormat": "{{ "{{" }}feature{{ "}}" }}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "currencyUSD",
+              "decimals": 3,
+              "custom": {
+                "stacking": {
+                  "mode": "normal"
+                },
+                "fillOpacity": 30
+              }
+            }
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 10,
+          "type": "timeseries",
+          "title": "By model",
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 6
+          },
+          "targets": [
+            {
+              "expr": "sum by (model) (rate(llm_cost_usd_total{namespace=~\"$namespace\",model=~\"$model\",feature=~\"$feature\"}[$__rate_interval])) * 3600",
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus"
+              },
+              "legendFormat": "{{ "{{" }}model{{ "}}" }}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "currencyUSD",
+              "decimals": 3,
+              "custom": {
+                "stacking": {
+                  "mode": "normal"
+                },
+                "fillOpacity": 30
+              }
+            }
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 11,
+          "type": "timeseries",
+          "title": "By service",
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 14
+          },
+          "targets": [
+            {
+              "expr": "sum by (service, namespace) (rate(llm_cost_usd_total{namespace=~\"$namespace\",model=~\"$model\",feature=~\"$feature\"}[$__rate_interval])) * 3600",
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus"
+              },
+              "legendFormat": "{{ "{{" }}service{{ "}}" }} ({{ "{{" }}namespace{{ "}}" }})"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "currencyUSD",
+              "decimals": 3,
+              "custom": {
+                "stacking": {
+                  "mode": "normal"
+                },
+                "fillOpacity": 30
+              }
+            }
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 12,
+          "type": "timeseries",
+          "title": "By token type",
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 14
+          },
+          "targets": [
+            {
+              "expr": "sum by (type) (rate(llm_cost_usd_total{namespace=~\"$namespace\",model=~\"$model\",feature=~\"$feature\"}[$__rate_interval])) * 3600",
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus"
+              },
+              "legendFormat": "{{ "{{" }}type{{ "}}" }}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "currencyUSD",
+              "decimals": 3,
+              "custom": {
+                "stacking": {
+                  "mode": "normal"
+                },
+                "fillOpacity": 30
+              }
+            }
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 13,
+          "type": "row",
+          "title": "Models and prices",
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 22
+          }
+        },
+        {
+          "id": 14,
+          "type": "table",
+          "title": "Models in use (selected range)",
+          "description": "Every model, feature and service that made a call in the range, with its requests, tokens and cost.",
+          "gridPos": {
+            "h": 10,
+            "w": 16,
+            "x": 0,
+            "y": 23
+          },
+          "targets": [
+            {
+              "expr": "sum by (namespace, service, model, feature) (increase(llm_requests_total{namespace=~\"$namespace\",model=~\"$model\",feature=~\"$feature\"}[$__range]))",
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus"
+              },
+              "format": "table",
+              "instant": true
+            },
+            {
+              "expr": "sum by (namespace, service, model, feature) (increase(llm_tokens_total{namespace=~\"$namespace\",model=~\"$model\",feature=~\"$feature\"}[$__range]))",
+              "refId": "B",
+              "datasource": {
+                "type": "prometheus"
+              },
+              "format": "table",
+              "instant": true
+            },
+            {
+              "expr": "sum by (namespace, service, model, feature) (increase(llm_cost_usd_total{namespace=~\"$namespace\",model=~\"$model\",feature=~\"$feature\"}[$__range]))",
+              "refId": "C",
+              "datasource": {
+                "type": "prometheus"
+              },
+              "format": "table",
+              "instant": true
+            }
+          ],
+          "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                },
+                "indexByName": {
+                  "namespace": 0,
+                  "service": 1,
+                  "feature": 2,
+                  "model": 3,
+                  "Value #A": 4,
+                  "Value #B": 5,
+                  "Value #C": 6
+                },
+                "renameByName": {
+                  "Value #A": "Requests",
+                  "Value #B": "Tokens",
+                  "Value #C": "Cost (USD)"
+                }
+              }
+            }
+          ],
+          "options": {
+            "sortBy": [
+              {
+                "displayName": "Cost (USD)",
+                "desc": true
+              }
+            ]
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Cost (USD)"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "currencyUSD"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 4
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Requests"
+                },
+                "properties": [
+                  {
+                    "id": "decimals",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Tokens"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "short"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 0
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": 15,
+          "type": "table",
+          "title": "Current list prices (USD per 1M tokens)",
+          "description": "The price table in internal/llm/pricing.go, as exported by the services. Reasoning bills at the output rate.",
+          "gridPos": {
+            "h": 10,
+            "w": 8,
+            "x": 16,
+            "y": 23
+          },
+          "targets": [
+            {
+              "expr": "max by (model, type) (llm_price_usd_per_million_tokens)",
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus"
+              },
+              "format": "table",
+              "instant": true
+            }
+          ],
+          "transformations": [
+            {
+              "id": "groupingToMatrix",
+              "options": {
+                "columnField": "type",
+                "rowField": "model",
+                "valueField": "Value"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "currencyUSD",
+              "decimals": 3
+            }
+          }
+        }
+      ],
+      "templating": {
+        "list": [
+          {
+            "name": "namespace",
+            "label": "Namespace",
+            "type": "query",
+            "datasource": {
+              "type": "prometheus"
+            },
+            "query": {
+              "query": "label_values(llm_tokens_total, namespace)",
+              "refId": "A"
+            },
+            "definition": "label_values(llm_tokens_total, namespace)",
+            "refresh": 2,
+            "sort": 1,
+            "multi": true,
+            "includeAll": true,
+            "allValue": ".*",
+            "hide": 0,
+            "current": {
+              "selected": true,
+              "text": [
+                "hiresense-app-prod",
+                "interviewhandoff-prod",
+                "matchengine-prod",
+                "recruiter-report-prod"
+              ],
+              "value": [
+                "hiresense-app-prod",
+                "interviewhandoff-prod",
+                "matchengine-prod",
+                "recruiter-report-prod"
+              ]
+            }
+          },
+          {
+            "name": "model",
+            "label": "Model",
+            "type": "query",
+            "datasource": {
+              "type": "prometheus"
+            },
+            "query": {
+              "query": "label_values(llm_tokens_total{namespace=~\"$namespace\"}, model)",
+              "refId": "A"
+            },
+            "definition": "label_values(llm_tokens_total{namespace=~\"$namespace\"}, model)",
+            "refresh": 2,
+            "sort": 1,
+            "multi": true,
+            "includeAll": true,
+            "allValue": ".*",
+            "hide": 0,
+            "current": {
+              "selected": true,
+              "text": [
+                "All"
+              ],
+              "value": [
+                "All"
+              ]
+            }
+          },
+          {
+            "name": "feature",
+            "label": "Feature",
+            "type": "query",
+            "datasource": {
+              "type": "prometheus"
+            },
+            "query": {
+              "query": "label_values(llm_tokens_total{namespace=~\"$namespace\",model=~\"$model\"}, feature)",
+              "refId": "A"
+            },
+            "definition": "label_values(llm_tokens_total{namespace=~\"$namespace\",model=~\"$model\"}, feature)",
+            "refresh": 2,
+            "sort": 1,
+            "multi": true,
+            "includeAll": true,
+            "allValue": ".*",
+            "hide": 0,
+            "current": {
+              "selected": true,
+              "text": [
+                "All"
+              ],
+              "value": [
+                "All"
+              ]
+            }
+          }
+        ]
+      }
+    }
