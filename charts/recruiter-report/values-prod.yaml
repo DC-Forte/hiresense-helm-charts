@@ -10,7 +10,7 @@ host: recruiter-report-api.dc-forte.com
 tls:
   secretName: recruiter-report-tls
 
-replicas: 1
+replicas: 2  # ClaimPendingReportJobs uses FOR UPDATE SKIP LOCKED: safe to run more than one
 
 env:
   # PROD PIN: prod images predate OPENAI_MODEL_EFFORT (and the Python model-family fix), so Luna on
@@ -18,3 +18,6 @@ env:
   # are promoted and staging is tested (docs: chapter-interview-backend-go staging-remove-gpt4 plan).
   OPENAI_MODEL: "gpt-4.1"
   ENVIRONMENT: production
+
+# Scheduling priority (see monitoring chart's priorityclasses.yaml).
+priorityClassName: hiresense-prod

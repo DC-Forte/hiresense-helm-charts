@@ -1,5 +1,11 @@
 # Resource allocation: use the current 2 nodes well
 
+**Status 2026-11-16: phases 1 and 2 are in the charts (committed locally,
+rendered with `helm template` for every chart and env; not applied).** Apply
+order matters: upgrade the `monitoring` chart first (it creates the
+PriorityClasses the app charts name), then staging charts, then prod one chart
+at a time. Phases 3 (load test) and 4 (database) are open.
+
 Written 2026-11-16. Goal: get the most out of the cluster we already pay for
 (2 x `s-4vcpu-8gb`, $96 a month, autoscale 2 to 4) without adding nodes. Data:
 30 days of Prometheus plus live pod config. Companion to
@@ -51,9 +57,9 @@ Memory in Mi, CPU in millicores, per pod. "Now" is the live request.
 | `hiresense-worker` | 1 to 1 | 128 to 128 | 25 to 25 | 42 Mi / 9 m |
 | `frontend-candidate`, `frontend-recruiter` | 1 to 2 each | 32 to 32 | 20 to 20 | 9 Mi / <1 m |
 | `interviewhandoff` | 1 to 2 | 128 to 128 | 25 to 50 | 42 Mi / 1 m |
-| `interviewhandoffworker` | 1 to 1 | 256 to 192 | 100 to 100 | 47 Mi / 3 m |
+| `interviewhandoffworker` | 1 to 1 | 256 unchanged | 100 to 100 | 47 Mi prod, 142 Mi staging (ffmpeg clips and template generation burst; a comment in the chart records a 595 Mi staging peak) |
 | `matchengine` | 1 to 2 | 256 to 128 | 200 to 100 | 26 Mi / 1 m |
-| `recruiter-report` | 1 to 1 | 128 to 128 | 25 to 25 | 59 Mi / 7 m |
+| `recruiter-report` | 1 to 2 | 128 to 128 | 25 to 25 | 59 Mi / 7 m (job claim uses `FOR UPDATE SKIP LOCKED`, so a second copy is safe) |
 
 Limits stay as they are. Totals are in the budget below.
 
@@ -63,7 +69,6 @@ Limits stay as they are. Totals are in the budget below.
 | --- | --- | --- | --- |
 | `hiresense-backend` | 2 to 1 | 192 to 128 | 50 to 50 |
 | `hiresense-ai-engine` | 1 to 1 | 384 to 256 | 75 to 75 |
-| `interviewhandoffworker` | 1 to 1 | 256 to 192 | 100 to 100 |
 | others | unchanged | unchanged | unchanged |
 
 ### Placement and resilience (prod)
@@ -95,13 +100,14 @@ Application pods, memory requests (Mi):
 
 | | Now | Target |
 | --- | --- | --- |
-| Prod | 1,792 | 1,856 |
-| Staging | 1,600 | 1,152 |
-| Istio sidecars (40 Mi each; 20 pods now, 24 after: +5 prod, -1 staging) | 800 | 960 |
-| Total | 4,192 | 3,968 |
+| Prod | 1,792 | 2,048 |
+| Staging | 1,600 | 1,216 |
+| Istio sidecars (40 Mi each; 20 pods now, 25 after: +6 prod, -1 staging) | 800 | 1,000 |
+| Total | 4,192 | 4,264 |
 
-So prod gets 5 more pods and a second copy of every critical stateless service
-while the application memory request still falls by about 220 Mi. CPU requests: ~1,030 m now,
+So prod gets 6 more pods and a second copy of every stateless service while the
+application memory request stays about level (+70 Mi): the staging trim and the
+smaller `backend`, `ai-engine` and `matchengine` requests pay for the new copies. CPU requests: ~1,030 m now,
 ~1,170 m target.
 
 Cluster, with the monitoring and Istio changes from the companion plan: memory

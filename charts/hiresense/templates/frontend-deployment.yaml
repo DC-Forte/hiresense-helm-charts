@@ -20,6 +20,7 @@ spec:
         app: {{ $name }}
         variant: {{ $variant }}
     spec:
+      {{- include "hiresense.scheduling" (dict "root" $ "app" $name "replicas" $.Values.frontend.replicas) | nindent 6 }}
       imagePullSecrets:
         - name: {{ $.Values.global.imagePullSecret }}
       containers:

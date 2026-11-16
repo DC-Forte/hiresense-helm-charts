@@ -19,7 +19,7 @@ gateway:
   resources:
     requests:
       cpu: 10m
-      memory: 40Mi
+      memory: 128Mi  # 30-day peak 104 MB; all public traffic goes through here
     limits:
       cpu: "2"
       memory: 1Gi

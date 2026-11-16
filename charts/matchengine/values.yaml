@@ -29,6 +29,8 @@ image:
   # values-staging.yaml/values-prod.yaml override with the real env tag; --set image.tag=<sha> to pin.
   tag: latest
 
+# PriorityClass (monitoring chart): set per env in values-prod/values-staging.
+priorityClassName: ""
 replicas: 1
 port: 8091
 # requests sized from 30d Prometheus peaks (2026-10-29): peak ~39Mi / p95 CPU ~1m

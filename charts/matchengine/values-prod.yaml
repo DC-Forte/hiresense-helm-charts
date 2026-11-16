@@ -7,7 +7,13 @@ global:
 image:
   tag: prod
 
-replicas: 1
+replicas: 2
+
+# Requests from 30 days of use (peak 26 MB, p99 CPU 1 m); limits stay the base values.
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
 
 env:
   # PROD PIN: prod images predate OPENAI_MODEL_EFFORT (and the Python model-family fix), so Luna on
@@ -15,3 +21,6 @@ env:
   # are promoted and staging is tested (docs: chapter-interview-backend-go staging-remove-gpt4 plan).
   OPENAI_MODEL: "gpt-4.1"
   APP_ENV: production # base values.yaml defaults to staging
+
+# Scheduling priority (see monitoring chart's priorityclasses.yaml).
+priorityClassName: hiresense-prod

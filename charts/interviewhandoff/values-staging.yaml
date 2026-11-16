@@ -37,3 +37,6 @@ env:
   ALLOWED_ORIGINS: "https://hiresense-staging.dc-forte.com,https://staging.dc-forte.com"
   MOBIUS_FRONTEND_ORIGIN: "https://staging.dc-forte.com"
   OTLP_ENDPOINT: "tempo.monitoring.svc.cluster.local:4318" # same Tempo instance charts/hiresense points at
+
+# Scheduling priority (see monitoring chart's priorityclasses.yaml).
+priorityClassName: hiresense-staging

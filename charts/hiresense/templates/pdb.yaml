@@ -1,0 +1,53 @@
+# Keep one replica up during node drains and upgrades. Only rendered for replicated deployments.
+{{- if gt (int .Values.backend.replicas) 1 }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: hiresense-backend
+  namespace: {{ .Values.global.namespace }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: hiresense-backend
+{{- end }}
+{{- if gt (int .Values.aiEngine.replicas) 1 }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: hiresense-ai-engine
+  namespace: {{ .Values.global.namespace }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: hiresense-ai-engine
+{{- end }}
+{{- if gt (int .Values.frontend.replicas) 1 }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: hiresense-frontend-candidate
+  namespace: {{ .Values.global.namespace }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: hiresense-frontend-candidate
+{{- end }}
+{{- if gt (int .Values.frontend.replicas) 1 }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: hiresense-frontend-recruiter
+  namespace: {{ .Values.global.namespace }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: hiresense-frontend-recruiter
+{{- end }}

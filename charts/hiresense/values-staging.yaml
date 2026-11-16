@@ -12,7 +12,7 @@
 # at the staging siblings via values.yaml's own defaults, unchanged.
 
 backend:
-  replicas: 2
+  replicas: 1
   image:
     tag: staging
 aiEngine:
@@ -76,3 +76,6 @@ monitoring:
   workerMetricsPort: "9091"
   serviceMonitor:
     enabled: true
+
+# Scheduling priority (see monitoring chart's priorityclasses.yaml).
+priorityClassName: hiresense-staging

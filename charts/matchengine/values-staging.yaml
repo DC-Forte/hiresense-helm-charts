@@ -5,3 +5,6 @@ image:
   tag: staging
 
 replicas: 1
+
+# Scheduling priority (see monitoring chart's priorityclasses.yaml).
+priorityClassName: hiresense-staging

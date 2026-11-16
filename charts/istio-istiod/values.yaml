@@ -11,7 +11,7 @@ istiod:
   resources:
     requests:
       cpu: 10m
-      memory: 100Mi
+      memory: 256Mi  # 30-day peak 195 MB
 
   # ponytail: demo-profile value kept for zero-diff adoption. No tracing provider is
   # configured mesh-wide, so nothing is sampled; revisit when dropping the demo profile.

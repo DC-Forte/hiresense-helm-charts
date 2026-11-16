@@ -8,6 +8,11 @@ metadata:
     app: interviewhandoff
 spec:
   replicas: {{ .Values.replicas }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
       app: interviewhandoff
@@ -19,6 +24,8 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         checksum/secrets: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
     spec:
+      {{- include "interviewhandoff.scheduling" (dict "root" . "app" "interviewhandoff" "replicas" .Values.replicas) | nindent 6 }}
+      terminationGracePeriodSeconds: 60  # let in-flight WebSocket transcript connections drain on a rollout
       imagePullSecrets:
         - name: {{ .Values.global.imagePullSecret }}
       containers:

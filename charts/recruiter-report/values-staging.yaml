@@ -15,3 +15,6 @@ replicas: 1
 env:
   ENVIRONMENT: staging
   DB_SSL_MODE: require
+
+# Scheduling priority (see monitoring chart's priorityclasses.yaml).
+priorityClassName: hiresense-staging

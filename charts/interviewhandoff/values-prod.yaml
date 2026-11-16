@@ -11,7 +11,7 @@ worker:
   image:
     tag: prod
 
-replicas: 1
+replicas: 2
 
 env:
   # PROD PIN: prod images predate OPENAI_MODEL_EFFORT (and the Python model-family fix), so Luna on
@@ -38,3 +38,6 @@ env:
   ALLOWED_ORIGINS: "https://hiresense.dc-forte.com,https://dc-forte.com"
   MOBIUS_FRONTEND_ORIGIN: "https://dc-forte.com"
   OTLP_ENDPOINT: "tempo.monitoring.svc.cluster.local:4318" # same Tempo instance charts/hiresense points at
+
+# Scheduling priority (see monitoring chart's priorityclasses.yaml).
+priorityClassName: hiresense-prod

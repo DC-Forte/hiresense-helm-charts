@@ -43,7 +43,7 @@ worker:
   image:
     tag: prod
 aiEngine:
-  replicas: 1
+  replicas: 2
   # CI (python build.yml) pushes :prod and :<sha> on every prod build and rolls
   # the Deployment by sha. Without this the base default (:latest, a stale
   # image) is applied by every `helm upgrade` and undoes CI's rollout
@@ -51,7 +51,7 @@ aiEngine:
   image:
     tag: prod
 frontend:
-  replicas: 1
+  replicas: 2
   # Same reason as aiEngine above: CI pushes :prod and :<sha>; the base default
   # (:latest) had left prod on the 2026-09-10 build (ce9d6b0), 37 commits behind
   # the 39248ff build CI deployed on 2026-09-29 (v5 report rendering, incProc
@@ -80,3 +80,6 @@ monitoring:
   workerMetricsPort: "9091"
   serviceMonitor:
     enabled: true
+
+# Scheduling priority (see monitoring chart's priorityclasses.yaml).
+priorityClassName: hiresense-prod

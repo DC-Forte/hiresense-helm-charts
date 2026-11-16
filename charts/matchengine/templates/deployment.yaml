@@ -19,6 +19,7 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         checksum/secrets: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
     spec:
+      {{- include "matchengine.scheduling" (dict "root" . "app" "matchengine" "replicas" .Values.replicas) | nindent 6 }}
       imagePullSecrets:
         - name: {{ .Values.global.imagePullSecret }}
       containers:

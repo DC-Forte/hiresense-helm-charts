@@ -1,0 +1,21 @@
+# Who is rescheduled first when a node is lost or full. Everything unclassified
+# (monitoring, Istio add-ons) keeps the default priority 0, so: prod > default
+# > staging. App charts reference these by name (priorityClassName in their
+# values-prod.yaml / values-staging.yaml), so upgrade this chart BEFORE them: a pod
+# naming a class that does not exist is rejected.
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: hiresense-prod
+value: 100000
+globalDefault: false
+description: "HireSense prod workloads: scheduled first, may preempt lower classes."
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: hiresense-staging
+value: -100
+preemptionPolicy: Never
+globalDefault: false
+description: "HireSense staging workloads: below everything else, never preempt."

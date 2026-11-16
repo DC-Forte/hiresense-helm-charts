@@ -43,6 +43,9 @@ tls:
   # Default false because we adopted pre-existing cert-manager resources.
   manageCertManager: false
 
+# PriorityClass (templates/../monitoring/templates/priorityclasses.yaml): hiresense-prod / hiresense-staging, set per env.
+priorityClassName: ""
+
 backend:
   image:
     repository: chapter-interview-go-backend
@@ -53,7 +56,7 @@ backend:
   resources:
     requests:
       cpu: 50m
-      memory: 192Mi
+      memory: 128Mi
     limits:
       cpu: 1
       memory: 1.5Gi
@@ -68,7 +71,7 @@ aiEngine:
   resources:
     requests:
       cpu: 75m
-      memory: 384Mi
+      memory: 256Mi
     limits:
       cpu: 1
       memory: 1.5Gi

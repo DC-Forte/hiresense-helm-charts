@@ -1,0 +1,14 @@
+# Keep one replica up during node drains and upgrades. Only rendered for replicated deployments.
+{{- if gt (int .Values.replicas) 1 }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: interviewhandoff
+  namespace: {{ .Values.global.namespace }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: interviewhandoff
+{{- end }}
