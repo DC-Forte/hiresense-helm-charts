@@ -80,7 +80,11 @@ env:
   ALLOW_INTERVIEW_WITHOUT_AGENT: "false"
   AGENTIC_API_URL: "https://hiresense-ai.dc-forte.com" # Python resume parser (hiresense-ai-engine, resume parsing only), reached via the hiresense-ai VirtualService; in-cluster DNS would cross a namespace boundary without a sidecar on this side
   LLM_TIMEOUT_SECONDS: "60"
-  OPENAI_MODEL: "gpt-4.1" # shared by the report pipeline, matchengine etc. -- do NOT point this at a reasoning model; template generation has its own TEMPLATE_MODEL below
+  # gpt-4.1 shuts down 2027-01-14. Shared by the report pipeline, matchengine etc.; effort none because
+  # Luna defaults to medium, too slow for the interactive sites. TEMPLATE_MODEL and INTERVIEW_FEEDBACK_MODEL
+  # below keep their own model and effort.
+  OPENAI_MODEL: "gpt-6-luna"
+  OPENAI_MODEL_EFFORT: "none"
   TEMPLATE_MODEL: "gpt-6-luna" # model used only for template generation (reasoning model: the Go client drops temperature/seed for it). Empty = OPENAI_MODEL
   TEMPLATE_MODEL_EFFORT: "medium" # reasoning_effort for TEMPLATE_MODEL (none|low|medium|high|...); empty = API default (medium for gpt-6-luna)
   INTERVIEW_FEEDBACK_MODEL: "gpt-6-luna" # model for the v5 interview feedback report (interviewhandoffworker only); empty = OPENAI_MODEL

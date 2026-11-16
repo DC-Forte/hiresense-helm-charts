@@ -49,7 +49,9 @@ env:
   DB_POOL_MAX: "10"
   DB_POOL_MIN: "1"
   DB_SSL_MODE: require
-  OPENAI_MODEL: "gpt-4.1"
+  # gpt-4.1 shuts down 2027-01-14. Effort none: Luna defaults to medium, too slow.
+  OPENAI_MODEL: "gpt-6-luna"
+  OPENAI_MODEL_EFFORT: "none"
 
 # All values below are placeholders. Real values come from
 # values-{env}.secrets.yaml (gitignored).

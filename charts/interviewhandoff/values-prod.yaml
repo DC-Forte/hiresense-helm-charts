@@ -14,6 +14,10 @@ worker:
 replicas: 1
 
 env:
+  # PROD PIN: prod images predate OPENAI_MODEL_EFFORT (and the Python model-family fix), so Luna on
+  # them would run at the slow default effort or fail. Remove this line when the prod images
+  # are promoted and staging is tested (docs: chapter-interview-backend-go staging-remove-gpt4 plan).
+  OPENAI_MODEL: "gpt-4.1"
   APP_ENV: production
   MATCHENGINE_URL: "http://matchengine.matchengine-prod.svc.cluster.local"
   LIVEKIT_AGENT_NAME: "dc-forte-voice-agent"
