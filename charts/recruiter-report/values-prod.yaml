@@ -13,10 +13,6 @@ tls:
 replicas: 2  # ClaimPendingReportJobs uses FOR UPDATE SKIP LOCKED: safe to run more than one
 
 env:
-  # PROD PIN: prod images predate OPENAI_MODEL_EFFORT (and the Python model-family fix), so Luna on
-  # them would run at the slow default effort or fail. Remove this line when the prod images
-  # are promoted and staging is tested (docs: chapter-interview-backend-go staging-remove-gpt4 plan).
-  OPENAI_MODEL: "gpt-4.1"
   ENVIRONMENT: production
 
 # Scheduling priority (see monitoring chart's priorityclasses.yaml).
