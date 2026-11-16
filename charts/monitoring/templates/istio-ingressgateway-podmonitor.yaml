@@ -14,3 +14,8 @@ spec:
     - port: http-envoy-prom
       path: /stats/prometheus
       interval: 30s
+      # Request/response size histograms: ~6k series, no dashboard or alert uses them.
+      metricRelabelings:
+        - sourceLabels: [__name__]
+          regex: istio_(request|response)_bytes_bucket
+          action: drop

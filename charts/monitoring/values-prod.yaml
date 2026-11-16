@@ -31,7 +31,7 @@ kube-prometheus-stack:
       # Request matches 30-day use (0.8-1.55 GB); the limit was never near.
       resources:
         requests:
-          cpu: 500m
+          cpu: 200m  # real use 20-80 m
           memory: 1536Mi
         limits:
           cpu: 2
@@ -56,7 +56,7 @@ kube-prometheus-stack:
     # stays 1Gi: the chart sets GOMEMLIMIT from it, so raising it only lets the heap drift up.
     resources:
       requests:
-        cpu: 200m
+        cpu: 100m
         memory: 512Mi
       limits:
         cpu: 1
@@ -126,7 +126,7 @@ loki:
       size: 5Gi   # WAL only; chunks go to Spaces
     resources:
       requests:
-        cpu: 200m
+        cpu: 100m
         memory: 512Mi
       limits:
         cpu: 1
@@ -142,7 +142,7 @@ tempo:
     # Must live under tempo.tempo — a top-level `resources:` is ignored by the chart.
     resources:
       requests:
-        cpu: 200m
+        cpu: 100m
         memory: 512Mi
       limits:
         cpu: 1

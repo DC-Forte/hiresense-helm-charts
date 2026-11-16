@@ -86,6 +86,18 @@ kube-prometheus-stack:
       requests: {cpu: 20m, memory: 32Mi}
       limits: {cpu: 500m, memory: 128Mi}  # 200m throttled it in 22-32% of periods though it uses ~11m
 
+  # DOKS' managed API server is 26k of ~78k Prometheus series (a third), mostly latency
+  # histograms feeding the built-in API-server SLO rules. Alertmanager is off, so nothing
+  # receives those alerts. Off: ~0.25-0.3 GB less Prometheus memory, ~3.5 GB less disk.
+  kubeApiServer:
+    enabled: false
+  defaultRules:
+    rules:
+      kubeApiserverAvailability: false
+      kubeApiserverBurnrate: false
+      kubeApiserverHistogram: false
+      kubeApiserverSlos: false
+
   # Disable components not reachable in managed k8s (DOKS)
   kubeProxy:
     enabled: false
@@ -117,6 +129,13 @@ kube-prometheus-stack:
 
     service:
       type: ClusterIP
+
+    # Grafana's HTTP size histograms are ~2.5k series nobody queries.
+    serviceMonitor:
+      metricRelabelings:
+        - sourceLabels: [__name__]
+          regex: grafana_http_(request_size|response_size)_bytes_bucket
+          action: drop
 
     resources:
       requests:
@@ -374,6 +393,11 @@ tempo:
     # 1,130 MB in-use heap was the ballast). 0 turns it off; expect ~300-400 MB.
     memBallastSizeMbs: 0
 
+    # With the ballast off, cap the Go heap below the container limit so a spike cannot OOM-kill it.
+    extraEnv:
+      - name: GOMEMLIMIT
+        value: 1500MiB
+
     reportingEnabled: false
     multitenancyEnabled: false
 
@@ -447,7 +471,11 @@ pyroscope:
 
     structuredConfig:
       limits:
-        compactor_blocks_retention_period: 168h  # 7 days
+        # Pyroscope runs the v2 storage architecture: retention_period (default 31d) is what
+        # expires data. compactor_blocks_retention_period is documented "[v1 storage only]",
+        # so on its own it left the 10Gi volume growing ~77 MB a day.
+        retention_period: 168h  # 7 days
+        compactor_blocks_retention_period: 168h
 
     # Base: local filesystem storage (override to s3 in values-prod)
     persistence:
@@ -458,7 +486,7 @@ pyroscope:
     resources:
       requests:
         cpu: 100m
-        memory: 256Mi
+        memory: 512Mi  # 30-day peak 423 MB
       limits:
         cpu: 500m
         memory: 1Gi
@@ -467,7 +495,7 @@ pyroscope:
   alloy:
     alloy:
       resources:
-        requests: {cpu: 50m, memory: 128Mi}
+        requests: {cpu: 50m, memory: 256Mi}  # 30-day peak 248 MB
         limits: {cpu: 500m, memory: 512Mi}
 
 # ─────────────────────────────────────────────────────────────────────────────
