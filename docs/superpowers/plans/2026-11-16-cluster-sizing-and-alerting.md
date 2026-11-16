@@ -175,6 +175,15 @@ rescheduled first during it.
 
 ## 5. Alerts to create in Grafana
 
+**Status 2026-11-16: created in Grafana (folder `HireSense`, group
+`hiresense-infra-alerts`, contact point `discord-hiresense`), all evaluating
+healthy and normal.** Rules: volume predicted full, volume nearly full,
+container OOM-killed, container restarting repeatedly, node memory above 85%,
+prod pod not ready, and a seventh added to guard the others, "kube-state-metrics
+down" (`absent(up{job="kube-state-metrics"} == 1)`, 10m). Not in the chart: they
+live in Grafana, like the existing 14. Each uses `count by (...)` so it returns
+1 per offending object. Table below is the original design.
+
 The existing 14 rules were created in Grafana (folder `HireSense`,
 `cfsw4c7xe8f0gb`) and are not in the chart, so create these there too, on the
 existing Discord contact point. Datasource uid `prometheus`.
