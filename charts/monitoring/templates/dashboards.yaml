@@ -29,7 +29,7 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 0, "y": 1 },
           "targets": [{
-            "expr": "sum(rate(http_server_request_duration_seconds_count{namespace=~\"hiresense-app.*\",job=~\"hiresense-backend.*\"}[2m])) by (namespace, http_route, http_request_method)",
+            "expr": "sum(rate(http_server_request_duration_seconds_count{namespace=\"$environment\",job=~\"hiresense-backend.*\"}[2m])) by (namespace, http_route, http_request_method)",
             "legendFormat": "{{ "{{" }}namespace{{ "}}" }} {{ "{{" }}http_request_method{{ "}}" }} {{ "{{" }}http_route{{ "}}" }}",
             "datasource": { "type": "prometheus" }
           }],
@@ -42,17 +42,17 @@ data:
           "gridPos": { "h": 8, "w": 8, "x": 8, "y": 1 },
           "targets": [
             {
-              "expr": "histogram_quantile(0.50, sum(rate(http_server_request_duration_seconds_bucket{namespace=~\"hiresense-app.*\",job=~\"hiresense-backend.*\"}[2m])) by (le, namespace)) * 1000",
+              "expr": "histogram_quantile(0.50, sum(rate(http_server_request_duration_seconds_bucket{namespace=\"$environment\",job=~\"hiresense-backend.*\"}[2m])) by (le, namespace)) * 1000",
               "legendFormat": "p50 {{ "{{" }}namespace{{ "}}" }}",
               "datasource": { "type": "prometheus" }
             },
             {
-              "expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{namespace=~\"hiresense-app.*\",job=~\"hiresense-backend.*\"}[2m])) by (le, namespace)) * 1000",
+              "expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{namespace=\"$environment\",job=~\"hiresense-backend.*\"}[2m])) by (le, namespace)) * 1000",
               "legendFormat": "p95 {{ "{{" }}namespace{{ "}}" }}",
               "datasource": { "type": "prometheus" }
             },
             {
-              "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{namespace=~\"hiresense-app.*\",job=~\"hiresense-backend.*\"}[2m])) by (le, namespace)) * 1000",
+              "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{namespace=\"$environment\",job=~\"hiresense-backend.*\"}[2m])) by (le, namespace)) * 1000",
               "legendFormat": "p99 {{ "{{" }}namespace{{ "}}" }}",
               "datasource": { "type": "prometheus" }
             }
@@ -65,7 +65,7 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 16, "y": 1 },
           "targets": [{
-            "expr": "100 * sum(rate(http_server_request_duration_seconds_count{namespace=~\"hiresense-app.*\",job=~\"hiresense-backend.*\",http_response_status_code=~\"5..\"}[2m])) by (namespace) / sum(rate(http_server_request_duration_seconds_count{namespace=~\"hiresense-app.*\",job=~\"hiresense-backend.*\"}[2m])) by (namespace)",
+            "expr": "100 * sum(rate(http_server_request_duration_seconds_count{namespace=\"$environment\",job=~\"hiresense-backend.*\",http_response_status_code=~\"5..\"}[2m])) by (namespace) / sum(rate(http_server_request_duration_seconds_count{namespace=\"$environment\",job=~\"hiresense-backend.*\"}[2m])) by (namespace)",
             "legendFormat": "{{ "{{" }}namespace{{ "}}" }} error %",
             "datasource": { "type": "prometheus" }
           }],
@@ -83,7 +83,7 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 0, "y": 10 },
           "targets": [{
-            "expr": "go_goroutines{namespace=~\"hiresense-app.*\",job=~\"hiresense-worker.*\"}",
+            "expr": "go_goroutines{namespace=\"$environment\",job=~\"hiresense-worker.*\"}",
             "legendFormat": "{{ "{{" }}namespace{{ "}}" }} {{ "{{" }}pod{{ "}}" }}",
             "datasource": { "type": "prometheus" }
           }],
@@ -95,7 +95,7 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 8, "y": 10 },
           "targets": [{
-            "expr": "go_memstats_heap_inuse_bytes{namespace=~\"hiresense-app.*\",job=~\"hiresense-worker.*\"}",
+            "expr": "go_memstats_heap_inuse_bytes{namespace=\"$environment\",job=~\"hiresense-worker.*\"}",
             "legendFormat": "{{ "{{" }}namespace{{ "}}" }} {{ "{{" }}pod{{ "}}" }}",
             "datasource": { "type": "prometheus" }
           }],
@@ -107,7 +107,7 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 16, "y": 10 },
           "targets": [{
-            "expr": "sum(rate(go_gc_duration_seconds_sum{namespace=~\"hiresense-app.*\",job=~\"hiresense-worker.*\"}[2m])) by (namespace)",
+            "expr": "sum(rate(go_gc_duration_seconds_sum{namespace=\"$environment\",job=~\"hiresense-worker.*\"}[2m])) by (namespace)",
             "legendFormat": "{{ "{{" }}namespace{{ "}}" }}",
             "datasource": { "type": "prometheus" }
           }],
@@ -125,7 +125,7 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 0, "y": 19 },
           "targets": [{
-            "expr": "increase(kube_pod_container_status_restarts_total{namespace=~\"hiresense-app.*\"}[15m])",
+            "expr": "increase(kube_pod_container_status_restarts_total{namespace=\"$environment\"}[15m])",
             "legendFormat": "{{ "{{" }}namespace{{ "}}" }}/{{ "{{" }}pod{{ "}}" }}",
             "datasource": { "type": "prometheus" }
           }],
@@ -137,7 +137,7 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 12, "y": 19 },
           "targets": [{
-            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"hiresense-app.*\",container!=\"\",container!=\"POD\"}[2m])) by (namespace, pod)",
+            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"$environment\",container!=\"\",container!=\"POD\"}[2m])) by (namespace, pod)",
             "legendFormat": "{{ "{{" }}namespace{{ "}}" }}/{{ "{{" }}pod{{ "}}" }}",
             "datasource": { "type": "prometheus" }
           }],
@@ -156,7 +156,7 @@ data:
           "gridPos": { "h": 10, "w": 24, "x": 0, "y": 28 },
           "options": { "dedupStrategy": "none", "showLabels": true, "showTime": true, "wrapLogMessage": true },
           "targets": [{
-            "expr": "{namespace=~\"hiresense-app.*\", app=\"hiresense-backend\"} | json",
+            "expr": "{namespace=\"$environment\", app=\"hiresense-backend\"} | json",
             "datasource": { "type": "loki" }
           }]
         },
@@ -173,7 +173,7 @@ data:
           "description": "Filtered by deployment.environment.name — requires the telemetry fix shipped 2026-09-12 (commit c799df7) to be deployed; older traces predate this tag and won't show here.",
           "gridPos": { "h": 12, "w": 24, "x": 0, "y": 39 },
           "targets": [{
-            "query": "{resource.service.name=~\"interview-backend.*\" && resource.deployment.environment.name=\"$environment\"}",
+            "query": "{resource.service.name=~\"interview-backend.*\" && resource.deployment.environment.name=\"${environment:text}\"}",
             "queryType": "traceql",
             "datasource": { "type": "tempo" }
           }]
@@ -184,12 +184,12 @@ data:
           {
             "name": "environment",
             "type": "custom",
-            "label": "Environment (traces)",
-            "query": "staging,production",
-            "current": { "text": "staging", "value": "staging" },
+            "label": "Environment",
+            "query": "staging : hiresense-app, production : hiresense-app-prod",
+            "current": { "text": "staging", "value": "hiresense-app" },
             "options": [
-              { "text": "staging", "value": "staging", "selected": true },
-              { "text": "production", "value": "production", "selected": false }
+              { "text": "staging", "value": "hiresense-app", "selected": true },
+              { "text": "production", "value": "hiresense-app-prod", "selected": false }
             ],
             "multi": false,
             "includeAll": false,
@@ -230,7 +230,7 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 0, "y": 1 },
           "targets": [{
-            "expr": "sum(rate(recruiterreport_request_duration_seconds_count{namespace=~\"recruiter-report-.*\"}[2m])) by (namespace)",
+            "expr": "sum(rate(recruiterreport_request_duration_seconds_count{namespace=\"recruiter-report-$environment\"}[2m])) by (namespace)",
             "legendFormat": "{{ "{{" }}namespace{{ "}}" }}",
             "datasource": { "type": "prometheus" }
           }],
@@ -243,17 +243,17 @@ data:
           "gridPos": { "h": 8, "w": 8, "x": 8, "y": 1 },
           "targets": [
             {
-              "expr": "histogram_quantile(0.50, sum(rate(recruiterreport_request_duration_seconds_bucket{namespace=~\"recruiter-report-.*\"}[2m])) by (le, namespace)) * 1000",
+              "expr": "histogram_quantile(0.50, sum(rate(recruiterreport_request_duration_seconds_bucket{namespace=\"recruiter-report-$environment\"}[2m])) by (le, namespace)) * 1000",
               "legendFormat": "p50 {{ "{{" }}namespace{{ "}}" }}",
               "datasource": { "type": "prometheus" }
             },
             {
-              "expr": "histogram_quantile(0.95, sum(rate(recruiterreport_request_duration_seconds_bucket{namespace=~\"recruiter-report-.*\"}[2m])) by (le, namespace)) * 1000",
+              "expr": "histogram_quantile(0.95, sum(rate(recruiterreport_request_duration_seconds_bucket{namespace=\"recruiter-report-$environment\"}[2m])) by (le, namespace)) * 1000",
               "legendFormat": "p95 {{ "{{" }}namespace{{ "}}" }}",
               "datasource": { "type": "prometheus" }
             },
             {
-              "expr": "histogram_quantile(0.99, sum(rate(recruiterreport_request_duration_seconds_bucket{namespace=~\"recruiter-report-.*\"}[2m])) by (le, namespace)) * 1000",
+              "expr": "histogram_quantile(0.99, sum(rate(recruiterreport_request_duration_seconds_bucket{namespace=\"recruiter-report-$environment\"}[2m])) by (le, namespace)) * 1000",
               "legendFormat": "p99 {{ "{{" }}namespace{{ "}}" }}",
               "datasource": { "type": "prometheus" }
             }
@@ -266,7 +266,7 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 16, "y": 1 },
           "targets": [{
-            "expr": "sum(rate(recruiterreport_request_errors_total{namespace=~\"recruiter-report-.*\"}[5m])) by (namespace) * 60",
+            "expr": "sum(rate(recruiterreport_request_errors_total{namespace=\"recruiter-report-$environment\"}[5m])) by (namespace) * 60",
             "legendFormat": "{{ "{{" }}namespace{{ "}}" }}",
             "datasource": { "type": "prometheus" }
           }],
@@ -284,7 +284,7 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 0, "y": 10 },
           "targets": [{
-            "expr": "go_goroutines{namespace=~\"recruiter-report-.*\"}",
+            "expr": "go_goroutines{namespace=\"recruiter-report-$environment\"}",
             "legendFormat": "{{ "{{" }}namespace{{ "}}" }} {{ "{{" }}pod{{ "}}" }}",
             "datasource": { "type": "prometheus" }
           }],
@@ -296,7 +296,7 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 8, "y": 10 },
           "targets": [{
-            "expr": "go_memstats_heap_inuse_bytes{namespace=~\"recruiter-report-.*\"}",
+            "expr": "go_memstats_heap_inuse_bytes{namespace=\"recruiter-report-$environment\"}",
             "legendFormat": "{{ "{{" }}namespace{{ "}}" }} {{ "{{" }}pod{{ "}}" }}",
             "datasource": { "type": "prometheus" }
           }],
@@ -308,7 +308,7 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 16, "y": 10 },
           "targets": [{
-            "expr": "sum(rate(go_gc_duration_seconds_sum{namespace=~\"recruiter-report-.*\"}[2m])) by (namespace)",
+            "expr": "sum(rate(go_gc_duration_seconds_sum{namespace=\"recruiter-report-$environment\"}[2m])) by (namespace)",
             "legendFormat": "{{ "{{" }}namespace{{ "}}" }}",
             "datasource": { "type": "prometheus" }
           }],
@@ -326,7 +326,7 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 0, "y": 19 },
           "targets": [{
-            "expr": "increase(kube_pod_container_status_restarts_total{namespace=~\"recruiter-report-.*\"}[15m])",
+            "expr": "increase(kube_pod_container_status_restarts_total{namespace=\"recruiter-report-$environment\"}[15m])",
             "legendFormat": "{{ "{{" }}namespace{{ "}}" }}/{{ "{{" }}pod{{ "}}" }}",
             "datasource": { "type": "prometheus" }
           }],
@@ -338,7 +338,7 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 8, "y": 19 },
           "targets": [{
-            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"recruiter-report-.*\",container!=\"\",container!=\"POD\"}[2m])) by (namespace, pod)",
+            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"recruiter-report-$environment\",container!=\"\",container!=\"POD\"}[2m])) by (namespace, pod)",
             "legendFormat": "{{ "{{" }}namespace{{ "}}" }}/{{ "{{" }}pod{{ "}}" }}",
             "datasource": { "type": "prometheus" }
           }],
@@ -350,7 +350,7 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 16, "y": 19 },
           "targets": [{
-            "expr": "sum(container_memory_working_set_bytes{namespace=~\"recruiter-report-.*\",container!=\"\",container!=\"POD\"}) by (namespace, pod)",
+            "expr": "sum(container_memory_working_set_bytes{namespace=\"recruiter-report-$environment\",container!=\"\",container!=\"POD\"}) by (namespace, pod)",
             "legendFormat": "{{ "{{" }}namespace{{ "}}" }}/{{ "{{" }}pod{{ "}}" }}",
             "datasource": { "type": "prometheus" }
           }],
@@ -369,7 +369,7 @@ data:
           "gridPos": { "h": 10, "w": 24, "x": 0, "y": 28 },
           "options": { "dedupStrategy": "none", "showLabels": true, "showTime": true, "wrapLogMessage": true },
           "targets": [{
-            "expr": "{namespace=~\"recruiter-report-.*\", app=\"recruiter-report\"} | json",
+            "expr": "{namespace=\"recruiter-report-$environment\", app=\"recruiter-report\"} | json",
             "datasource": { "type": "loki" }
           }]
         },
@@ -386,7 +386,7 @@ data:
           "description": "Filtered by deployment.environment.name — requires the telemetry fix shipped 2026-09-12 (commit c799df7) to be deployed; older traces predate this tag and won't show here.",
           "gridPos": { "h": 12, "w": 24, "x": 0, "y": 39 },
           "targets": [{
-            "query": "{resource.service.name=\"recruiter-report\" && resource.deployment.environment.name=\"$environment\"}",
+            "query": "{resource.service.name=\"recruiter-report\" && resource.deployment.environment.name=~\"$environment.*\"}",
             "queryType": "traceql",
             "datasource": { "type": "tempo" }
           }]
@@ -397,12 +397,12 @@ data:
           {
             "name": "environment",
             "type": "custom",
-            "label": "Environment (traces)",
-            "query": "staging,production",
+            "label": "Environment",
+            "query": "staging : staging, production : prod",
             "current": { "text": "staging", "value": "staging" },
             "options": [
               { "text": "staging", "value": "staging", "selected": true },
-              { "text": "production", "value": "production", "selected": false }
+              { "text": "production", "value": "prod", "selected": false }
             ],
             "multi": false,
             "includeAll": false,
